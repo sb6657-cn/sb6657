@@ -46,11 +46,14 @@
 <script setup>
 import httpInstance, { isRelogin } from "@/apis/httpInstance";
 import { useIsMobile } from '@/composables/useIsMobile';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { setToken } from "@/utils/cookieUtils";
 import { ElMessage } from "element-plus";
 import Cookies from "js-cookie";
 import { reactive, ref } from "vue";
 import resetPassword from './resetPassword.vue';
+
+const authStore = useAuthStore();
 
 const props = defineProps({
     onRegister: {
@@ -149,6 +152,8 @@ function reg() {
 
 function closeLoginDialog() {
     props.closeDialog();
+    // 广播登录成功：投稿弹窗等组件据此刷新自身登录状态提示
+    authStore.notifyLoginSuccess();
 }
 
 function showResetPassword() {

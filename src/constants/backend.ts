@@ -37,6 +37,7 @@ export const API = {
     CHECKIN_STATUS: '/machine/checkin/status',             // 签到状态
     CHECKIN_WALLET: '/machine/checkin/wallet',             // 我的钱包
     CHECKIN_REWARD: '/machine/checkin/reward',             // 打赏
+    WHOAMI: '/machine/whoami',                              // 登录状态查询（前端用于校准 token 是否仍有效）
     LIFECYCLE_DASHBOARD: '/machine/lifecycle/dashboard',   // 生命周期看板
     LIFECYCLE_STAGE: '/machine/lifecycle/stage',           // 生命周期分阶段分页 (后接 /{stage}?pageNum=&pageSize=)
     DNA_RELATIONS: '/machine/dna',                         // 梗DNA关联 (后接 /{barrageId})

@@ -123,6 +123,13 @@ watch(
         loginView.value = newVal
     }
 )
+
+// 弹窗被用户手动关闭（点 X / 遮罩）时同步 store，避免 store 一直停在 true 导致下次 showLogin 不触发
+watch(loginView, (visible) => {
+    if (!visible && authStore.loginVisible) {
+        authStore.hideLogin()
+    }
+})
 </script>
 
 <style lang='scss' scoped>

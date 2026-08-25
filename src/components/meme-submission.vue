@@ -1,5 +1,17 @@
 <template>
     <div class="meme-submission">
+        <!-- 登录状态提示：登录后投稿会记录归属，方便用户确认 -->
+        <div class="login-status-tip" :class="isLoggedIn ? 'is-logged-in' : 'is-guest'">
+            <span class="tip-icon">{{ isLoggedIn ? '✅' : '👤' }}</span>
+            <template v-if="isLoggedIn">
+                当前已登录<b v-if="nickName">（{{ nickName }}）</b>，投稿通过审核后将记录为<b>你的烂梗</b>，可在个人主页查看。
+            </template>
+            <template v-else>
+                当前<b>未登录</b>，投稿为匿名；<el-button class="tip-login-btn" link type="primary"
+                    @click="authStore.showLogin()">点此登录</el-button>后投稿将归属于你的账号。
+            </template>
+        </div>
+
         <div class="submission-header">
             可选标签
             <el-popover :width="300">
@@ -59,10 +71,12 @@ import httpInstance from '@/apis/httpInstance';
 import tagSelector from '@/components/tag-selector.vue';
 import { API } from '@/constants/backend';
 import { useMemeTagsStore } from '@/stores/memeTags';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { getToken, getTokenExpireTime } from '@/utils/cookieUtils';
 import { type getMemeTags as memeTag } from '@/types/meme';
 import { QuestionFilled, Warning } from '@element-plus/icons-vue';
 import { ElNotification } from 'element-plus';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type MatchData = {
     id: number | string;
@@ -99,6 +113,69 @@ const matchData = ref<MatchData | null>(null);
 const isMatchSelected = ref(false);
 const submitting = ref(false);
 
+// ===== 登录状态提示 =====
+// 先用本地 token 做即时判断（避免闪烁），再用后端 /machine/whoami 校准——
+// 后端能从 token 解析出用户才算真登录（覆盖 token 被服务端作废的场景）。
+const authStore = useAuthStore();
+const isLoggedIn = ref(checkLoginState());
+const nickName = ref('');
+
+function checkLoginState(): boolean {
+    const token = getToken();
+    if (!token) return false;
+    const expireTime = getTokenExpireTime();
+    // 没记录过期时间时保守视为已登录（老版本登录可能没写 expire），有过期时间则严格校验
+    return !expireTime || expireTime > Date.now();
+}
+
+/** 调后端 whoami 精确校准登录状态；失败时回退到本地 token 判断 */
+function refreshLoginState() {
+    const localState = checkLoginState();
+    isLoggedIn.value = localState;
+    if (!localState) {
+        nickName.value = '';
+        return;
+    }
+    httpInstance
+        .get(API.WHOAMI)
+        .then((res) => {
+            const data = (res as any).data || {};
+            isLoggedIn.value = !!data.loggedIn;
+            nickName.value = data.nickName || data.username || '';
+        })
+        .catch(() => {
+            // 请求失败（网络等）保持本地判断结果，不打扰用户
+        });
+}
+
+// 弹窗每次打开、或登录弹窗关闭后，都刷新一次登录状态
+watch(
+    () => props.active,
+    (isActive) => {
+        if (isActive) {
+            refreshLoginState();
+            getInProgressMatch();
+        }
+    },
+    { immediate: true }
+);
+watch(
+    () => authStore.loginSuccessTick,
+    () => {
+        // 登录成功广播：token 写入 cookie 后立刻重新校准
+        refreshLoginState();
+    }
+);
+watch(
+    () => authStore.loginVisible,
+    (loginVisible, prevVisible) => {
+        // 登录弹窗从开到关（含用户手动关闭）→ 兜底再校准一次
+        if (prevVisible && !loginVisible) {
+            refreshLoginState();
+        }
+    }
+);
+
 memeTagsStore.tagsLoaded.then(() => {
     allTags.value = memeTagsStore.memeTags;
 });
@@ -118,16 +195,6 @@ function getInProgressMatch() {
             matchData.value = null;
         });
 }
-
-watch(
-    () => props.active,
-    (isActive) => {
-        if (isActive) {
-            getInProgressMatch();
-        }
-    },
-    { immediate: true }
-);
 
 function saveBarrage() {
     const selectedValues = selectedTags.value.map((t) => t.dictValue);
@@ -180,6 +247,42 @@ function saveBarrage() {
     width: 100%;
     line-height: 25px;
     box-sizing: border-box;
+
+    .login-status-tip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 7px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.5;
+        box-sizing: border-box;
+
+        .tip-icon {
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .tip-login-btn {
+            font-size: 13px;
+            padding: 0;
+            vertical-align: baseline;
+        }
+
+        &.is-logged-in {
+            background-color: rgba(61, 179, 2, 0.08);
+            color: var(--body-color);
+            border: 1px solid rgba(61, 179, 2, 0.25);
+        }
+
+        &.is-guest {
+            background-color: var(--el-fill-color-light, #f5f7fa);
+            color: var(--body-color);
+            border: 1px dashed var(--el-border-color, #dcdfe6);
+        }
+    }
 
     .submission-header {
         width: 100%;
