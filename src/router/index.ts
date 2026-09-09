@@ -43,6 +43,7 @@ const router = createRouter({
                 { path: 'growth', name: 'growth', component: () => import('@/views/MainLayout/components/play/growth.vue') },
                 { path: 'lifecycle', name: 'lifecycle', component: () => import('@/views/MainLayout/components/keep/lifecycle.vue') },
                 { path: 'checkin', name: 'checkin', component: () => import('@/views/MainLayout/components/keep/checkin.vue') },
+                { path: 'lieDetector', name: 'lieDetector', component: () => import('@/views/MainLayout/components/play/lie-detector.vue') },
             ],
         },
         {

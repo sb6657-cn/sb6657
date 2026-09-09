@@ -62,6 +62,7 @@ import hotwall_icon from '@/assets/icons/hotwall_icon.svg';
 export const MemeCategory = [
     { path: '/home', text: '首页', icon: home_icon },
     { path: '/memes/AllBarrage', text: '全部烂梗', icon: all_icon, api: API.GET_ALL_MEME, category: 'allbarrage' },
+    { path: '/lieDetector', text: '测谎仪', icon: cs2_icon },
     { path: '/image', text: '时光相册', icon: image_icon },
     { path: '/post-bar', text: '社区贴吧', icon: post_icon },
     { path: '/aichat', text: 'AI造梗', icon: chat_icon },
