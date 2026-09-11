@@ -3,7 +3,7 @@
         <el-menu router class="sidebar-el-menu" :default-active="route.path">
             <el-menu-item v-for="category in MemeCategory" :key="category.path" :index="category.path">
                 <div class="sidebar-icon">
-                    <img :src="category.icon" alt="" />
+                    <img :src="category.icon" alt="" :class="{ 'keep-color': category.keepColor }" />
                 </div>
                 <span>{{ category.text }}</span>
             </el-menu-item>
@@ -42,6 +42,10 @@ const route = useRoute();
         img {
             height: 18px;
             width: 18px;
+        }
+
+        html.dark & img:not(.keep-color) {
+            filter: invert(1);
         }
     }
 

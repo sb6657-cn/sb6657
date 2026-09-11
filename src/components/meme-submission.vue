@@ -3,13 +3,12 @@
         <!-- 登录状态提示：登录后投稿会记录归属，方便用户确认 -->
         <div class="login-status-tip" :class="isLoggedIn ? 'is-logged-in' : 'is-guest'">
             <span class="tip-icon">{{ isLoggedIn ? '✅' : '👤' }}</span>
-            <template v-if="isLoggedIn">
+            <span v-if="isLoggedIn" class="tip-text">
                 当前已登录<b v-if="nickName">（{{ nickName }}）</b>，投稿通过审核后将记录为<b>你的烂梗</b>，可在个人主页查看。
-            </template>
-            <template v-else>
-                当前<b>未登录</b>，投稿为匿名；<el-button class="tip-login-btn" link type="primary"
-                    @click="authStore.showLogin()">点此登录</el-button>后投稿将归属于你的账号。
-            </template>
+            </span>
+            <span v-else class="tip-text">
+                当前<b>未登录</b>，投稿为匿名；<el-button class="tip-login-btn" link type="primary" @click="authStore.showLogin()">点此登录</el-button>后投稿将归属于你的账号。
+            </span>
         </div>
 
         <div class="submission-header">
@@ -250,7 +249,7 @@ function saveBarrage() {
 
     .login-status-tip {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 6px;
         width: 100%;
         margin-bottom: 10px;
@@ -263,10 +262,18 @@ function saveBarrage() {
         .tip-icon {
             flex-shrink: 0;
             font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .tip-text {
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .tip-login-btn {
             font-size: 13px;
+            height: auto;
             padding: 0;
             vertical-align: baseline;
         }
