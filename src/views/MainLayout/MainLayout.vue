@@ -95,6 +95,10 @@ onMounted(() => {
         bottom: 5px;
         z-index: 1002;
         font-size: 10px;
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
+        }
     }
 
     :global(.el-backtop) {
@@ -127,6 +131,10 @@ onMounted(() => {
         bottom: 0px;
         z-index: 1002;
         font-size: 0.5rem;
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
+        }
     }
 
     :global(.el-backtop) {

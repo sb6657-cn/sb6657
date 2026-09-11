@@ -35,7 +35,7 @@
                 <img src="@/assets/imgs/douyu.png" alt="douyu" class="icon-img" />
             </a>
             <a class="icon-container" href="https://github.com/sb6657-cn/sb6657/" target="_blank">
-                <img src="@/assets/imgs/github.png" alt="github" class="icon-img" />
+                <img src="@/assets/imgs/github.png" alt="github" class="icon-img github-icon" />
             </a>
 
             <HeaderSupportEntry v-slot="{ open }" dialog-width="35%">
@@ -87,6 +87,10 @@ function complaintButton() {
     justify-content: space-between;
     gap: 10px;
     backdrop-filter: saturate(100%) blur(4px);
+
+    html.dark & {
+        background: var(--header-bg);
+    }
 }
 
 .logo-link {
@@ -128,11 +132,20 @@ function complaintButton() {
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
+
+    html.dark & {
+        color: var(--header-text);
+    }
 }
 
 .hot-barrage-span {
     color: #e4d6b8;
     border-bottom: 1px solid #e4d6b8;
+
+    html.dark & {
+        color: var(--header-text);
+        border-bottom-color: var(--header-text);
+    }
 }
 
 .fade-enter-active,
@@ -199,6 +212,14 @@ function complaintButton() {
     object-fit: contain;
 }
 
+html.dark .github-icon {
+    filter: invert(1);
+}
+
+html.dark .message-icon img {
+    filter: invert(1) brightness(1.15);
+}
+
 .user-message {
     height: 32px;
     margin-right: 15px;
@@ -215,6 +236,10 @@ function complaintButton() {
 
     img {
         height: 28px;
+    }
+
+    html.dark & {
+        color: var(--header-text);
     }
 }
 

@@ -60,6 +60,11 @@ async function navigateTo(path: string) {
     z-index: 100;
     border-bottom: darkgrey solid 1px;
 
+    html.dark & {
+        background-color: var(--header-bg);
+        border-bottom-color: var(--header-border);
+    }
+
     .tab-container {
         display: flex;
         align-items: center;
@@ -72,6 +77,11 @@ async function navigateTo(path: string) {
         font-size: large;
         color: dimgray;
         position: relative;
+
+        html.dark & {
+            color: var(--header-text);
+            opacity: 0.7;
+        }
     }
 
     .selected {
@@ -79,6 +89,11 @@ async function navigateTo(path: string) {
         color: #000;
         font-weight: bold;
         padding: 0 2px;
+
+        html.dark & {
+            color: var(--header-text);
+            opacity: 1;
+        }
     }
 
     .selected::after {

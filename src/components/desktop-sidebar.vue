@@ -19,34 +19,6 @@ const route = useRoute();
 </script>
 
 <style lang="scss" scoped>
-.el-menu {
-    background-color: transparent !important;
-}
-
-.el-menu-item,
-.el-sub-menu .el-menu-item {
-    color: black;
-    background-color: transparent !important;
-}
-
-.el-menu-item.is-active,
-.el-sub-menu .el-menu-item.is-active {
-    background-color: rgba(255, 255, 255, 0.5) !important;
-    color: black;
-    border-radius: 5px;
-}
-
-.el-menu.el-menu--vertical.v-enter-to {
-    background-color: rgba(255, 255, 255, 0) !important;
-}
-
-.el-menu .el-menu-item:hover {
-    outline: 0 !important;
-    color: #2e95fb !important;
-    background: linear-gradient(270deg, #f2f7fc 0%, #fefefe 100%) !important;
-    border-radius: 5px;
-}
-
 .sidebar {
     width: auto;
     border-right: 0px solid #ddd;
@@ -70,6 +42,46 @@ const route = useRoute();
         img {
             height: 18px;
             width: 18px;
+        }
+    }
+
+    :deep(.el-menu) {
+        background-color: transparent;
+    }
+
+    :deep(.el-menu-item) {
+        color: black;
+        background-color: transparent;
+        border-radius: 5px;
+
+        &.is-active {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: black;
+        }
+
+        &:hover {
+            outline: 0;
+            color: #2e95fb;
+            background: linear-gradient(270deg, #f2f7fc 0%, #fefefe 100%);
+        }
+    }
+
+    html.dark & {
+        background: var(--sidebar-bg);
+
+        :deep(.el-menu-item) {
+            color: var(--sidebar-text);
+            background-color: transparent;
+
+            &.is-active {
+                background-color: var(--el-color-primary-light-8, rgba(17, 169, 131, 0.2));
+                color: var(--sidebar-text);
+            }
+
+            &:hover {
+                color: var(--el-color-primary);
+                background: var(--el-fill-color-light, rgba(255, 255, 255, 0.1));
+            }
         }
     }
 }

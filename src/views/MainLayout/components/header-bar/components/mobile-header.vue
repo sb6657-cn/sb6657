@@ -27,7 +27,7 @@
                 <img src="@/assets/imgs/douyu.png" alt="douyu" class="icon-img" />
             </a>
             <a class="icon-container" href="https://github.com/sb6657-cn/sb6657/" target="_blank">
-                <img src="@/assets/imgs/github.png" alt="github" class="icon-img" />
+                <img src="@/assets/imgs/github.png" alt="github" class="icon-img github-icon" />
             </a>
 
             <HeaderSupportEntry v-slot="{ open }" dialog-width="100%">
@@ -92,6 +92,10 @@ function complaintButton() {
     padding-top: 6px;
     background-color: #fff;
     backdrop-filter: saturate(100%) blur(4px);
+
+    html.dark & {
+        background-color: var(--header-bg);
+    }
 }
 
 .header-primary {
@@ -187,6 +191,11 @@ function complaintButton() {
     color: #e4d6b8;
     border-bottom: 1px solid #e4d6b8;
     opacity: 0.8;
+
+    html.dark & {
+        color: var(--header-text);
+        border-bottom-color: var(--header-text);
+    }
 }
 
 .fade-enter-active,
@@ -216,6 +225,14 @@ function complaintButton() {
     object-fit: contain;
 }
 
+html.dark .github-icon {
+    filter: invert(1);
+}
+
+html.dark .message-icon img {
+    filter: invert(1) brightness(1.15);
+}
+
 .user-message {
     height: auto;
     margin-right: 0;
@@ -233,6 +250,10 @@ function complaintButton() {
 
     img {
         height: 20px;
+    }
+
+    html.dark & {
+        color: var(--header-text);
     }
 }
 
