@@ -152,19 +152,5 @@ import { RouterLink } from 'vue-router';
 html.dark .sub-info a {
     color: var(--el-color-primary);
 }
-
-html.dark .promotion .partner-card {
-    border-color: rgba(201, 234, 22, 0.28);
-    background:
-        radial-gradient(circle at 86% 24%, rgba(201, 234, 22, 0.18), transparent 48%),
-        linear-gradient(160deg, #1c2410 0%, #152018 100%);
-    color: #e8f0c8;
-    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.35));
-}
-
-html.dark .promotion .partner-kicker,
-html.dark .promotion .partner-name {
-    color: #e8f0c8;
-}
 </style>
 

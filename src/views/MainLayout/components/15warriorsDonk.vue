@@ -579,6 +579,11 @@ async function downloadRankingImage() {
         font-weight: bold;
         color: #777;
         background: linear-gradient(rgba(245, 245, 247, 0), #f5f5f7);
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
+            background: linear-gradient(rgba(18, 20, 26, 0), var(--el-fill-color-light, #12141a));
+        }
     }
 
     .section-title {
@@ -683,6 +688,42 @@ async function downloadRankingImage() {
 
             .maps {
                 text-align: center;
+            }
+        }
+    }
+}
+
+html.dark {
+    .container {
+        .ranking-section,
+        .updates-section {
+            table {
+                thead th {
+                    color: var(--el-text-color-regular);
+                    background-color: var(--el-fill-color);
+                    border-bottom-color: var(--el-border-color);
+                }
+
+                tbody {
+                    tr {
+                        &:nth-child(odd) {
+                            background-color: rgba(255, 255, 255, 0.04);
+                        }
+
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 0.08);
+                        }
+
+                        td {
+                            border-bottom-color: var(--el-border-color);
+
+                            &.expr .before,
+                            &.expr .after {
+                                color: var(--body-color);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -608,4 +608,66 @@ onUnmounted(() => {
         }
     }
 }
+
+html.dark {
+    .pause-notice {
+        background: linear-gradient(90deg, #3a2416 0%, #3a1f1c 100%);
+        border-color: #8a4b2e;
+
+        .notice-title {
+            color: #ffb080;
+        }
+
+        .notice-desc,
+        .notice-text h3 {
+            color: #e0c4b0;
+        }
+    }
+
+    .briefing {
+        background-color: #3a3214;
+        border-color: #a68500;
+
+        .briefing-content {
+            color: #f0c040;
+        }
+    }
+
+    .ranking-section {
+        border-color: var(--el-border-color);
+        background-color: var(--card-bg);
+
+        .section-header {
+            background-color: var(--el-fill-color);
+            border-bottom-color: var(--el-border-color);
+
+            .section-title {
+                color: var(--body-color);
+            }
+
+            .btn-link {
+                color: var(--el-color-primary);
+            }
+        }
+    }
+
+    .commentary {
+        background-color: var(--card-bg);
+        border-color: var(--el-border-color);
+
+        .commentary-title {
+            background-color: #1a3050;
+            border-bottom-color: var(--el-border-color);
+            color: #7eb8ff;
+        }
+
+        .commentary-content {
+            color: var(--el-text-color-regular);
+        }
+    }
+
+    .match-date {
+        color: var(--el-text-color-secondary);
+    }
+}
 </style>
