@@ -130,7 +130,9 @@ import { ElMessage } from 'element-plus'
 import { Share, View } from '@element-plus/icons-vue'
 import html2canvas from 'html2canvas'
 import CoinPreviewDialog from '@/components/CoinPreviewDialog.vue'
+import { useThemeStore } from '@/stores/themeStore'
 
+const theme = useThemeStore()
 const route = useRoute()
 const matchId = ref<number>(0)
 const isLoading = ref(true)
@@ -403,7 +405,7 @@ const captureAndShare = async () => {
 
         // 创建截图
         const canvas = await html2canvas(element, {
-            backgroundColor: '#ffffff',
+            backgroundColor: theme.isDark ? '#12141a' : '#ffffff',
             scale: 1.5,
             logging: false,
             useCORS: true,

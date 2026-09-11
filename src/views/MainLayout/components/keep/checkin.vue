@@ -150,6 +150,12 @@ onMounted(() => { loadWallet(); loadStatus(); });
 }
 .page-sub { color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 16px; }
 
+html.dark .page-sub,
+html.dark .reward-tip,
+html.dark .login-tip {
+    color: var(--el-text-color-secondary);
+}
+
 /* Holographic Wallet */
 .wallet-card {
     position: relative; border-radius: 18px; padding: 22px; margin-bottom: 16px;

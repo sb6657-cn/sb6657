@@ -196,6 +196,10 @@ onUnmounted(() => {
     font-size: 14px;
     line-height: 1.6;
     color: var(--body-color);
+
+    html.dark & {
+        border-color: var(--el-border-color);
+    }
 }
 
 // Header 样式

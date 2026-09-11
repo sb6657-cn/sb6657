@@ -45,7 +45,7 @@
 
         <el-dialog v-model="qqGroupDialogVisible" append-to-body title="官方交流群" width="min(420px, 92vw)">
             <img src="https://static.wishao.site/sb6657/img/qqgroup.webp" alt="sb6657 官方交流群二维码" style="display: block; width: 100%; max-width: 100%; height: auto; object-fit: contain" />
-            <p style="margin-top: 10px; color: #606266; font-size: 13px; text-align: center">QQ群：1070269456、526042235</p>
+            <p class="qq-group-hint">QQ群：1070269456、526042235</p>
         </el-dialog>
 
         <el-dialog v-model="supportDialogVisible" append-to-body title="谢谢老板~" width="min(420px, 92vw)">
@@ -173,6 +173,17 @@ const daysSinceLaunch = computed(() => {
             background: transparent;
             font-size: 12px;
             line-height: 18px;
+        }
+    }
+
+    .qq-group-hint {
+        margin-top: 10px;
+        color: #606266;
+        font-size: 13px;
+        text-align: center;
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
         }
     }
 

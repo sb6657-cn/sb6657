@@ -245,6 +245,10 @@ onBeforeUnmount(() => {
     background: #f8edb8;
     border-radius: 8px;
     overflow: hidden;
+
+    html.dark & {
+        box-shadow: inset 0 0 0 1px var(--el-border-color);
+    }
 }
 
 .merge-pig-wrapper {
@@ -281,6 +285,12 @@ onBeforeUnmount(() => {
     border-left: 1px solid rgba(70, 123, 76, 0.18);
     display: flex;
     flex-direction: column;
+
+    html.dark & {
+        background: #1e2418;
+        border-left-color: var(--el-border-color);
+        color: var(--body-color);
+    }
 }
 
 .leaderboard-header {

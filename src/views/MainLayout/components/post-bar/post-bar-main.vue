@@ -345,6 +345,10 @@ onMounted(() => {
             .post-createTime {
                 font-size: 12px;
                 color: #999;
+
+                html.dark & {
+                    color: var(--el-text-color-secondary);
+                }
             }
 
             .meme-tag {
@@ -452,6 +456,10 @@ onMounted(() => {
             .post-createTime {
                 font-size: 12px;
                 color: #999;
+
+                html.dark & {
+                    color: var(--el-text-color-secondary);
+                }
             }
 
             .meme-tag {
@@ -465,8 +473,11 @@ onMounted(() => {
                 height: auto;
                 padding: 5px;
                 span{
-                    filter: invert(100%);
-                    color: white !important;
+                    color: #003844;
+
+                    html.dark & {
+                        color: var(--body-color);
+                    }
                 }
             }
 

@@ -196,7 +196,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { useThemeStore } from '@/stores/themeStore';
 import { API } from '@/constants/backend';
 import { get, post } from '@/apis/httpInstance';
 import { useMemeTagsStore } from '@/stores/memeTags';
@@ -234,6 +235,10 @@ for (const k of STAGE_KEYS) panels[k] = { items: [], pageNum: 0, isLast: false, 
 
 // 图表的全局字体栈：微软雅黑优先
 const CHART_FONT = '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", sans-serif';
+const theme = useThemeStore();
+function chartLabelColor() {
+    return theme.isDark ? '#e6edf3' : '#222';
+}
 
 const dnaVisible = ref(false);
 const dnaLoading = ref(false);
@@ -752,7 +757,7 @@ function initDnaChart() {
             label: {
                 show: true,
                 fontSize: nFontSize,
-                color: '#222',
+                color: chartLabelColor(),
                 fontFamily: CHART_FONT,
                 formatter: '{b}',
                 align: 'center',
@@ -850,6 +855,14 @@ onMounted(async () => {
         observers.push(obs);
     }
 });
+watch(
+    () => theme.isDark,
+    () => {
+        if (dnaGraphData.value) initDnaChart();
+        if (evolutionGraph.value) renderEvolutionChart();
+    },
+);
+
 onUnmounted(() => {
     observers.forEach(o => o.disconnect());
     if (evolutionChart) {
@@ -896,6 +909,11 @@ onUnmounted(() => {
     background: linear-gradient(135deg, #e6fffb, #bae7ff, #efdbff, #fff1f0);
     background-size: 300% 300%;
     animation: dna-hero-shift 4s ease infinite;
+
+    html.dark & {
+        background: linear-gradient(135deg, #0f1c2e, #1a2a3a, #1e1a2e, #2a1a2e);
+        background-size: 300% 300%;
+    }
 }
 @keyframes dna-hero-shift {
     0%,100% { background-position: 0% 50%; }
@@ -922,6 +940,10 @@ onUnmounted(() => {
     display: flex; margin-bottom: 20px;
     background: linear-gradient(90deg, #e6fffb, #bae7ff, #efdbff, #fff1f0);
     border-radius: 14px; padding: 16px 8px; position: relative;
+
+    html.dark & {
+        background: linear-gradient(90deg, #0f1c2e, #1a2a3a, #1e1a2e, #2a1a2e);
+    }
 }
 .stage-timeline::before {
     content: ''; position: absolute; top: 50%; left: 10%; right: 10%; height: 3px;
@@ -1246,6 +1268,10 @@ onUnmounted(() => {
 .flow-node-ancestor .flow-node-tag { background: #f9f0ff; color: #722ed1; }
 .flow-node-center .flow-node-tag { background: #fff7e6; color: #d46b08; }
 .flow-node-descendant .flow-node-tag { background: #e6fffb; color: #13c2c2; }
+
+html.dark .flow-node-ancestor .flow-node-tag { background: rgba(114, 46, 209, 0.22); color: #d3adf7; }
+html.dark .flow-node-center .flow-node-tag { background: rgba(212, 107, 8, 0.22); color: #ffd591; }
+html.dark .flow-node-descendant .flow-node-tag { background: rgba(19, 194, 194, 0.22); color: #87e8de; }
 .flow-node-id { font-size: 12px; color: var(--body-color); opacity: 0.6; }
 .flow-node-text {
     font-size: 13px; font-weight: 600; color: var(--body-color);
@@ -1283,6 +1309,11 @@ onUnmounted(() => {
     border-radius: 10px;
     background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
     border: 1px solid var(--el-border-color-lighter, #ebeef5);
+
+    html.dark & {
+        background: linear-gradient(180deg, #151a22 0%, #1a1f27 100%);
+        border-color: var(--el-border-color);
+    }
 }
 .evolution-chart-hint {
     display: flex; flex-wrap: wrap; gap: 14px;

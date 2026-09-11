@@ -87,6 +87,15 @@ function removeTag(tag: memeTag) {
                     background-color: #ecf5ff;
                 }
 
+                html.dark & {
+                    border-color: var(--el-border-color);
+
+                    &:hover {
+                        border-color: var(--el-color-primary);
+                        background-color: var(--el-color-primary-light-9);
+                    }
+                }
+
                 .tag-icon-wrapper {
                     display: flex;
                     align-items: center;

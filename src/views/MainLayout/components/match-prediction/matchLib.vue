@@ -317,16 +317,25 @@ onUnmounted(() => {
     transition: all 0.3s;
     cursor: pointer;
     height: 100%;
-    background: rgba(255, 255, 255, 0.5) !important;
-    backdrop-filter: blur(12228px);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    html.dark & {
+        background: rgba(26, 31, 39, 0.82);
+        border-color: var(--el-border-color);
+    }
 }
 
 .match-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.8);
+
+    html.dark & {
+        background: rgba(26, 31, 39, 0.95);
+    }
 }
 
 .card-content {
@@ -343,6 +352,10 @@ onUnmounted(() => {
     justify-content: center;
     background: rgba(255, 255, 255, 0.4);
     padding: 15px;
+
+    html.dark & {
+        background: rgba(255, 255, 255, 0.06);
+    }
 }
 
 .match-image {
@@ -374,6 +387,10 @@ onUnmounted(() => {
     color: #303133;
     flex: 1;
     line-height: 1.4;
+
+    html.dark & {
+        color: var(--body-color);
+    }
 }
 
 .match-level {
@@ -392,6 +409,10 @@ onUnmounted(() => {
     gap: 6px;
     color: #606266;
     font-size: 14px;
+
+    html.dark & {
+        color: var(--el-text-color-secondary);
+    }
 }
 
 .match-time {
@@ -406,6 +427,10 @@ onUnmounted(() => {
     gap: 6px;
     color: #606266;
     font-size: 14px;
+
+    html.dark & {
+        color: var(--el-text-color-secondary);
+    }
 }
 
 .el-icon {

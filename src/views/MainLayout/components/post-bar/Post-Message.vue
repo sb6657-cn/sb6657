@@ -115,6 +115,10 @@ onMounted(() => {
     justify-content: space-between;
     font-size: 14px;
     color: #666;
+
+    html.dark & {
+        color: var(--el-text-color-regular);
+    }
 }
 
 .nickname {
@@ -124,12 +128,20 @@ onMounted(() => {
 .time {
     font-size: 12px;
     color: #999;
+
+    html.dark & {
+        color: var(--el-text-color-secondary);
+    }
 }
 
 .item-type {
     font-size: 13px;
     margin-bottom: 6px;
     color: #444;
+
+    html.dark & {
+        color: var(--el-text-color-regular);
+    }
 }
 
 .item-content {

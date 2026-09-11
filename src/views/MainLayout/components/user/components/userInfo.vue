@@ -74,5 +74,9 @@ watch(() => props.user, user => {
   margin-left: 12px;
   color: #909399;
   font-size: 12px;
+
+  html.dark & {
+    color: var(--el-text-color-secondary);
+  }
 }
 </style>

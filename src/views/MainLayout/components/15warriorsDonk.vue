@@ -167,6 +167,9 @@ import { ArrowDownBold, ArrowUpBold, Download } from '@element-plus/icons-vue';
 import { ElIcon, ElMessage } from 'element-plus';
 import { toCanvas } from 'html-to-image';
 import { computed, ref, watch } from 'vue';
+import { useThemeStore } from '@/stores/themeStore';
+
+const theme = useThemeStore();
 
 const url = new URL(window.location.href);
 const searchParams = url.searchParams;
@@ -245,12 +248,12 @@ function addSourceBanner(canvas: HTMLCanvasElement) {
     const ctx = outputCanvas.getContext('2d');
     if (!ctx) return canvas;
 
-    ctx.fillStyle = '#f5f5f7';
+    ctx.fillStyle = theme.isDark ? '#12141a' : '#f5f5f7';
     ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
     ctx.font = `600 ${13 * captureScale}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#666';
+    ctx.fillStyle = theme.isDark ? '#e6edf3' : '#666';
     ctx.fillText('sb6657.cn · 数据来源', outputCanvas.width / 2, bannerHeight / 2 + 1 * captureScale);
     ctx.drawImage(canvas, 0, bannerHeight);
 
@@ -267,7 +270,7 @@ async function downloadRankingImage() {
         const canvas = await toCanvas(containerRef.value, {
             width: captureWidth,
             height: captureHeight,
-            backgroundColor: '#f5f5f7',
+            backgroundColor: theme.isDark ? '#12141a' : '#f5f5f7',
             cacheBust: true,
             pixelRatio: captureScale,
             style: {

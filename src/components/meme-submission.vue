@@ -353,6 +353,10 @@ function saveBarrage() {
                         font-size: 14px;
                         text-overflow: ellipsis;
                         white-space: nowrap;
+
+                        html.dark & {
+                            color: var(--body-color);
+                        }
                     }
                 }
 

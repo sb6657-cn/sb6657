@@ -232,6 +232,10 @@ function handleReset() {
   .slider-text {
     margin-bottom: 20px;
     color: #606266;
+
+    html.dark & {
+      color: var(--el-text-color-secondary);
+    }
   }
 
   :deep(.el-slider) {
@@ -239,6 +243,10 @@ function handleReset() {
       height: 40px;
       background-color: #f5f7fa;
       border-radius: 20px;
+
+      html.dark & {
+        background-color: var(--el-fill-color-light);
+      }
     }
 
     .el-slider__bar {

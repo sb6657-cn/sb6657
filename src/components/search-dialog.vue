@@ -330,7 +330,7 @@ const highlightedMemeArr = computed(() => {
     const regex = new RegExp(escapeRegExp(props.searchKey), 'gi');
     return memeArr.value.map((meme) => ({
         ...meme,
-        highlightedContent: meme.content.replace(regex, (match) => `<span style="background-color: yellow">${match}</span>`),
+        highlightedContent: meme.content.replace(regex, (match) => `<span class="search-hit">${match}</span>`),
     }));
 });
 
@@ -394,6 +394,10 @@ watch(
         border: 1px solid #e4e7ed;
         padding: 0 6px;
         background-color: var(--el-fill-color-light, #eee);
+
+        html.dark & {
+            border-color: var(--el-border-color);
+        }
 
         .title {
             display: flex;
@@ -584,5 +588,14 @@ watch(
         color: var(--body-color);
         font-size: 14px;
     }
+}
+
+.search-hit {
+    background-color: yellow;
+}
+
+html.dark .search-hit {
+    background-color: var(--search-hit-bg, #8c6d1f);
+    color: var(--body-color);
 }
 </style>
