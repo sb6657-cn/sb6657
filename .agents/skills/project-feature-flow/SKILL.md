@@ -19,6 +19,7 @@ Use best judgment only when the ambiguity is low risk and the existing code/docs
     - `README.md` for project positioning or backend usage.
     - `docs/更新日志.md` when the change is user-visible or version-related.
     - `docs/版本策略.md` before any code or release metadata change.
+    - `docs/ai-plans/README.md` plus the matching `docs/ai-plans/<slug>.md` when the user wants to continue a multi-session plan, says goal mode, or the request clearly matches an `active` plan. Execute only the current step.
 3. Inspect the nearest relevant source files before deciding an approach.
 4. Check for ambiguity:
     - Ask the user before coding if multiple valid behaviors exist.

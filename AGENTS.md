@@ -9,6 +9,7 @@
 - 改动已有功能、版本展示或用户可见能力时，参考 `docs/更新日志.md`。
 - 修改代码或版本信息前读 `docs/版本策略.md`。它定义新版本格式、major/minor/patch 升级口径和第三版网站的历史版本溯源。
 - 只有涉及油猴脚本说明页或第三方脚本文案时，才需要读 `docs/油猴脚本.md`。
+- 跨多次对话的大改动先读 `docs/ai-plans/README.md`。正在执行的计划在 `docs/ai-plans/` 下；用户说按计划做或继续 goal 时，从该计划的「当前步骤」开始，不要另起一份平行方案。
 - 文档与代码不一致时，以离改动最近的源码为最终依据。
 
 ## 项目概况
@@ -45,7 +46,7 @@
 
 ## Repo Skills
 
-- `.agents/skills/project-feature-flow`：实现功能、修 bug、重构、优化或 UI 改动时使用。它强调先读上下文、遇到模棱两可的问题先问用户，再进入实现、版本同步和验证。
+- `.agents/skills/project-feature-flow`：实现功能、修 bug、重构、优化或 UI 改动时使用。它强调先读上下文、遇到模棱两可的问题先问用户，再进入实现、版本同步和验证。若任务对应 `docs/ai-plans/` 里一份 `active` 计划，按计划的当前步骤做，不要重新设计范围。
 - `.agents/skills/project-commit`：用户明确要求提交代码时使用。它要求先检查变更范围、版本号和更新日志同步、pnpm 质量门禁，然后才能 stage 并 commit。
 
 ## 版本和更新日志
@@ -94,6 +95,7 @@
 - `src/components/`：全局可复用组件，以及按页面/业务命名目录收纳的页面私有子组件，如桌面侧边栏、移动端顶部 Tab、标签选择器、投稿弹窗、搜索、聊天室、硬币预览、词云和首页组件。
 - `src/assets/css/index.scss`：Element Plus 主题变量。
 - `src/assets/css/global.css`：全局 reset 和共享样式。
+- `docs/ai-plans/`：跨会话 AI 实施计划；规范见该目录 `README.md`，正在推进的深色模式收口见 `dark-mode.md`。
 
 ## 请求和后端约定
 

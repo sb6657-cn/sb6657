@@ -785,7 +785,11 @@ memeTagsStore.tagsLoaded.then(() => {
 
 - `src/assets/css/index.scss`：Element Plus 主题变量。
 - `src/assets/css/global.css`：全局 reset、`.card`、`.el-backtop`、`.site-version` 等。
-- `src/assets/css/dark.css`：`html.dark` 下的全局深色变量和组件覆盖；`themeStore` 将选择保存到 `localStorage` 的 `theme-mode`，跟随系统时监听 `prefers-color-scheme`。
+- `src/assets/css/dark.css`：只放 `html.dark` token 和 `html.dark body`。业务深色覆盖写在组件 scoped 的 `html.dark` 里。
+- `themeStore` 将选择保存到 `localStorage` 的 `theme-mode`；`isDark` 依赖响应式的系统深色 flag，跟随系统时监听 `prefers-color-scheme`。`index.html` 在 Vue 启动前按同一规则给 `<html>` 加 `dark`，避免闪白。
+- 浅色维持用色自由度，不要把浅色 hex 收成设计系统。深色覆盖走 token / `--el-*`。`invert`、配色 `!important` 这类凑合补丁不要再加。
+- 固定皮（不跟官网壳）：合成大猪头游戏区、测谎仪仪表、赛事竞猜舞台、热度墙事件流内岛、签到钱包卡、3D 硬币预览、404、屏保。
+- 跨会话大改动的计划写法见 `docs/ai-plans/README.md`。深色模式收口计划见 `docs/ai-plans/dark-mode.md`。
 
 组件样式：
 
