@@ -12,8 +12,8 @@
                     <el-popover placement="top-start" trigger="hover" width="auto"
                         @before-enter="getBarrageById(post.barrageId)">
                         <template #reference>
-                            <el-tag effect="dark" round color="#00FFFF" v-if="post.barrage" class="meme-tag">
-                                <span style="color: var(--body-color);">#烂梗：{{ post.barrage }}</span>
+                            <el-tag effect="dark" round v-if="post.barrage" class="meme-tag">
+                                <span class="meme-tag-text">#烂梗：{{ post.barrage }}</span>
                             </el-tag>
                         </template>
                         <template #default>
@@ -345,18 +345,36 @@ onMounted(() => {
             .post-createTime {
                 font-size: 12px;
                 color: #999;
+
+                html.dark & {
+                    color: var(--el-text-color-secondary);
+                }
             }
 
-            .meme-tag {
+            .meme-tag.el-tag {
                 cursor: pointer;
                 margin-bottom: 5px;
                 font-size: 14px;
-                color: var(--body-color);
                 margin-left: 10px;
                 white-space: normal;
                 /* 确保自动换行 */
                 height: auto;
                 padding: 5px;
+                background-color: #00ffff;
+                border-color: #00ffff;
+
+                .meme-tag-text {
+                    color: #003844;
+                }
+
+                html.dark & {
+                    background-color: #1b5e66;
+                    border-color: #1b5e66;
+
+                    .meme-tag-text {
+                        color: #d7f6f8;
+                    }
+                }
             }
 
             .user-img {
@@ -452,9 +470,13 @@ onMounted(() => {
             .post-createTime {
                 font-size: 12px;
                 color: #999;
+
+                html.dark & {
+                    color: var(--el-text-color-secondary);
+                }
             }
 
-            .meme-tag {
+            .meme-tag.el-tag {
                 cursor: pointer;
                 margin-bottom: 5px;
                 font-size: 14px;
@@ -464,9 +486,20 @@ onMounted(() => {
                 /* 确保自动换行 */
                 height: auto;
                 padding: 5px;
-                span{
-                    filter: invert(100%);
-                    color: white !important;
+                background-color: #00ffff;
+                border-color: #00ffff;
+
+                .meme-tag-text {
+                    color: #003844;
+                }
+
+                html.dark & {
+                    background-color: #1b5e66;
+                    border-color: #1b5e66;
+
+                    .meme-tag-text {
+                        color: #d7f6f8;
+                    }
                 }
             }
 

@@ -1,122 +1,25 @@
 html.dark {
-  color-scheme: dark;
+    color-scheme: dark;
 
-  --body-bg: #141414;
-  --body-color: #e6edf3;
+    --body-bg: #12141a;
+    --body-color: #e6edf3;
 
-  --card-bg: #151b23;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --card-bg: #1a1f27;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 
-  --content-bg: #0b1016;
+    --content-bg: transparent;
 
-  --header-bg: #111821;
-  --header-text: #e6edf3;
-  --header-title-color: #38bdf8;
-  --header-border: #263442;
+    --header-bg: rgba(18, 20, 26, 0.88);
+    --header-text: #e8eef4;
+    --header-title-color: #ff552e;
+    --header-border: #2a3340;
 
-  --sidebar-bg: #111821;
-  --sidebar-text: #b8c4d0;
+    --sidebar-bg: transparent;
+    --sidebar-text: #c5d0dc;
 
-  /* 强调色 */
-  --primary-color: #38bdf8;
-  --primary-hover: #60a5fa;
+    --search-hit-bg: #8c6d1f;
 }
 
 html.dark body {
-  background-color: var(--body-bg);
-}
-
-/* Deep dark mode: apply backgrounds to layout elements */
-html.dark .sidebar {
-  background: var(--sidebar-bg);
-}
-
-html.dark .header {
-  background: var(--header-bg);
-}
-
-html.dark .tab {
-  background: var(--header-bg);
-}
-
-/* Sidebar dark mode text colors */
-html.dark .el-menu-item,
-html.dark .el-sub-menu .el-menu-item {
-  color: var(--sidebar-text) !important;
-  background-color: transparent !important;
-}
-
-html.dark .el-menu-item.is-active,
-html.dark .el-sub-menu .el-menu-item.is-active {
-  background-color: var(--el-color-primary-light-8, rgba(56, 189, 248, 0.2)) !important;
-  color: var(--sidebar-text) !important;
-}
-
-html.dark .el-menu .el-menu-item:hover {
-  background: var(--el-fill-color-light, rgba(255, 255, 255, 0.1)) !important;
-  color: var(--primary-color) !important;
-}
-
-/* Header dark mode text colors */
-html.dark .header-title {
-  color: var(--header-title-color, #38bdf8) !important;
-}
-
-html.dark .hot-barrage,
-html.dark .hot-barrage-span,
-html.dark .message-icon {
-  color: var(--header-text) !important;
-}
-
-html.dark .hot-barrage-span {
-  border-bottom-color: var(--header-text) !important;
-}
-
-/* Mobile tab bar dark mode */
-html.dark .tab1 {
-  color: var(--header-text) !important;
-  opacity: 0.7;
-}
-
-html.dark .tab1.selected {
-  color: var(--header-text) !important;
-  opacity: 1;
-}
-
-/* Mobile content area dark mode */
-html.dark .content {
-  /* background-color: var(--content-bg) !important; */
-}
-
-/* Lifecycle component dark mode fixes */
-html.dark .dna-hero-bg {
-  background: linear-gradient(135deg, #0f1c2e, #1a2a3a, #1e1a2e, #2a1a2e) !important;
-  background-size: 300% 300% !important;
-}
-
-html.dark .stage-timeline {
-  background: linear-gradient(90deg, #0f1c2e, #1a2a3a, #1e1a2e, #2a1a2e) !important;
-}
-
-html.dark :deep(.el-dropdown-menu) {
-  background: var(--card-bg) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid var(--el-border-color, #4c4d4f) !important;
-}
-
-html.dark :deep(.el-dropdown-item) {
-  color: #fff !important;
-}
-
-html.dark :deep(.el-dropdown-item .menu-icon) {
-  color: #fff !important;
-}
-
-html.dark :deep(.el-dropdown-item:hover) {
-  background: var(--el-fill-color-light, rgba(255, 255, 255, 0.1)) !important;
-}
-
-html.dark :deep(.el-dropdown-item.is-active) {
-  background: var(--el-color-primary-light-9, rgba(56, 189, 248, 0.15)) !important;
-  color: var(--primary-color) !important;
+    background-color: var(--body-bg);
 }

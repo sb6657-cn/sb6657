@@ -184,6 +184,11 @@ onUnmounted(disconnect);
 }
 .page-sub { color: #666; font-size: 14px; margin: 0 0 16px; }
 
+html.dark .page-sub,
+html.dark .online-count {
+    color: var(--el-text-color-secondary);
+}
+
 /* Live Bar */
 .live-bar {
     display: flex; align-items: center; gap: 10px;

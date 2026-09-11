@@ -179,12 +179,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUnmounted, computed } from 'vue';
+import { ref, nextTick, onMounted, computed } from 'vue';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import httpInstance from '@/apis/httpInstance';
 import { getToken } from '@/utils/cookieUtils';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useThemeStore } from '@/stores/themeStore';
 import aiAvatarUrl from '@/assets/imgs/user-img-0.png';
 import userAvatarUrl from '@/assets/icons/ai_chat_user.svg';
 
@@ -206,29 +207,12 @@ interface SessionItem {
   updateTime: string;
 }
 
-// ========== 系统主题检测 ==========
-const prefersDark = ref(false);
-let mediaQuery: MediaQueryList | null = null;
-
-function initThemeDetection() {
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  prefersDark.value = mediaQuery.matches;
-  const handler = (e: MediaQueryListEvent) => { prefersDark.value = e.matches; };
-  mediaQuery.addEventListener('change', handler);
-}
-
-const themeClass = computed(() => prefersDark.value ? 'theme-dark' : 'theme-light');
+const theme = useThemeStore();
+const themeClass = computed(() => (theme.isDark ? 'theme-dark' : 'theme-light'));
 
 onMounted(() => {
-  initThemeDetection();
   loadSessions();
   loadDailyRemaining();
-});
-
-onUnmounted(() => {
-  if (mediaQuery) {
-    mediaQuery.removeEventListener('change', () => {});
-  }
 });
 
 // ========== 状态 ==========

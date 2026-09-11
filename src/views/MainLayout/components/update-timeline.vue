@@ -230,6 +230,10 @@ function getUpdateTypeClass(type: string): string {
         font-size: 14px;
         color: #606266;
 
+        html.dark & {
+            color: var(--el-text-color-regular);
+        }
+
         strong {
             margin-right: 6px;
         }

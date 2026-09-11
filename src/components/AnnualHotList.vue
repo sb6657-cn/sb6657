@@ -875,12 +875,20 @@ const handlePageChange = (page: number) => {
     .text {
         color: black;
         font-size: 17px;
+
+        html.dark & {
+            color: var(--body-color);
+        }
     }
 
     .pickSum {
         color: black;
         font-size: 15px;
         margin-left: 5px;
+
+        html.dark & {
+            color: var(--body-color);
+        }
     }
 
     .pickHome {
@@ -931,6 +939,10 @@ const handlePageChange = (page: number) => {
     .text {
         color: black;
         font-size: 13px;
+
+        html.dark & {
+            color: var(--body-color);
+        }
     }
 
     .loadBtn {
@@ -942,6 +954,10 @@ const handlePageChange = (page: number) => {
         color: black;
         font-size: 12px;
         margin-left: 0px;
+
+        html.dark & {
+            color: var(--body-color);
+        }
     }
 
     .context {

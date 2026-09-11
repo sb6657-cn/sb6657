@@ -1,66 +1,63 @@
-import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { defineStore } from 'pinia';
+import { computed, ref, watch } from 'vue';
+import { resolveIsDark, systemDarkForApply, type ThemeMode } from '@/utils/themeMode';
 
-export type ThemeMode = 'system' | 'light' | 'dark'
+export type { ThemeMode };
 
-const STORAGE_KEY = 'theme-mode'
+const STORAGE_KEY = 'theme-mode';
 
-function getSystemDark(): boolean {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
+function readSystemDark(): boolean {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 export const useThemeStore = defineStore('theme', () => {
-  const mode = ref<ThemeMode>(
-    (localStorage.getItem(STORAGE_KEY) as ThemeMode) || 'system'
-  )
+    const mode = ref<ThemeMode>((localStorage.getItem(STORAGE_KEY) as ThemeMode) || 'system');
+    const systemDark = ref(readSystemDark());
 
-  const isDark = computed(() => {
-    if (mode.value === 'system') return getSystemDark()
-    return mode.value === 'dark'
-  })
+    const isDark = computed(() => resolveIsDark(mode.value, systemDark.value));
 
-  let mediaQuery: MediaQueryList | null = null
-  let mediaListener: (() => void) | null = null
+    let mediaQuery: MediaQueryList | null = null;
+    let mediaListener: ((event: MediaQueryListEvent) => void) | null = null;
 
-  function apply() {
-    document.documentElement.classList.toggle('dark', isDark.value)
+    function apply() {
+        systemDark.value = systemDarkForApply(mode.value, readSystemDark, systemDark.value);
+        document.documentElement.classList.toggle('dark', isDark.value);
 
-    // 仅在 system 模式时监听 OS 主题变化
-    if (mode.value === 'system') {
-      if (!mediaQuery) {
-        mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        mediaListener = () => {
-          document.documentElement.classList.toggle('dark', mediaQuery!.matches)
+        if (mode.value === 'system') {
+            if (!mediaQuery) {
+                mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                mediaListener = (event: MediaQueryListEvent) => {
+                    systemDark.value = event.matches;
+                };
+                mediaQuery.addEventListener('change', mediaListener);
+            }
+        } else if (mediaQuery && mediaListener) {
+            mediaQuery.removeEventListener('change', mediaListener);
+            mediaQuery = null;
+            mediaListener = null;
         }
-        mediaQuery.addEventListener('change', mediaListener)
-      }
-    } else {
-      if (mediaQuery && mediaListener) {
-        mediaQuery.removeEventListener('change', mediaListener)
-        mediaQuery = null
-        mediaListener = null
-      }
     }
-  }
 
-  function setMode(m: ThemeMode) {
-    mode.value = m
-    localStorage.setItem(STORAGE_KEY, m)
-    apply()
-  }
+    function setMode(next: ThemeMode) {
+        mode.value = next;
+        localStorage.setItem(STORAGE_KEY, next);
+        apply();
+    }
 
-  // 初始化时立即 apply
-  apply()
+    apply();
 
-  // 监听 mode 变更以重新 apply（处理 listener 注册/注销）
-  watch(mode, () => {
-    apply()
-  })
+    watch(mode, () => {
+        apply();
+    });
 
-  return {
-    mode,
-    isDark,
-    setMode,
-    apply
-  }
-})
+    watch(isDark, (dark) => {
+        document.documentElement.classList.toggle('dark', dark);
+    });
+
+    return {
+        mode,
+        isDark,
+        setMode,
+        apply,
+    };
+});

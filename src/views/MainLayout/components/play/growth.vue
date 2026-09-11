@@ -523,4 +523,29 @@ onMounted(async () => {
     .stat-item { min-width: 45%; }
     .medals { grid-template-columns: repeat(2, 1fr); }
 }
+
+html.dark .page-sub,
+html.dark .loading,
+html.dark .rank-exp,
+html.dark .empty {
+    color: var(--el-text-color-secondary);
+}
+
+html.dark .spinner {
+    border-color: var(--el-border-color);
+    border-top-color: #ff6b35;
+}
+
+html.dark .rank-item {
+    border-bottom-color: var(--el-border-color);
+}
+
+html.dark .rank-item.self {
+    background: linear-gradient(90deg, rgba(255, 214, 102, 0.16), transparent);
+}
+
+html.dark .rank-tier {
+    background: var(--el-color-primary-light-9);
+    color: var(--el-color-primary);
+}
 </style>

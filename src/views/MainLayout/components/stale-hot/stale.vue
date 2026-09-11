@@ -433,7 +433,25 @@ onUnmounted(() => observer?.disconnect());
 }
 
 /* vote feedback */
-.meme-item.just-voted { background: #fffbe6 !important; }
+.meme-item.just-voted { background: #fffbe6; }
 .vote-btn:disabled { opacity: 0.4; cursor: default; }
+
+html.dark .page-sub,
+html.dark .list-end {
+    color: var(--el-text-color-secondary);
+}
+
+html.dark .mini-spinner {
+    border-color: var(--el-border-color);
+    border-top-color: #ff6b35;
+}
+
+html.dark .thermo-bulb {
+    background: var(--card-bg);
+}
+
+html.dark .meme-item.just-voted {
+    background: rgba(255, 214, 102, 0.16);
+}
 </style>
 

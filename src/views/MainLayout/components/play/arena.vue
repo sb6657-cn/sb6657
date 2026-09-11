@@ -362,4 +362,32 @@ onMounted(() => {
     .pk-vs-badge { width: 100%; height: 28px; border-radius: 6px; }
     .rank-barrage { max-width: 160px; }
 }
+
+html.dark .loading,
+html.dark .week-range,
+html.dark .hw-votes,
+html.dark .empty {
+    color: var(--el-text-color-secondary);
+}
+
+html.dark .spinner {
+    border-color: var(--el-border-color);
+    border-top-color: #e74c3c;
+}
+
+html.dark .pk-fighter {
+    border-color: var(--el-border-color);
+}
+
+html.dark .pk-fighter.picked {
+    background: rgba(255, 107, 53, 0.12);
+}
+
+html.dark .day-chip.win {
+    background: rgba(82, 196, 26, 0.16);
+}
+
+html.dark .hw-detail {
+    border-top-color: var(--el-border-color);
+}
 </style>

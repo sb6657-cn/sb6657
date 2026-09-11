@@ -295,6 +295,18 @@ const scrollToTop = () => {
                 --el-button-active-bg-color: #ffdde8;
                 --el-button-active-border-color: #e95a88;
                 --el-button-outline-color: rgba(251, 114, 153, 0.35);
+
+                html.dark & {
+                    --el-button-text-color: #ff9fbd;
+                    --el-button-bg-color: #3a2430;
+                    --el-button-border-color: #fb7299;
+                    --el-button-hover-text-color: #fff;
+                    --el-button-hover-bg-color: #4a2c3a;
+                    --el-button-hover-border-color: #ff85ad;
+                    --el-button-active-text-color: #fff;
+                    --el-button-active-bg-color: #5a3344;
+                    --el-button-active-border-color: #fb7299;
+                }
                 height: 36px;
                 flex-shrink: 0;
                 padding: 0 12px;

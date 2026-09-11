@@ -136,6 +136,10 @@ const copyContent = async (text: string) => {
     margin-bottom: 16px;
     padding-bottom: 16px;
     border-bottom: 2px solid #303133;
+
+    html.dark & {
+        border-bottom-color: var(--header-border);
+    }
 }
 
 .header-content {
@@ -146,6 +150,10 @@ const copyContent = async (text: string) => {
         margin: 0;
         letter-spacing: 1px;
         text-transform: uppercase;
+
+        html.dark & {
+            color: var(--body-color);
+        }
     }
 
     .subtitle {
@@ -153,6 +161,10 @@ const copyContent = async (text: string) => {
         color: #606266;
         margin: 8px 0 0;
         font-weight: 500;
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
+        }
     }
 }
 
@@ -174,6 +186,11 @@ const copyContent = async (text: string) => {
     border-radius: 2px;
     font-weight: 500;
 
+    html.dark & {
+        background-color: var(--el-fill-color-light);
+        color: var(--el-text-color-secondary);
+    }
+
     .hint-icon {
         margin-right: 4px;
         font-size: 14px;
@@ -191,6 +208,10 @@ const copyContent = async (text: string) => {
     align-items: flex-start;
     background: var(--card-bg);
     border: 1px solid #dcdfe6;
+
+    html.dark & {
+        border-color: var(--el-border-color);
+    }
     padding: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -252,6 +273,10 @@ const copyContent = async (text: string) => {
             color: #303133;
             white-space: pre-wrap; /* 保留换行 */
             word-break: break-word;
+
+            html.dark & {
+                color: var(--body-color);
+            }
         }
     }
 

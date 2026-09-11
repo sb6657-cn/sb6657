@@ -148,4 +148,9 @@ import { RouterLink } from 'vue-router';
         transform: skewX(-4deg);
     }
 }
+
+html.dark .sub-info a {
+    color: var(--el-color-primary);
+}
 </style>
+

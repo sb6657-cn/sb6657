@@ -139,6 +139,12 @@ onBeforeUnmount(() => {
     z-index: 10;
     border: 2px solid #fff;
 
+    html.dark & {
+        background: var(--card-bg);
+        border-color: var(--el-border-color);
+        color: var(--el-text-color-regular);
+    }
+
     &:hover {
         color: #f00;
         background: #fff5f5;

@@ -356,4 +356,22 @@ onMounted(() => {
 	color: gray;
 	margin-bottom: 5px;
 }
+
+html.dark #message-container {
+	border-color: var(--el-border-color);
+}
+
+html.dark .mine {
+	background-color: rgba(17, 169, 131, 0.22);
+	color: var(--body-color);
+}
+
+html.dark .others {
+	background-color: var(--el-fill-color-light);
+	color: var(--body-color);
+}
+
+html.dark .time {
+	color: var(--el-text-color-secondary);
+}
 </style>

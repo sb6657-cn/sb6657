@@ -14,7 +14,7 @@
             layout="prev, pager, next" background class="pagination" />
     </div>
     <div v-else>
-        <p style="color: #999;">暂无评论，期待您的评论~</p>
+        <p class="empty-comment">暂无评论，期待您的评论~</p>
     </div>
 </template>
 
@@ -152,5 +152,13 @@ onMounted(() => {
 .pagination {
     margin-top: 20px;
     text-align: right;
+}
+
+.empty-comment {
+    color: #999;
+}
+
+html.dark .empty-comment {
+    color: var(--el-text-color-secondary);
 }
 </style>

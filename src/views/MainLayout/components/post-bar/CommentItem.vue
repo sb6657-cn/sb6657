@@ -215,4 +215,12 @@ const submitReply = async () => {
         margin-top: 5px;
     }
 }
+
+html.dark .username {
+    color: var(--el-text-color-secondary);
+}
+
+html.dark .time {
+    color: var(--el-text-color-secondary);
+}
 </style>

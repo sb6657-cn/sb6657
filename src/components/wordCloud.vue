@@ -3,11 +3,12 @@
 </template>
 
 <script setup>
-    import { nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
+    import { nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import * as echarts from 'echarts';
     import 'echarts-wordcloud';
     import httpInstance from '@/apis/httpInstance';
+    import { useThemeStore } from '@/stores/themeStore';
 
     const route = useRoute();
     const router = useRouter();
@@ -15,6 +16,7 @@
     const chart = shallowRef(null);
     const list = ref([]);
     const colors = ['#0d3555', '#58D5FF', '#0093c4', '#0d3555', '#0093c4', '#0d3555', '#73DDFF', '#58D5FF', '#ff0000', '#00ff00', '#ff0000', '#00ff00', '#1a721a', '#1a721a', '#1a721a'];
+    const theme = useThemeStore();
 
     function handleWordClick(params) {
         const searchKey = typeof params?.name === 'string' ? params.name.trim() : '';
@@ -67,9 +69,9 @@
                     borderWidth: 1,
                     padding: [5, 5, 5, 5],
                     confine: true,
-                    backgroundColor: 'rgba(255, 255, 255, .9)',
+                    backgroundColor: theme.isDark ? 'rgba(26, 31, 39, .92)' : 'rgba(255, 255, 255, .9)',
                     textStyle: {
-                        color: 'hotpink',
+                        color: theme.isDark ? '#e6edf3' : 'hotpink',
                         lineHeight: 16,
                     },
                     extraCssText: 'box-shadow: 0 4px 20px -4px rgba(199, 206, 215, 1);border-radius: 4px;',
@@ -129,6 +131,13 @@
         ensureChart();
         getData();
     });
+
+    watch(
+        () => theme.isDark,
+        () => {
+            getWordCloudList();
+        },
+    );
 
     onBeforeUnmount(() => {
         chart.value?.dispose();

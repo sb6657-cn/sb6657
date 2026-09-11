@@ -72,7 +72,21 @@
                 content: '...';
             }
         }
+
+        html.dark #global-loading {
+            background-color: #12141a;
+            color: #e6edf3;
+        }
     </style>
+    <script>
+        (function () {
+            try {
+                var mode = localStorage.getItem('theme-mode') || 'system';
+                var dark = mode === 'dark' || (mode !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
+            } catch (e) {}
+        })();
+    </script>
 
     <script defer>
         var _hmt = _hmt || [];

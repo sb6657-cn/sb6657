@@ -70,6 +70,10 @@ function refreshWordCloud() {
         text-align: center;
         padding: 20px;
         color: #909399;
+
+        html.dark & {
+            color: var(--el-text-color-secondary);
+        }
     }
 }
 
