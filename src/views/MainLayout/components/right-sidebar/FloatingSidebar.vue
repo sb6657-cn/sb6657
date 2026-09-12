@@ -1,5 +1,6 @@
 <template>
     <div class="floating-sidebar">
+        <HomeRightDock v-if="showHomeWordCloud" />
         <HomeWordCloudPanel v-if="showHomeWordCloud" class="home-right-word-cloud" />
 
         <div class="draggable chat-room-draggable" :style="{ left: `${chatX}vw`, top: `${chatY}px` }" @mousedown="startDrag" v-show="isChatVisible">
@@ -70,6 +71,7 @@ import ChatRoom from '@/components/ChatRoom.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
 import { Close } from '@element-plus/icons-vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import HomeRightDock from './HomeRightDock.vue';
 import HomeWordCloudPanel from './HomeWordCloudPanel.vue';
 
 const props = defineProps<{

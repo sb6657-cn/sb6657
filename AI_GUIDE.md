@@ -210,14 +210,14 @@ export const SERVER_ADDRESS = import.meta.env.VITE_BASE_URL || 'https://hguofich
 | GET  | `/machine/growth/me`                      | `growth.vue`   | 当前用户经验、段位、投稿数、上榜数和全站排名             |
 | GET  | `/machine/growth/medals`                  | `growth.vue`   | 勋章全集与当前用户已拥有的勋章 code                      |
 | GET  | `/machine/growth/rank`                    | `growth.vue`   | 经验排行榜                                               |
-| GET  | `/machine/stale/rank?pageNum=&pageSize=`  | `stale.vue`    | 烂度总榜，当前每页 20 条                                 |
+| GET  | `/machine/stale/rank?pageNum=&pageSize=`  | `stale.vue`、`home-plaza.vue` | 烂度总榜；首页预览只拉 1 条                             |
 | GET  | `/machine/stale/hot?pageNum=&pageSize=`   | `stale.vue`    | 实时热度榜，展示 `hotScore`                              |
 | POST | `/machine/stale/vote`                     | `stale.vue`    | 烂度投票，body 为 `{ barrageId, score }`                 |
-| GET  | `/machine/arena/current`                  | `arena.vue`    | 今日对决、日期范围和本周排行                             |
+| GET  | `/machine/arena/current`                  | `arena.vue`、`home-plaza.vue` | 今日对决、日期范围和本周排行；首页只预览一组 PK         |
 | POST | `/machine/arena/vote`                     | `arena.vue`    | 对决投票，body 为 `{ matchId, choice }`                  |
 | GET  | `/machine/arena/weekly`                   | `arena.vue`    | 历史周排行索引                                           |
 | GET  | `/machine/arena/weekly/{weekStart}`       | `arena.vue`    | 展开某周时按需加载排行详情                               |
-| GET  | `/machine/checkin/status`                 | `checkin.vue`  | 今日签到状态和连续签到天数                               |
+| GET  | `/machine/checkin/status`                 | `checkin.vue`、`home-checkin-strip.vue` | 今日签到状态和连续签到天数；首页未登录不请求 |
 | GET  | `/machine/checkin/wallet`                 | `checkin.vue`、`growth.vue` | 梗币余额、累计获得和累计花费                  |
 | POST | `/machine/checkin/sign`                   | `checkin.vue`  | 每日签到，body 为空对象                                  |
 | POST | `/machine/checkin/reward`                 | `checkin.vue`  | 打赏烂梗，body 为 `{ barrageId, amount }`                |
@@ -230,11 +230,11 @@ export const SERVER_ADDRESS = import.meta.env.VITE_BASE_URL || 'https://hguofich
 
 | 方法 | 路径                                                    | 调用位置                    | 用途                                                     |
 | ---- | ------------------------------------------------------- | --------------------------- | -------------------------------------------------------- |
-| GET  | `/machine/lifecycle/dashboard`                          | `lifecycle.vue`             | 四个生命周期阶段的数量统计                               |
+| GET  | `/machine/lifecycle/dashboard`                          | `lifecycle.vue`、`home-plaza.vue` | 四个生命周期阶段的数量统计                         |
 | GET  | `/machine/lifecycle/stage/{stage}?pageNum=&pageSize=20` | `lifecycle.vue`             | `BIRTH/BOOM/STALE/DEAD` 各阶段独立分页                   |
 | GET  | `/machine/dna/v6/{memeId}`                              | `memeDnaV6.ts`、`lifecycle.vue` | 获取中心梗、节点和带评分明细的关系边                  |
 | GET  | `/machine/dna/v6/{memeId}/evolution`                    | `memeDnaV6.ts`              | 获取母体和衍生链；封装已存在，但当前页面调用被注释       |
-| GET  | `/machine/hotwall/stream`                               | `hotwall.vue`               | SSE 实时事件流与最近 5 分钟热度快照                       |
+| GET  | `/machine/hotwall/stream`                               | `hotwall.vue`、`home-now-strip.vue` | SSE 实时事件流与最近 5 分钟热度快照；首页只取一帧 snapshot 后断开 |
 
 DNA v6 的节点包含标准化文本、固定片段、可变槽位、关键词、锚点、结构模板、语义骨架和指纹。关系类型固定为 `DERIVED_FROM`、`PARENT_OF`、`SAME_TEMPLATE`、`VARIANT_OF`、`HIGHLY_SIMILAR`；每条边还带模板、结构、固定片段和槽位模式等分项得分。`API.DNA_RELATIONS` 仍保留旧 `/machine/dna` 常量，但当前图谱走 `DNA_RELATIONS_V6`。
 
@@ -266,7 +266,7 @@ WebSocket 消息约定来自当前前端：
 
 | 方法 | 路径 / URL                                                 | 调用位置             | 用途                  |
 | ---- | ---------------------------------------------------------- | -------------------- | --------------------- |
-| GET  | `/machine/showImage`                                       | `image.vue`          | 主播相册分页          |
+| GET  | `/machine/showImage`                                       | `image.vue`、`home-plaza.vue` | 主播相册分页；首页预览最新一张 |
 | POST | `/machine/addCommentname`                                  | `image.vue`          | 图片评论              |
 | GET  | `https://sb6657oss.wishao.fun/dejaVuNiko.json`             | `deja-vu-niko.vue`   | 超级逮虾户战报数据    |
 | GET  | `https://sb6657oss.wishao.fun/15warriorsDonk_2025.json`    | `15warriorsDonk.vue` | 2025 布雷德十五勇士榜 |
@@ -324,7 +324,7 @@ App.vue
 
 | 路径               | 页面组件                    | 主要用途                                                                   |
 | ------------------ | --------------------------- | -------------------------------------------------------------------------- |
-| `/home`            | `Home.vue`                  | 首页、介绍、随机烂梗、烂梗投稿                                             |
+| `/home`            | `Home.vue`                  | 首页、公告、投稿库橱窗、随机烂梗、玩法预览入口                             |
 | `/memes/:category` | `memes-view.vue`            | 烂梗列表页，目前主要 `/memes/AllBarrage`                                   |
 | `/shieldWord`      | `shieldWord.vue`            | 屏蔽词列表、投票、投稿                                                     |
 | `/post-bar`        | `post-bar-main.vue`         | 社区帖子流                                                                 |
@@ -349,8 +349,8 @@ App.vue
 | `/Tampermonkey`    | `Tampermonkey.vue`          | 油猴脚本说明                                                               |
 | `/ChatRoom`        | `ChatRoom.vue`              | 聊天室独立路由                                                             |
 
-`MemeCategory` 在 `src/constants/backend.ts` 同时控制侧边栏和移动端 Tab 的主要菜单项。新业务中 `/stale`、`/arena`、`/lifecycle`、`/hotwall` 在这里；`/growth` 和 `/checkin` 不在主导航，二者都在用户下拉菜单，首页简介另有 `/checkin` 的直接入口。
-超级逮虾户战报当前因作者停更较久仅在首页 `didYouKnow.vue` 中注释推荐入口，`MemeCategory` 侧边栏/移动端菜单和 `/dejaVuNiko` 路由仍保留。
+`MemeCategory` 在 `src/constants/backend.ts` 同时控制侧边栏和移动端 Tab 的主要菜单项。新业务中 `/stale`、`/arena`、`/lifecycle`、`/hotwall` 在这里；`/growth` 和 `/checkin` 不在主导航，二者都在用户下拉菜单。首页玩法卡上方有近 5 分钟热度「此刻」条进 `/hotwall`；签到条桌面在原广告位、移动端在正文流底部进 `/checkin`。预览卡露出 `/arena`、`/lifecycle`、`/stale` 和 `/image`，并各自带一条实时数据钩子。
+超级逮虾户战报当前因作者停更较久不再出现在首页趣味轮播，`MemeCategory` 侧边栏/移动端菜单和 `/dejaVuNiko` 路由仍保留。
 
 ## 核心页面和组件说明
 
@@ -362,28 +362,31 @@ App.vue
 Home
 ├─ 顶部 boom 图片
 ├─ cards-container
-│  ├─ HomeIntro
+│  ├─ HomeIntro（公告、油猴、开播提醒、更新日志、友情推广）
 │  └─ DidYouKnow
-│     ├─ 你知道吗
-│     ├─ sb6657 时光机
-│     └─ 最新烂梗
+│     ├─ 投稿总量 + 最新投稿
+│     └─ HomeSpotlight（你知道吗：上下滚入轮播，换一条对齐随机烂梗）
 ├─ RandomMeme
-├─ 投稿卡片
-│  ├─ tag-selector
-│  ├─ textarea
-│  ├─ 当前赛事关联区
-│  └─ 投稿按钮
+├─ HomeNowStrip（近 5 分钟热度第一名，整行进 /hotwall）
+├─ HomePlaza（2×2 玩法预览卡：擂台 / 生命周期 / 烂度榜 / 相册）
 ├─ ChatRoom（移动端内容流里显示，桌面端 CSS 隐藏）
-└─ HomeWordCloudPanel（移动端显示）
+├─ HomeWordCloudPanel（移动端显示）
+└─ HomeCheckinStrip（移动端正文流最底部；桌面由 HomeRightDock 挂在原广告位）
 ```
 
-`DidYouKnow.vue` 将右侧信息卡片划分为三个 `.info-module`，模块之间使用 `module-divider` 分隔。你知道吗与时光机使用同规格标题，最新烂梗保留无标题的紧凑数据排版；`.info-module` 统一维护基础文字和链接样式，列表和链接组分别复用 `.module-list` 与 `.module-links`。
+`HomeIntro.vue` 只承担站点公告和友情推广，不再放签到、成长或生命周期入口。友情推广区展示“弗一把”合作入口，卡片内置官网的 `CS MAJOR // PLAYER GUESSING` 英文标语，并使用可整卡点击的新窗口外链跳转合作网站。
+
+`DidYouKnow.vue` 先展示投稿库规模和最新一条烂梗：总数链到全部烂梗页并单独一行大字，最新投稿时间下一行，梗文案再下一行点击复制。下方 `HomeSpotlight` 轮播 15 勇士、年度 TOP20 和时光机。15 勇士和 TOP20 标题仍是「你知道吗？」；切到时光机时标题恢复为「sb6657 时光机」，正文为「万恶之源，我们的来时路。旧版 sb6657.cn 考古专项。」，链接文案为 `sb6657.cn v1` / `sb6657.cn v2`。旧条先向下滚出再从上滚入下一条，带淡入淡出和减速曲线；右侧「换一条」沿用随机烂梗的文字+刷新图标。超级逮虾户不在轮播里。
+
+`HomeCheckinStrip` 整行进 `/checkin`。桌面端由 `FloatingSidebar` 里的 `HomeRightDock` 固定在原广告位（约 `top: 30%`）；搜索词云仍在右下。移动端放在首页正文流最底部。未登录不请求签到接口，文案为「登录后每天领梗币」；已登录则读 `/machine/checkin/status`，展示今日未签到或已签到连续天数。悬停只改文字颜色。
 
 桌面首页右侧词云不是 `Home.vue` 直接放的，而是 `MainLayout` 给 `.content--with-home-sidebar` 预留右侧空间，`FloatingSidebar` 固定显示 `HomeWordCloudPanel`。
 
-首页搜索词云的桌面端和移动端共用 `wordCloud.vue`。点击词条会沿用 Header 搜索的 `search` 路由查询参数打开全局搜索弹窗；首页随机烂梗卡片只有烂梗文案和右侧复制按钮触发复制，点击标签会携带 `tag` 查询参数跳转全部烂梗页，时间和其余空白区域不触发复制。
+`HomeNowStrip` 在玩法卡上方，整行进 `/hotwall`。用与热度墙相同的 SSE 拉一帧 `snapshot` 后立即断开，只展示近 5 分钟热度第一名和次数，不在首页保活事件流。
 
-`HomeIntro.vue` 的简介区提供签到/梗币/成长体系和梗生命周期/DNA 的站内入口；友情推广区展示“弗一把”合作入口，卡片内置官网的 `CS MAJOR // PLAYER GUESSING` 英文标语，并使用可整卡点击的新窗口外链跳转合作网站。
+`HomePlaza` 四张整卡可点，只预览不在首页完成投票/打分。悬停只改标题和「去看」颜色，不上浮、不加阴影。数据分别来自 `/machine/arena/current` 的今日 PK、`/machine/lifecycle/dashboard` 四阶段数量、`/machine/stale/rank` 第一名，以及 `/machine/showImage` 最新一张照片。桌面端两列、`600px` 及以下改单列。
+
+首页搜索词云的桌面端和移动端共用 `wordCloud.vue`。点击词条会沿用 Header 搜索的 `search` 路由查询参数打开全局搜索弹窗；首页随机烂梗卡片只有烂梗文案和右侧复制按钮触发复制，点击标签会携带 `tag` 查询参数跳转全部烂梗页，时间和其余空白区域不触发复制。
 
 全局 `FooterBar` 将入口分为 `sb6657` 和 `友情链接` 两组。`sb6657` 按当前顺序展示 GitHub、官方交流群、建议/提交 BUG、油猴脚本、星空背景、更新日志、赞赏支持和 sb6657 旧版 v1/v2，其中交流群与赞赏使用 Footer 内的二维码弹窗；`友情链接` 展示玩机器直播间、dgq63136.cn、弗一把及两项 B 站友情推广。两组链接使用可换行 Flex 布局，下方分割线后按原有两行排版展示服务器到期时间，以及 IPv6 状态、网站运行天数和 2024 年运营起始标记。
 
@@ -411,7 +414,7 @@ Home
 - 底部：可关联当前进行中的赛事 `/machine/InProgressMatch`
 - 提交：`/machine/submission`
 
-实际表单由 `meme-submission.vue` 负责。`Home.vue` 继续直接内嵌这份表单，它不属于弹窗单例。
+实际表单由 `meme-submission.vue` 负责。首页不再内嵌投稿表单，投稿只走这份全局弹窗。
 
 ### 标签选择器 `tag-selector.vue`
 
@@ -636,13 +639,13 @@ App.vue
 
 | 页面                 | 数据来源                                        | UI 说明                                                  |
 | -------------------- | ----------------------------------------------- | -------------------------------------------------------- |
-| `image.vue`          | `/machine/showImage`、`/machine/addCommentname` | 自适应照片网格（桌面多列、移动双列）、图片预览、卡内评论和评论弹窗 |
+| `image.vue`          | `/machine/showImage`、`/machine/addCommentname` | 自适应照片网格（桌面多列、移动双列）、图片预览、卡内评论和评论弹窗；照片投稿走顶部「上传照片 / 建议/提交BUG」问卷，后台人工添加，页面内不能上传 |
 | `memeTop20.vue`      | OSS JSON                                        | 年度 TOP20 静态榜单，年份下拉切换                        |
 | `AnnualHotList.vue`  | `/machine/hotTop20/**`                          | 年度 TOP20 评选活动页                                    |
-| `deja-vu-niko.vue`   | OSS JSON                                        | 战报式表格页面，首页推荐入口暂时隐藏，路由和菜单入口保留 |
+| `deja-vu-niko.vue`   | OSS JSON                                        | 战报式表格页面，首页趣味轮播不再展示，路由和菜单入口保留 |
 | `15warriorsDonk.vue` | OSS JSON                                        | 榜单页面，可导出图片                                     |
 
-时光相册已经按业务职责拆分：`image.vue` 只负责分页请求、失败重试、评论提交和弹窗选择态；`src/components/TimeAlbum/AlbumGallery.vue` 负责网格、无限滚动和加载状态，`AlbumPhotoCard.vue` 负责单张照片及其评论列表，`AlbumCommentDialog.vue` 负责表单校验。相册数据类型位于 `src/types/timeAlbum.ts`，不依赖 Vue 的标题、日期和响应规范化函数位于 `src/utils/timeAlbum.ts`。
+时光相册已经按业务职责拆分：`image.vue` 只负责分页请求、失败重试、评论提交和弹窗选择态；`src/components/TimeAlbum/AlbumGallery.vue` 负责网格、无限滚动和加载状态，`AlbumPhotoCard.vue` 负责单张照片及其评论列表，`AlbumCommentDialog.vue` 负责表单校验。相册数据类型位于 `src/types/timeAlbum.ts`，不依赖 Vue 的标题、日期和响应规范化函数位于 `src/utils/timeAlbum.ts`。用户投稿照片不走相册页内上传，而是顶部「上传照片 / 建议/提交BUG」问卷，后台看到后再手动加入。
 
 ## 桌面端和移动端布局
 

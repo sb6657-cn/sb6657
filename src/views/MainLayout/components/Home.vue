@@ -14,36 +14,36 @@
         <div class="card third-card">
             <RandomMeme />
         </div>
-        <div class="card fifth-card">
-            <h2 class="submit-title">烂梗投稿</h2>
-            <MemeSubmission />
-        </div>
+        <HomeNowStrip />
+        <HomePlaza />
         <el-backtop :right="50" :bottom="50" />
         <ChatRoom class="ChatRoom card"></ChatRoom>
         <HomeWordCloudPanel v-if="isMobile" class="mobile-word-cloud" />
+        <HomeCheckinStrip v-if="isMobile" class="mobile-checkin" />
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import ChatRoom from '@/components/ChatRoom.vue';
 import DidYouKnow from '@/components/home/didYouKnow.vue';
 import HomeIntro from '@/components/home/homeIntro.vue';
+import HomeCheckinStrip from '@/components/home/home-checkin-strip.vue';
+import HomeNowStrip from '@/components/home/home-now-strip.vue';
+import HomePlaza from '@/components/home/home-plaza.vue';
 import RandomMeme from '@/components/home/random-meme.vue';
-import MemeSubmission from '@/components/meme-submission.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
 import HomeWordCloudPanel from '@/views/MainLayout/components/right-sidebar/HomeWordCloudPanel.vue';
+
 const isMobile = useIsMobile();
 </script>
 
 <style scoped lang="scss">
-// ===== 主容器样式 =====
 .home {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    // 顶部横幅区域
     .boom {
         height: 150px;
 
@@ -53,49 +53,35 @@ const isMobile = useIsMobile();
         }
     }
 
-    // 卡片容器
     .cards-container {
         width: 100%;
         display: flex;
         gap: 8px;
         margin-top: 10px;
+        align-items: stretch;
     }
 
-    // 卡片通用样式
     .card {
         width: 100%;
         line-height: 25px;
 
         &.first-card,
         &.second-card {
-            flex: 1; // 让两个卡片平分宽度
-            margin-top: 0; // 重置margin，由容器控制间距
+            flex: 1;
+            margin-top: 0;
         }
 
         &.third-card {
             margin-top: 8px;
             padding: 12px;
         }
-
-        &.fifth-card {
-            margin-top: 8px;
-            padding: 12px;
-            box-sizing: border-box;
-
-            .submit-title {
-                margin-bottom: 4px;
-            }
-        }
     }
 }
 
-// ===== 聊天室样式 =====
 .ChatRoom {
     margin: 10px 0;
 }
 
-// ===== 响应式设计 =====
-// 大屏幕样式 (601px及以上)
 @media (min-width: 601px) {
     .ChatRoom {
         display: none;
@@ -106,7 +92,6 @@ const isMobile = useIsMobile();
     }
 }
 
-// 前俩卡片在窄屏下换行展示
 @media (max-width: 768px) {
     .home {
         .cards-container {
@@ -115,7 +100,6 @@ const isMobile = useIsMobile();
     }
 }
 
-// 小屏幕样式 (600px及以下)
 @media (max-width: 600px) {
     .home {
         width: 100%;
@@ -129,13 +113,10 @@ const isMobile = useIsMobile();
             }
         }
 
-        .mobile-word-cloud {
+        .mobile-word-cloud,
+        .mobile-checkin {
             margin-top: 10px;
             width: 100%;
-        }
-
-        .card.fifth-card {
-            margin-top: 8px;
         }
     }
 }

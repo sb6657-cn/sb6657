@@ -8,7 +8,11 @@
                 </div>
                 <p>记录玩机器相关的照片与表情包</p>
             </div>
-            <p class="album-notice">如涉及侵权，请通过右上角“建议/提交 BUG”联系删除</p>
+            <p class="album-notice">
+                想补一张请点顶部「上传照片 / 建议/提交BUG」填表，
+                <br />
+                我们看到后会手动加上。侵权删除也走这里。
+            </p>
         </header>
 
         <AlbumGallery :images="images" :loading="loading" :has-more="hasMore" @load-more="loadMoreImages" @toggle-comments="toggleComments" @comment="openCommentDialog" />
@@ -183,7 +187,7 @@ void load();
 }
 
 .album-notice {
-    max-width: 320px;
+    max-width: 36em;
     text-align: right;
 }
 
