@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Commit"
-  short_description: "检查版本同步、构建结果、变更范围后再提交。"
-  default_prompt: "Use $project-commit to check the project and commit the current changes."

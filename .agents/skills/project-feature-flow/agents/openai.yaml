@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Feature Flow"
-  short_description: "按项目规范分析、澄清、实现并验证代码改动。"
-  default_prompt: "Use $project-feature-flow to implement this change with the project workflow."
