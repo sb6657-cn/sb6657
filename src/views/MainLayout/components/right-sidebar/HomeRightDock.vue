@@ -11,7 +11,7 @@ import HomeCheckinStrip from '@/components/home/home-checkin-strip.vue';
 <style scoped lang="scss">
 .home-right-dock {
     position: fixed;
-    top: 30%;
+    top: 24%;
     right: 10px;
     z-index: 5;
     width: 300px;
