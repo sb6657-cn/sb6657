@@ -57,6 +57,13 @@
                             </div>
                         </div>
                         <div class="ctrl-tip">💡 技能条会随融合慢慢攒满，攒满后才能触发</div>
+
+                        <!-- 移动端榜单入口（桌面端榜单常驻在右侧） -->
+                        <div v-if="isMobile" class="ctrl-mobile-leaderboard">
+                            <el-button type="primary" size="small" @click="showMobileLeaderboard = true">
+                                🏆 查看排行榜
+                            </el-button>
+                        </div>
                     </div>
                 </div>
 
@@ -307,6 +314,7 @@ onBeforeUnmount(() => {
 }
 
 .merge-watermelon-content {
+    position: relative;
     display: flex;
     width: 100%;
     height: min(80dvh, 860px);
@@ -450,6 +458,12 @@ onBeforeUnmount(() => {
     font-size: 10.5px;
     color: #7d6b91;
     letter-spacing: 0.02em;
+}
+
+.ctrl-mobile-leaderboard {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 @keyframes skill-pulse {
@@ -624,6 +638,14 @@ onBeforeUnmount(() => {
         min-height: 100%;
         border-radius: 0;
         flex-direction: column;
+    }
+
+    /* 榜单改为覆盖层，盖住游戏区而不是挤压它 */
+    .merge-watermelon-leaderboard {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        z-index: 20;
     }
 
     .ctrl-row {
