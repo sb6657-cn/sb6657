@@ -590,11 +590,11 @@ watch(
     }
 }
 
-.search-hit {
+.barrage-text :deep(.search-hit) {
     background-color: yellow;
 }
 
-html.dark .search-hit {
+html.dark .barrage-text :deep(.search-hit) {
     background-color: var(--search-hit-bg, #8c6d1f);
     color: var(--body-color);
 }
