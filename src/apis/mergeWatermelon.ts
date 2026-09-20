@@ -17,6 +17,12 @@ export interface MergeWatermelonRankInfo {
 export interface MergeWatermelonSubmitResult {
     rank: number;
     bestScore: number;
+    /** 本局是否刷新了个人最高分 */
+    improved: boolean;
+    /** 命中服务端提交限流：未写库，返回的是当前名次 */
+    throttled?: boolean;
+    /** 命中防作弊校验被拒：未写库，返回的是当前名次 */
+    rejected?: boolean;
 }
 
 /** 拉取前 N 名排行榜 */
@@ -36,11 +42,12 @@ export async function submitMergeWatermelonScore(
     siteToken: string,
     score: number,
     topSpecies: string | null,
+    finished: boolean,
 ): Promise<MergeWatermelonSubmitResult | null> {
     try {
-        const res = await post<{ siteToken: string; score: number; topSpecies: string | null }, MergeWatermelonSubmitResult>({
+        const res = await post<{ siteToken: string; score: number; topSpecies: string | null; finished: boolean }, MergeWatermelonSubmitResult>({
             url: '/machine/merge-watermelon/score',
-            data: { siteToken, score, topSpecies },
+            data: { siteToken, score, topSpecies, finished },
         });
         return res.flatData ?? null;
     } catch (e) {

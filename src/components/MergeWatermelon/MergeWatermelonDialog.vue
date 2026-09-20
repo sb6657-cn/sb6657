@@ -72,7 +72,7 @@
                     <div class="leaderboard-header">
                         <span class="title">🏆 排行榜 TOP100</span>
                         <span style="font-size: 11px; color: #000;">登录以记录昵称</span>
-                        <el-button text type="primary" size="small" @click="loadLeaderboard">刷新</el-button>
+                        <el-button text type="primary" size="small" @click="loadLeaderboard(true)">刷新</el-button>
                     </div>
 
                     <div v-if="myRank" class="my-rank-card" :class="{ 'top-three': myRank.rank > 0 && myRank.rank <= 3 }">
@@ -164,30 +164,56 @@ const loading = ref(false);
 const myNickname = ref<string | null>(null);
 const showMobileLeaderboard = ref(false);
 
-// iframe 内 DOM 轮询：检测 game over + 同步技能条进度
+// 轮询间隔：只读 iframe 内 DOM，不产生网络请求，用于同步技能条、检测结算与计时
+const POLL_INTERVAL_MS = 250;
+// 榜单定时刷新间隔：弹窗打开期间最多这么久拉一次，挡住高频请求
+const LEADERBOARD_REFRESH_MS = 30_000;
+// 个人排名缓存 TTL
+const MY_RANK_TTL_MS = 30_000;
+// 游戏进行中每隔这么久同步一次当前分（finished=false）；不是实时，只为长局也能上榜
+const SCORE_SYNC_INTERVAL_MS = 30_000;
+
 let pollTimer: number | null = null;
-let lastSubmittedScore = -1;
 let isWatchingGameOver = false;
+/** 本局的最终成绩是否已提交，避免同一局结算反复提交 */
+let roundHandled = false;
+/** 上次定时同步当前分的时间 */
+let lastScoreSyncAt = 0;
+let leaderboardFetchedAt = 0;
+let myRankFetchedAt = 0;
 const heatPct = ref(0);
 const shakePct = ref(0);
 const heatReady = ref(false);
 const shakeReady = ref(false);
 
+// 结算的权威信号：游戏的结束浮层 #overOv 由 hidden 属性切换
+// （死亡后出现、点「再滴一罐」后隐藏）。这是一次干净的单次跳变，
+// 不像分数那样每落一球都在变，所以只会在真正结束时触发一次提交。
 function isGameOverShown(doc: Document): boolean {
-    const btn = doc.getElementById('againBtn');
-    if (!btn) return false;
-    const style = doc.defaultView?.getComputedStyle(btn);
-    return !!style && style.display !== 'none' && style.visibility !== 'hidden';
+    const ov = doc.getElementById('overOv');
+    return !!ov && !(ov as HTMLElement).hidden;
 }
 
 function readFinalScore(doc: Document): { score: number; topSpecies: string | null } | null {
-    const scoreEl = doc.getElementById('score');
+    // #overScore 是结算面板上的最终分（gameOver 时一次性写入），
+    // 比 HUD 的 #score（游戏中持续跳动）更适合作为最终成绩。
+    const scoreEl = doc.getElementById('overScore') || doc.getElementById('score');
     const tierEl = doc.getElementById('ovTier');
     if (!scoreEl) return null;
     const score = parseInt(scoreEl.textContent?.trim() ?? '0', 10);
     const topSpecies = tierEl?.textContent?.trim() || null;
     if (Number.isNaN(score) || score <= 0) return null;
     return { score, topSpecies: topSpecies === '—' ? null : topSpecies };
+}
+
+// 游戏进行中的实时分：读 HUD 的 #score。
+// 未结束时 #overScore 还没写入，最终水果无从得知，所以实时上报只带分数。
+function readLiveScore(doc: Document): number | null {
+    const scoreEl = doc.getElementById('score');
+    if (!scoreEl) return null;
+    const score = parseInt(scoreEl.textContent?.trim() ?? '0', 10);
+    if (Number.isNaN(score) || score <= 0) return null;
+    return score;
 }
 
 /** 读取技能条的进度百分比；按钮未被禁用且 meter 已满即视为可用 */
@@ -214,18 +240,38 @@ function readSkill(doc: Document, btnId: string, meterId: string): { pct: number
 function startWatching() {
     if (isWatchingGameOver) return;
     isWatchingGameOver = true;
-    lastSubmittedScore = -1;
+    roundHandled = false;
+    lastScoreSyncAt = 0;
     const tick = () => {
         const win = iframeRef.value?.contentWindow;
         if (!win) return;
         const doc = win.document;
-        if (isGameOverShown(doc)) {
+
+        const over = isGameOverShown(doc);
+        if (over && !roundHandled) {
+            // 结束时必须提交一次：带最终分和最高水果，finished=true。
+            // 只在「未处理 → 结算浮层出现」跳变时触发一次；点「再滴一罐」后复位。
             const result = readFinalScore(doc);
-            if (result && result.score !== lastSubmittedScore) {
-                lastSubmittedScore = result.score;
-                submitAndRefresh(result.score, result.topSpecies);
+            if (result) {
+                roundHandled = true;
+                void submitScore(result.score, result.topSpecies, true);
+            }
+        } else if (!over) {
+            if (roundHandled) roundHandled = false;
+            // 游戏进行中：按固定间隔同步当前分（不是实时，长局也能先上榜）
+            const now = Date.now();
+            if (now - lastScoreSyncAt >= SCORE_SYNC_INTERVAL_MS) {
+                const score = readLiveScore(doc);
+                if (score !== null) {
+                    lastScoreSyncAt = now;
+                    void submitScore(score, null, false);
+                }
             }
         }
+
+        // 榜单也按固定间隔刷新（loadLeaderboard 内部靠时间戳挡住高频请求）
+        void loadLeaderboard(false, true);
+
         const heat = readSkill(doc, 'skHeat', 'mHeat');
         const shake = readSkill(doc, 'skShake', 'mShake');
         heatPct.value = heat.pct;
@@ -233,7 +279,7 @@ function startWatching() {
         heatReady.value = heat.ready;
         shakeReady.value = shake.ready;
     };
-    pollTimer = window.setInterval(tick, 250);
+    pollTimer = window.setInterval(tick, POLL_INTERVAL_MS);
 }
 
 function stopWatching() {
@@ -244,28 +290,47 @@ function stopWatching() {
     }
 }
 
-async function submitAndRefresh(score: number, topSpecies: string | null) {
+/**
+ * 提交分数。finished=true 是结束时的最终成绩（带最高水果），false 是进行中的定时同步。
+ * 提交响应带回 rank / bestScore，所以不再单独打个人排名接口；
+ * 只有刷新了最高分才重拉榜单，否则继续用缓存。
+ */
+async function submitScore(score: number, topSpecies: string | null, finished: boolean) {
     const siteToken = getSiteToken();
     if (!siteToken) return;
-    await submitMergeWatermelonScore(siteToken, score, topSpecies);
-    await loadLeaderboard();
-    await loadMyRank(siteToken);
-}
 
-async function loadLeaderboard() {
-    loading.value = true;
-    try {
-        leaderboard.value = await fetchMergeWatermelonLeaderboard(100);
-    } catch (e) {
-        console.error('[MergeWatermelon] leaderboard error', e);
-    } finally {
-        loading.value = false;
+    const res = await submitMergeWatermelonScore(siteToken, score, topSpecies, finished);
+    if (!res) return;
+    myRank.value = { rank: res.rank, bestScore: res.bestScore };
+    myRankFetchedAt = Date.now();
+    myNickname.value = getCookie('nickname');
+    if (res.improved) {
+        await loadLeaderboard(true);
     }
 }
 
-async function loadMyRank(siteToken: string) {
+/**
+ * 拉榜单。force=true 跳过时间间隔（手动刷新、成绩提升时用）；
+ * silent=true 不显示 loading（定时后台刷新用，避免列表闪烁）。
+ */
+async function loadLeaderboard(force = false, silent = false) {
+    if (!force && Date.now() - leaderboardFetchedAt < LEADERBOARD_REFRESH_MS) return;
+    if (!silent) loading.value = true;
+    try {
+        leaderboard.value = await fetchMergeWatermelonLeaderboard(100);
+        leaderboardFetchedAt = Date.now();
+    } catch (e) {
+        console.error('[MergeWatermelon] leaderboard error', e);
+    } finally {
+        if (!silent) loading.value = false;
+    }
+}
+
+async function loadMyRank(siteToken: string, force = false) {
+    if (!force && Date.now() - myRankFetchedAt < MY_RANK_TTL_MS) return;
     try {
         myRank.value = await fetchMergeWatermelonRank(siteToken);
+        myRankFetchedAt = Date.now();
         myNickname.value = getCookie('nickname');
     } catch (e) {
         console.error('[MergeWatermelon] rank error', e);
@@ -279,10 +344,8 @@ function onIframeLoad() {
 watch(dialogVisible, async (visible) => {
     if (!visible) {
         stopWatching();
-        leaderboard.value = [];
-        myRank.value = null;
-        myNickname.value = null;
-        lastSubmittedScore = -1;
+        roundHandled = false;
+        // 榜单与个人排名保留在内存里：重新打开先展示缓存，超过 TTL 才重新拉
         heatPct.value = 0;
         shakePct.value = 0;
         heatReady.value = false;
