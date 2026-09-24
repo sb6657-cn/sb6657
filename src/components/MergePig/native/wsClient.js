@@ -1,3 +1,5 @@
+import { WS_SERVER_ADDRESS } from '@/constants/backend';
+
 /**
  * 合成大猪头 WSS 客户端
  * 与后端 /machine/merge-pig/{siteToken} WebSocket 通信
@@ -8,10 +10,7 @@ export class MergePigWsClient {
      * @param {object} handlers - 事件处理 { onInit, onNextBall, onGameOver, onError, onNetworkStatusChange }
      */
     constructor(siteToken, handlers) {
-        const protocol = 'wss:';
-        const host = 'hguofichp.cn';
-        const wsPort = 10086;
-        this.url = `${protocol}//${host}:${wsPort}/machine/merge-pig/${encodeURIComponent(siteToken)}`;
+        this.url = `${WS_SERVER_ADDRESS}/machine/merge-pig/${encodeURIComponent(siteToken)}`;
         this.handlers = handlers;
         this.ws = null;
         this.reconnectTimer = null;

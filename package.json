@@ -1,6 +1,6 @@
 {
   "name": "sb6657.cn",
-  "version": "3.15.7+20260920",
+  "version": "3.15.8+20260924",
   "private": true,
   "packageManager": "pnpm@11.3.0",
   "scripts": {

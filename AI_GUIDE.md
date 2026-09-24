@@ -58,7 +58,8 @@ sb6657-cn/sb6657（源码仓库）
 后端地址定义在 `src/constants/backend.ts`：
 
 ```ts
-export const SERVER_ADDRESS = import.meta.env.VITE_BASE_URL || 'https://hguofichp.cn:10086';
+export const SERVER_ADDRESS = (import.meta.env.VITE_BASE_URL as string) || 'https://api.hguofichp.cn';
+export const WS_SERVER_ADDRESS = SERVER_ADDRESS.replace(/^http/, 'ws');
 ```
 
 统一请求实例在 `src/apis/httpInstance.ts`：
@@ -246,7 +247,7 @@ DNA v6 的节点包含标准化文本、固定片段、可变槽位、关键词�
 | ---- | ----------------------------------------------------- | ----------------------------- | ------------------------------------- |
 | GET  | `/machine/merge-pig/leaderboard?top={top}`            | `apis/mergePig.ts`            | 排行榜，弹窗当前请求 TOP100           |
 | GET  | `/machine/merge-pig/rank/{siteToken}`                 | `apis/mergePig.ts`            | 当前匿名站点标识的历史最高分和排名    |
-| WSS  | `wss://hguofichp.cn:10086/machine/merge-pig/{siteToken}` | `MergePig/native/wsClient.js` | 初始化球序列、上报对局并接收结算       |
+| WSS  | `wss://api.hguofichp.cn/machine/merge-pig/{siteToken}` | `MergePig/native/wsClient.js` | 初始化球序列、上报对局并接收结算       |
 
 WebSocket 消息约定来自当前前端：
 
@@ -260,7 +261,7 @@ WebSocket 消息约定来自当前前端：
 | 前端 → 服务端 | `game_over`  | `win`、`score`、`level`、可选 `adminToken` |
 | 前端 → 服务端 | `restart`    | 无额外字段                                 |
 
-`siteToken` 从 cookie 读取；没有时弹窗本次会退回临时的 `anonymous-{timestamp}`。登录态下，WebSocket 的定时分数和结算消息会尝试附带 `localStorage` 中的 `Admin-Token`，用于让后端关联昵称。REST 请求仍沿用 `httpInstance` 的后端地址，但 WebSocket 地址目前是独立硬编码的。
+`siteToken` 从 cookie 读取；没有时弹窗本次会退回临时的 `anonymous-{timestamp}`。登录态下，WebSocket 的定时分数和结算消息会尝试附带 `localStorage` 中的 `Admin-Token`，用于让后端关联昵称。REST 请求沿用 `httpInstance` 的 `SERVER_ADDRESS`，WebSocket 地址由 `WS_SERVER_ADDRESS` 派生，都跟随 `VITE_BASE_URL`。
 
 ### 相册、外部数据和其他接口
 
@@ -824,7 +825,7 @@ memeTagsStore.tagsLoaded.then(() => {
 - 热度墙也不走 Axios 响应拦截器：它用 `fetch` 手工解析 SSE，并手动复制官网来源头。这个头仍然只属于官网 Web 前端，不要把它抄到第三方调用示例。
 - `/machine/dna` 是遗留常量，当前图谱使用 `/machine/dna/v6/{memeId}`；演变接口虽然已有封装，`lifecycle.vue` 内的实际请求仍被注释。
 - “合成大猪头”没有路由，入口和弹窗挂在 `App.vue`；不要在 `MainLayout` 再挂一份，否则会出现两个全局实例。
-- 合成大猪头的 REST 请求跟随 `SERVER_ADDRESS`，但 WebSocket 当前硬编码为 `wss://hguofichp.cn:10086`。切换测试或生产后端时两处要分别检查。
+- 合成大猪头和在线聊天的 WebSocket 地址都由 `WS_SERVER_ADDRESS` 从 `SERVER_ADDRESS` 派生，切换后端地址只需要改 `VITE_BASE_URL`，不要再硬编码 host 或端口。
 - `MergePigWsClient` 虽然提供 `sendPing()`，当前没有定时器调用它；现有定时任务只有每 20 秒的 `score_update`，不要把代码注释里的“30s 心跳”当成已启用行为。
 - 合成大猪头的静态图使用 `import.meta.env.BASE_URL + 'merge-pig/'`；资源应放在 `public/merge-pig/`，不要移进 `src/assets` 后仍沿用原路径。
 - 游戏弹窗用 `useIsMobile()` 的 600px 判断，原生游戏 CSS 用 680px；修改其响应式时要同时检查两层。

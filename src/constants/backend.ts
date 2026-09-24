@@ -1,6 +1,9 @@
 // 优先从环境变量读取后端地址，未设置时回退默认值
 export const SERVER_ADDRESS = (import.meta.env.VITE_BASE_URL as string) || 'https://api.hguofichp.cn';
 
+// WebSocket 地址跟随后端地址派生，http → ws、https → wss
+export const WS_SERVER_ADDRESS = SERVER_ADDRESS.replace(/^http/, 'ws');
+
 export const API = {
     INCREASE_COPY_COUNT: '/machine/addCnt',             // 增加复制次数
     INCREASE_LIKE_COUNT: '/machine/like',               // 增加复制次数

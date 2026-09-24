@@ -65,7 +65,7 @@
 
 ## 请求和后端
 
-- `SERVER_ADDRESS` 读 `VITE_BASE_URL`，默认 `https://hguofichp.cn:10086`。
+- `SERVER_ADDRESS` 读 `VITE_BASE_URL`，默认 `https://api.hguofichp.cn`；WebSocket 用由它派生的 `WS_SERVER_ADDRESS`，不要再硬编码 host 或端口。
 - `httpInstance.get/post` 返回后端 body `{ code, data, msg }`，不是 AxiosResponse。实例方法泛型 `T` 是 `data`；轻封装 `get`/`post` 返回 `{ _failure, flatData }`。
 - 拦截器会加 `siteToken`（匿名统计）、`dpahjdoiaw`（官网 Web 来源统计）、登录后的 `Authorization`。
 - `dpahjdoiaw` 不是鉴权密钥。禁止写进 QQ bot、agent、油猴脚本、第三方客户端、文档示例或任何非官网 Web 前端调用。

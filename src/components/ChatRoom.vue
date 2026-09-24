@@ -25,6 +25,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import httpInstance from "@/apis/httpInstance";
+import { WS_SERVER_ADDRESS } from '@/constants/backend';
 
 interface Message {
 	text: string;
@@ -56,7 +57,7 @@ interface SensitiveWordData {
 
 // 判断当前浏览器是否支持WebSocket
 if ('WebSocket' in window) {
-	websocket.value = new WebSocket(`wss://hguofichp.cn:10086/machine/ws/${clientId.value}`);
+	websocket.value = new WebSocket(`${WS_SERVER_ADDRESS}/machine/ws/${clientId.value}`);
 } else {
 	ElMessageBox.alert('浏览器不支持在线聊天', '😣', {
 		confirmButtonText: 'OK',
@@ -184,7 +185,7 @@ const reconnectWebSocket = (): boolean => {
   }
 
   try {
-    websocket.value = new WebSocket(`wss://hguofichp.cn:10086/machine/ws/${clientId.value}`);
+    websocket.value = new WebSocket(`${WS_SERVER_ADDRESS}/machine/ws/${clientId.value}`);
     websocket.value.onerror = onWebSocketError;
     websocket.value.onopen = onWebSocketOpen;
     websocket.value.onmessage = onWebSocketMessage;
