@@ -1,6 +1,7 @@
 import { SERVER_ADDRESS } from '@/constants/backend';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getRefreshToken, getSiteToken, getToken, isTokenExpiringSoon, removeToken, setSiteToken, setToken } from '@/utils/cookieUtils';
+import { getTurnstilePass, setTurnstilePass, triggerTurnstileGuard } from '@/composables/useTurnstileGuard';
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { ref } from 'vue';
@@ -150,6 +151,12 @@ httpInstance.interceptors.request.use(
         // 用于统计请求来源自sb6657.cn网站前端。如果你要使用网站后端，请移除此请求头，防止我们统计错数据，感谢配合
         config.headers['dpahjdoiaw'] = 'eAR48ZFJwfRTy6SyQPFj';
 
+        // 附加 Cloudflare Turnstile 安全通行证
+        const cfPass = getTurnstilePass();
+        if (cfPass && !config.headers['X-Turnstile-Pass']) {
+            config.headers['X-Turnstile-Pass'] = cfPass;
+        }
+
         const token = getToken();
         if (token) {
             // 如果有有效token，确保isRelogin状态为true
@@ -216,6 +223,10 @@ httpInstance.interceptors.response.use(
             } catch (e) {
                 console.warn('Pinia 尚未初始化，无法获取 authStore');
             }
+        }
+        const passHeader = res.headers?.['x-turnstile-pass'] || res.headers?.['X-Turnstile-Pass'];
+        if (passHeader) {
+            setTurnstilePass(passHeader as string);
         }
         // 未设置状态码则默认成功状态
         const code = res.data.code || 200;
@@ -321,6 +332,22 @@ httpInstance.interceptors.response.use(
                             });
                         });
                     }
+                case 403:
+                    if (error.response?.data?.needTurnstile) {
+                        const action = error.response.data.action || 'general';
+                        try {
+                            const newPass = await triggerTurnstileGuard(action);
+                            error.config.headers['X-Turnstile-Pass'] = newPass;
+                            return httpInstance(error.config);
+                        } catch (guardErr) {
+                            return Promise.reject(guardErr);
+                        }
+                    }
+                    if (error.response?.data?.msg) {
+                        ElMessage({ message: error.response.data.msg, type: 'error', duration: 5 * 1000 });
+                        return Promise.reject(error);
+                    }
+                    break;
                 default:
                     if (message === 'Network Error') {
                         message = '接口连接异常';

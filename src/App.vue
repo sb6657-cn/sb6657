@@ -8,6 +8,7 @@
         <MergePigDialog />
         <MergeWatermelonLauncher />
         <MergeWatermelonDialog />
+        <TurnstileGuardModal />
     </div>
 </template>
 
@@ -19,6 +20,7 @@ import MergePigLauncher from '@/components/MergePig/MergePigLauncher.vue';
 import MergePigDialog from '@/components/MergePig/MergePigDialog.vue';
 import MergeWatermelonLauncher from '@/components/MergeWatermelon/MergeWatermelonLauncher.vue';
 import MergeWatermelonDialog from '@/components/MergeWatermelon/MergeWatermelonDialog.vue';
+import TurnstileGuardModal from '@/components/TurnstileGuardModal.vue';
 import { useThemeStore } from '@/stores/themeStore';
 
 const theme = useThemeStore();

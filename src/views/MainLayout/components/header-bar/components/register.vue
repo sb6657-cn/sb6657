@@ -7,7 +7,7 @@
           auto-complete="off" placeholder="邮箱-用于登录">
           <template #append>
             <el-button type="primary" :disabled="emailCodeButtonDisabled" size="small" style="padding: 0;font-weight: 500;"
-              @click="showSliderDialog">发送邮箱验证码</el-button>
+              @click="showMailSecurityDialog">发送邮箱验证码</el-button>
           </template>
         </el-input>
       </el-form-item>
@@ -43,6 +43,7 @@
         </div>
       </el-form-item>
       <el-form-item style="width:100%;">
+        <TurnstileWidget ref="registerTurnstileRef" action="register" v-model="registerTurnstileToken" />
         <el-button :loading="loading" size="large" type="primary" style="width:100%;" @click.prevent="handleRegister">
           <span v-if="!loading">注 册</span>
           <span v-else>注 册 中...</span>
@@ -50,20 +51,11 @@
       </el-form-item>
     </el-form>
 
-    <!-- 滑动验证对话框 -->
-    <el-dialog v-model="sliderDialogVisible" title="安全验证" width="300px" :show-close="false" :close-on-click-modal="false"
-      :close-on-press-escape="false" append-to-body>
-      <div class="slider-container">
-        <div class="slider-text">请滑动至最右侧完成验证</div>
-        <el-slider v-model="sliderValue" :min="0" :max="100" :step="1" :show-tooltip="false"
-          :disabled="sliderDisabled" @change="handleSliderChange">
-          <template #button>
-            <div class="slider-button">
-              <el-icon v-if="!sliderSuccess"><Right /></el-icon>
-              <el-icon v-else><Check /></el-icon>
-            </div>
-          </template>
-        </el-slider>
+    <!-- 安全验证对话框 (发送邮箱验证码前) -->
+    <el-dialog v-model="mailSecurityDialogVisible" title="安全验证" width="360px" :show-close="true" append-to-body>
+      <div style="text-align: center; padding: 10px 0;">
+        <p style="margin-bottom: 12px; color: #666;">请完成人机验证以发送验证码</p>
+        <TurnstileWidget v-if="mailSecurityDialogVisible" ref="mailTurnstileRef" action="mail_code" @success="handleMailTurnstileSuccess" />
       </div>
     </el-dialog>
   </div>
@@ -72,6 +64,7 @@
 <script setup>
 import { ElMessageBox, ElMessage } from "element-plus";
 import httpInstance from "@/apis/httpInstance";
+import TurnstileWidget from "@/components/TurnstileWidget.vue";
 import { Right, Check } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
@@ -135,34 +128,25 @@ const emailCodeButtonText = ref("发送邮箱验证码");
 const emailCodeButtonDisabled = ref(false);
 let emailCodeTimer = null;
 
-const sliderDialogVisible = ref(false);
-const sliderValue = ref(0);
-const sliderDisabled = ref(false);
-const sliderSuccess = ref(false);
+const mailSecurityDialogVisible = ref(false);
+const mailTurnstileRef = ref();
+const registerTurnstileRef = ref();
+const registerTurnstileToken = ref("");
 
-function showSliderDialog() {
+function showMailSecurityDialog() {
   if (!registerForm.value.username) {
     ElMessage.info("请先输入邮箱");
     return;
   }
-  sliderDialogVisible.value = true;
-  sliderValue.value = 0;
-  sliderDisabled.value = false;
-  sliderSuccess.value = false;
+  mailSecurityDialogVisible.value = true;
 }
 
-function handleSliderChange(value) {
-  if (value === 100) {
-    sliderDisabled.value = true;
-    sliderSuccess.value = true;
-    setTimeout(() => {
-      sliderDialogVisible.value = false;
-      getEmailCode();
-    }, 500);
-  }
+function handleMailTurnstileSuccess(token) {
+  mailSecurityDialogVisible.value = false;
+  getEmailCode(token);
 }
 
-function getEmailCode() {
+function getEmailCode(token) {
   if (!registerForm.value.username) {
     ElMessage.info("请先输入邮箱");
     return;
@@ -182,12 +166,14 @@ function getEmailCode() {
       emailCodeButtonText.value = `邮箱中已有验证码，或请 ${count}分钟 后重试`;
     }
   }, 1000 * 60 * 10);
-  // console.log(registerForm.value.username);
 
-  // 发送请求
+  // 发送请求，附带 Turnstile Token
   httpInstance.get("/login/getMailCode", {
     params: {
       toEMail: registerForm.value.username
+    },
+    headers: {
+      'cf-turnstile-response': token
     }
   }).then(res => {
     if (res.code === 200) {
@@ -210,8 +196,16 @@ function getEmailCode() {
 function handleRegister() {
   registerRef.value.validate(valid => {
     if (valid) {
+      if (!registerTurnstileToken.value) {
+        ElMessage.warning('请先完成人机安全验证');
+        return;
+      }
       loading.value = true;
-      httpInstance.post('/register', registerForm.value).then(res => {
+      httpInstance.post('/register', registerForm.value, {
+        headers: {
+          'cf-turnstile-response': registerTurnstileToken.value
+        }
+      }).then(res => {
         const username = registerForm.value.username;
         if (res.code === 200) {
           ElMessageBox.alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", "系统提示", {
@@ -221,7 +215,8 @@ function handleRegister() {
             //注册成功后的操作，跳转到登录页面
           }).catch(() => { });
         } else {
-          ElMessage.error(res.msg)
+          ElMessage.error(res.msg);
+          registerTurnstileRef.value?.reset();
           loading.value = false;
           if (captchaEnabled.value) {
             getCode();
@@ -229,6 +224,7 @@ function handleRegister() {
         }
 
       }).catch(() => {
+        registerTurnstileRef.value?.reset();
         loading.value = false;
         if (captchaEnabled.value) {
           getCode();

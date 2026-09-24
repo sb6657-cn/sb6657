@@ -50,6 +50,7 @@
                     clearable />
             </el-form-item>
             <span>⁕由于屏蔽词是某个词语，故限制长度为10</span>
+            <TurnstileWidget v-if="dialogVisible" ref="turnstileRef" action="shield_submit" v-model="turnstileToken" />
         </el-form>
         <template #footer>
             <div class="dialog-footer">
@@ -98,12 +99,15 @@
 
 <script setup lang="ts">
 import httpInstance from '@/apis/httpInstance';
+import TurnstileWidget from '@/components/TurnstileWidget.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { onMounted, ref, watch } from 'vue';
 
-const isMobile = useIsMobile()
+const isMobile = useIsMobile();
+const turnstileRef = ref();
+const turnstileToken = ref('');
 
 interface ShieldItem {
     id: number;
@@ -236,11 +240,19 @@ const handleSubmitShieldWord = async () => {
     await formRef.value.validate(async (valid) => {
         if (!valid) return;
 
+        if (!turnstileToken.value) {
+            ElMessage.warning('请先完成人机安全验证');
+            return;
+        }
+
         submitLoading.value = true;
         try {
             const res = await httpInstance.get('/machine/addShieldWord', {
                 params: {
                     shieldWord: submitForm.value.shieldWord.trim(),
+                },
+                headers: {
+                    'cf-turnstile-response': turnstileToken.value,
                 },
             });
 
@@ -250,10 +262,12 @@ const handleSubmitShieldWord = async () => {
                 getList(); // 刷新列表
             } else {
                 ElMessage.error(res.msg || '投稿失败');
+                turnstileRef.value?.reset();
             }
         } catch (error) {
             console.error('投稿失败:', error);
             ElMessage.error('请求失败，请检查网络连接');
+            turnstileRef.value?.reset();
         } finally {
             submitLoading.value = false;
         }
@@ -264,6 +278,8 @@ const handleSubmitShieldWord = async () => {
 const handleDialogCancel = () => {
     dialogVisible.value = false;
     submitForm.value.shieldWord = '';
+    turnstileToken.value = '';
+    turnstileRef.value?.reset();
     formRef.value?.resetFields();
 };
 

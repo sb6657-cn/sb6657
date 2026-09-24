@@ -58,6 +58,7 @@
                 </div>
                 <div v-else class="no-match-info">当前无正在进行的大型赛事</div>
             </div>
+            <TurnstileWidget ref="turnstileRef" action="meme_submit" v-model="turnstileToken" />
             <div class="button-group">
                 <el-button type="primary" :loading="submitting" @click="saveBarrage">投稿</el-button>
             </div>
@@ -67,6 +68,7 @@
 
 <script setup lang="ts">
 import httpInstance from '@/apis/httpInstance';
+import TurnstileWidget from '@/components/TurnstileWidget.vue';
 import tagSelector from '@/components/tag-selector.vue';
 import { API } from '@/constants/backend';
 import { useMemeTagsStore } from '@/stores/memeTags';
@@ -111,6 +113,8 @@ const selectedTags = ref<memeTag[]>([]);
 const matchData = ref<MatchData | null>(null);
 const isMatchSelected = ref(false);
 const submitting = ref(false);
+const turnstileRef = ref();
+const turnstileToken = ref('');
 
 // ===== 登录状态提示 =====
 // 先用本地 token 做即时判断（避免闪烁），再用后端 /machine/whoami 校准——
@@ -207,6 +211,11 @@ function saveBarrage() {
         return;
     }
 
+    if (!turnstileToken.value) {
+        ElNotification.warning('请先完成人机安全验证');
+        return;
+    }
+
     const submitData: SubmitData = {
         tags: selectedValues.join(','),
         barrage: barrage.value,
@@ -218,10 +227,15 @@ function saveBarrage() {
 
     submitting.value = true;
     httpInstance
-        .post(API.SUBMIT_MEME, submitData)
+        .post(API.SUBMIT_MEME, submitData, {
+            headers: {
+                'cf-turnstile-response': turnstileToken.value,
+            },
+        })
         .then((res) => {
             barrage.value = '';
             isMatchSelected.value = false;
+            turnstileRef.value?.reset();
             if (res.code === 200) {
                 ElNotification.success('投稿成功，待审核(一天内)');
                 emit('submitted');
@@ -233,6 +247,7 @@ function saveBarrage() {
         })
         .catch((err) => {
             console.error('投稿失败', err);
+            turnstileRef.value?.reset();
             ElNotification.error('请求失败');
         })
         .finally(() => {

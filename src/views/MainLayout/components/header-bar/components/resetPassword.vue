@@ -7,7 +7,7 @@
           auto-complete="off" placeholder="请输入注册邮箱">
           <template #append>
             <el-button type="primary" :disabled="emailCodeButtonDisabled" size="small" style="padding: 0;font-weight: 500;"
-              @click="showSliderDialog">发送邮箱验证码</el-button>
+              @click="showMailSecurityDialog">发送邮箱验证码</el-button>
           </template>
         </el-input>
       </el-form-item>
@@ -27,6 +27,7 @@
         </el-input>
       </el-form-item>
       <el-form-item style="width:100%;">
+        <TurnstileWidget ref="resetTurnstileRef" action="reset_pwd" v-model="resetTurnstileToken" />
         <el-button :loading="loading" size="large" type="primary" style="width:100%;" @click.prevent="handleReset">
           <span v-if="!loading">重置密码</span>
           <span v-else>重置中...</span>
@@ -34,20 +35,11 @@
       </el-form-item>
     </el-form>
 
-    <!-- 滑动验证对话框 -->
-    <el-dialog v-model="sliderDialogVisible" title="安全验证" width="300px" :show-close="false" :close-on-click-modal="false"
-      :close-on-press-escape="false" append-to-body>
-      <div class="slider-container">
-        <div class="slider-text">请滑动至最右侧完成验证</div>
-        <el-slider v-model="sliderValue" :min="0" :max="100" :step="1" :show-tooltip="false"
-          :disabled="sliderDisabled" @change="handleSliderChange">
-          <template #button>
-            <div class="slider-button">
-              <el-icon v-if="!sliderSuccess"><Right /></el-icon>
-              <el-icon v-else><Check /></el-icon>
-            </div>
-          </template>
-        </el-slider>
+    <!-- 安全验证对话框 (发送邮箱验证码前) -->
+    <el-dialog v-model="mailSecurityDialogVisible" title="安全验证" width="360px" :show-close="true" append-to-body>
+      <div style="text-align: center; padding: 10px 0;">
+        <p style="margin-bottom: 12px; color: #666;">请完成人机验证以发送验证码</p>
+        <TurnstileWidget v-if="mailSecurityDialogVisible" ref="mailTurnstileRef" action="mail_code" @success="handleMailTurnstileSuccess" />
       </div>
     </el-dialog>
   </div>
@@ -57,6 +49,7 @@
 import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import httpInstance from "@/apis/httpInstance";
+import TurnstileWidget from "@/components/TurnstileWidget.vue";
 import { Right, Check } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -104,34 +97,25 @@ const emailCodeButtonText = ref("发送邮箱验证码");
 const emailCodeButtonDisabled = ref(false);
 let emailCodeTimer = null;
 
-const sliderDialogVisible = ref(false);
-const sliderValue = ref(0);
-const sliderDisabled = ref(false);
-const sliderSuccess = ref(false);
+const mailSecurityDialogVisible = ref(false);
+const mailTurnstileRef = ref();
+const resetTurnstileRef = ref();
+const resetTurnstileToken = ref("");
 
-function showSliderDialog() {
+function showMailSecurityDialog() {
   if (!resetForm.value.username) {
     ElMessage.info("请先输入邮箱");
     return;
   }
-  sliderDialogVisible.value = true;
-  sliderValue.value = 0;
-  sliderDisabled.value = false;
-  sliderSuccess.value = false;
+  mailSecurityDialogVisible.value = true;
 }
 
-function handleSliderChange(value) {
-  if (value === 100) {
-    sliderDisabled.value = true;
-    sliderSuccess.value = true;
-    setTimeout(() => {
-      sliderDialogVisible.value = false;
-      getEmailCode();
-    }, 500);
-  }
+function handleMailTurnstileSuccess(token) {
+  mailSecurityDialogVisible.value = false;
+  getEmailCode(token);
 }
 
-function getEmailCode() {
+function getEmailCode(token) {
   if (!resetForm.value.username) {
     ElMessage.info("请先输入邮箱");
     return;
@@ -155,6 +139,9 @@ function getEmailCode() {
   httpInstance.get("/login/getMailCode", {
     params: {
       toEMail: resetForm.value.username
+    },
+    headers: {
+      'cf-turnstile-response': token
     }
   }).then(res => {
     if (res.code === 200) {
@@ -177,8 +164,16 @@ function getEmailCode() {
 function handleReset() {
   resetPasswordRef.value.validate(valid => {
     if (valid) {
+      if (!resetTurnstileToken.value) {
+        ElMessage.warning('请先完成人机安全验证');
+        return;
+      }
       loading.value = true;
-      httpInstance.post('/resetPassword', resetForm.value).then(res => {
+      httpInstance.post('/resetPassword', resetForm.value, {
+        headers: {
+          'cf-turnstile-response': resetTurnstileToken.value
+        }
+      }).then(res => {
         if (res.code === 200) {
           ElMessageBox.alert("密码重置成功！请使用新密码登录", "系统提示", {
             type: "success",
@@ -187,12 +182,14 @@ function handleReset() {
           }).catch(() => { });
         } else {
           ElMessage.error(res.msg);
+          resetTurnstileRef.value?.reset();
           loading.value = false;
         }
       }).catch((error) => {
         ElMessageBox.alert(error.message, "系统提示", {
-            type: "success",
-          })
+            type: "error",
+          });
+        resetTurnstileRef.value?.reset();
         loading.value = false;
       });
     }
