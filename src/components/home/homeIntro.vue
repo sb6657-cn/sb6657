@@ -11,7 +11,7 @@
         <p class="sub-info">
             <b>
                 <RouterLink to="/Tampermonkey">油猴插件</RouterLink>
-                (已更新至v2026.09.25.01版本)
+                (已更新至v2026.09.26.01版本)
                 <a href="/sb6657.user.js" target="_blank">点击下载</a>
                 可在斗鱼直播间一键发送烂梗
             </b>
