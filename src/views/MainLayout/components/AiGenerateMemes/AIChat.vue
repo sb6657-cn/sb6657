@@ -610,7 +610,6 @@ const inputPlaceholder = computed(() => chatMode.value === 'meme'
 onMounted(() => {
   loadSessions();
   loadDailyRemaining();
-  loadAgentTools();
 });
 
 function getMergedToolEvents(events: ToolEventItem[]): MergedToolCard[] {
@@ -811,28 +810,17 @@ async function computeSha256Hex(raw: string): Promise<string> {
   return sha256Fallback(raw);
 }
 
-async function buildAntiProxyHeaders(userPrompt: string, modeStr: string) {
-  const ts = Date.now().toString();
+async function buildAntiProxyPayload(userPrompt: string, modeStr: string) {
+  const timestamp = Date.now().toString();
   const nonce = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
   const promptHead = userPrompt.trim().substring(0, 32);
-  const raw = `${ts}:${nonce}:${SITE_MODULE}:${modeStr}:${promptHead}:${AI_SIGN_SALT}`;
+  const raw = `${timestamp}:${nonce}:${SITE_MODULE}:${modeStr}:${promptHead}:${AI_SIGN_SALT}`;
   const sign = await computeSha256Hex(raw);
   return {
-    'dpahjdoiaw': 'true',
-    'X-Site-Module': SITE_MODULE,
-    'X-Ai-Timestamp': ts,
-    'X-Ai-Nonce': nonce,
-    'X-Ai-Sign': sign,
+    timestamp,
+    nonce,
+    sign,
   };
-}
-
-async function loadAgentTools() {
-  try {
-    const res: any = await httpInstance.get(`/machine/ai/tools?module=${SITE_MODULE}`);
-    if (Array.isArray(res?.data) && res.data.length > 0) {
-      agentCatalog.value = res.data;
-    }
-  } catch {}
 }
 
 async function loadSessions() {
@@ -952,14 +940,14 @@ async function sendMessage() {
 
   try {
     const modeStr = chatMode.value === 'meme' ? 'MEME' : 'CHAT';
-    const securityHeaders = await buildAntiProxyHeaders(userPrompt, modeStr);
+    const securityPayload = await buildAntiProxyPayload(userPrompt, modeStr);
 
     const resp = await fetch(`${httpInstance.defaults.baseURL}/machine/ai/chat/stream`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token,
-        ...securityHeaders,
+        'dpahjdoiaw': 'eAR48ZFJwfRTy6SyQPFj',
       },
       body: JSON.stringify({
         prompt: userPrompt,
@@ -971,6 +959,7 @@ async function sendMessage() {
         skill: chatMode.value === 'meme' ? 'MEME_MAKER' : null,
         mode: modeStr,
         module: SITE_MODULE,
+        ...securityPayload,
       }),
     });
 
