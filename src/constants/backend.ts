@@ -68,7 +68,7 @@ export const MemeCategory = [
     // { path: '/lieDetector', text: '测谎仪', icon: cs2_icon },
     { path: '/image', text: '时光相册', icon: image_icon },
     { path: '/post-bar', text: '社区贴吧', icon: post_icon },
-    { path: '/aichat', text: 'AI造梗', icon: chat_icon },
+    { path: '/aichat', text: '造梗Agent', icon: chat_icon },
     { path: '/shieldWord', text: '屏蔽词收集', icon: shieldWord },
     { path: '/15warriorsDonk', text: '布雷德15勇士', icon: donk, keepColor: true },
     { path: '/matchLib', text: '赛事烂梗库', icon: cs2_icon },
