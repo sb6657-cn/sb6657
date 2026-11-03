@@ -48,14 +48,13 @@
             <p class="qq-group-hint">QQ群：1070269456、526042235</p>
         </el-dialog>
 
-        <el-dialog v-model="supportDialogVisible" append-to-body title="谢谢老板~" width="min(420px, 92vw)">
-            <img src="https://cdn.hguofichp.cn/zfb.jpg" alt="支付宝赞赏码" style="display: block; width: 100%; max-width: 100%; height: auto; object-fit: contain" />
-        </el-dialog>
+        <SponsorModal v-model="supportDialogVisible" />
     </footer>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import SponsorModal from '@/components/SponsorModal.vue';
 import { RouterLink } from 'vue-router';
 
 const serverDate = ref(0);
