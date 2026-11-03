@@ -195,7 +195,7 @@ const QR_MAP = {
 const currentQrUrl = computed(() => QR_MAP[currentChannel.value])
 
 /**
- * 名字脱敏函数（>3个字脱1个，>6个字脱2个，>8个字脱3个，>10个字脱4个，热心水友不脱敏）
+ * 名字脱敏函数（<3个字脱敏，3~6个字脱1个，>6个字脱2个，>8个字脱3个，>10个字脱4个，热心水友不脱敏）
  */
 function maskName(raw: string | undefined): string {
   if (!raw || !raw.trim()) {
@@ -209,21 +209,22 @@ function maskName(raw: string | undefined): string {
     return name
   }
   const len = name.length
-  let maskCount = 0
+  if (len <= 1) {
+    return '*'
+  }
+  if (len === 2) {
+    return name.charAt(0) + '*'
+  }
+
+  let maskCount = 1
   if (len > 10) {
     maskCount = 4
   } else if (len > 8) {
     maskCount = 3
   } else if (len > 6) {
     maskCount = 2
-  } else if (len > 3) {
-    maskCount = 1
   } else {
-    maskCount = 0
-  }
-
-  if (maskCount <= 0) {
-    return name
+    maskCount = 1
   }
 
   maskCount = Math.min(maskCount, len - 2)

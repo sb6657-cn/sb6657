@@ -45,8 +45,8 @@ let repeatOpenTimer: ReturnType<typeof setInterval> | undefined;
 
 function getRandomInterval(): number {
     // 60 秒到 90 秒之间的随机周期毫秒数
-    const min = 60;
-    const max = 90;
+    const min = 90;
+    const max = 120;
     const seconds = Math.floor(Math.random() * (max - min + 1)) + min;
     return seconds * 1000;
 }
@@ -75,7 +75,7 @@ function showBubbleBriefly() {
     hideTimer = setTimeout(() => {
         bubbleVisible.value = false;
         scheduleNextBubble();
-    }, 6000); // 浮现展示 6 秒后平滑隐去，进入 180~500 秒随机周期倒计时
+    }, 30000); // 浮现展示 6 秒后平滑隐去，进入 180~500 秒随机周期倒计时
 }
 
 function onBubbleMouseEnter() {
