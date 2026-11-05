@@ -1,10 +1,11 @@
 <template>
-    <el-dropdown @command="handleCommand" class="right-menu-item hover-effect" trigger="hover">
-        <div class="avatar-wrapper">
-            <el-icon size="32">
-                <User />
-            </el-icon>
-            <el-icon><caret-bottom /></el-icon>
+    <el-dropdown @command="handleCommand" class="right-menu-item hover-effect" :trigger="isMobile ? 'click' : 'hover'">
+        <div class="avatar-wrapper" :class="{ 'mobile-light': isMobile && !theme.isDark }" title="用户中心">
+            <span class="avatar-icon-box">
+                <User :size="isMobile ? 20 : 22" :stroke-width="2" class="avatar-icon" />
+                <span v-if="isRelogin.show" class="login-status-dot" title="已登录" />
+            </span>
+            <ChevronDown :size="13" :stroke-width="2.5" class="caret-icon" />
         </div>
         <template #dropdown>
             <el-dropdown-menu>
@@ -40,57 +41,50 @@
             </el-dropdown-menu>
         </template>
     </el-dropdown>
-    <el-dialog :align-center="true" v-model="loginView" :draggable="true" :width=dialogWidth :modal="false"
+    <el-dialog :align-center="true" v-model="loginView" :draggable="true" :width="dialogWidth" :modal="false"
         :append-to-body="true">
         <login v-show="loginView" :onRegister="handleRegister" :closeDialog="closeDialog"></login>
     </el-dialog>
-    <el-dialog :align-center="true" v-model="registerView" :draggable="true" :width=dialogWidth :modal="false"
+    <el-dialog :align-center="true" v-model="registerView" :draggable="true" :width="dialogWidth" :modal="false"
         :append-to-body="true">
         <register v-show="registerView"></register>
     </el-dialog>
 
     <el-dialog v-model="ysCommunityNorms" title="社区规范与隐私政策"
-        style="position: fixed;top: 0; left: 0; right: 0; bottom: 0; margin: auto;" :width=dialogWidth :modal="false"
+        style="position: fixed;top: 0; left: 0; right: 0; bottom: 0; margin: auto;" :width="dialogWidth" :modal="false"
         :append-to-body="true">
         <div v-html="CommunityNorms"></div>
     </el-dialog>
 </template>
 
-<script setup>
-import { ElMessageBox } from 'element-plus'
-import { ref, watch } from 'vue'
+<script setup lang="ts">
+import { ElMessageBox } from 'element-plus';
+import { ref, computed, watch } from 'vue';
+import { User, ChevronDown } from '@lucide/vue';
 import { removeToken } from '@/utils/cookieUtils';
-import httpInstance from "@/apis/httpInstance";
 import login from './login.vue';
-import { CommunityNorms } from '@/common/CommunityNorms'
+import { CommunityNorms } from '@/common/CommunityNorms';
 import register from './register.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
 import { isRelogin } from '@/apis/httpInstance';
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useThemeStore } from '@/stores/themeStore';
 
-const authStore = useAuthStore()
-
-
-const loginView = ref(false)
-const registerView = ref(false)
+const authStore = useAuthStore();
+const theme = useThemeStore();
 const isMobile = useIsMobile();
 
+const loginView = ref(false);
+const registerView = ref(false);
+const ysCommunityNorms = ref(false);
 
-const ysCommunityNorms = ref(false)
+const dialogWidth = computed(() => (isMobile.value ? '95%' : '400px'));
+
 function loginAndReg() {
-    // console.log(isRelogin.show);
-    loginView.value = true
-    registerView.value = false
+    loginView.value = true;
+    registerView.value = false;
 }
 
-let dialogWidth = '400px'
-
-function getDialogWidth() {
-    if (isMobile.value) {
-        dialogWidth = '95%'
-    }
-}
-getDialogWidth()
 function logout() {
     ElMessageBox.confirm('确定退出登录吗？', '提示', {
         confirmButtonText: '确定',
@@ -98,8 +92,7 @@ function logout() {
         type: 'warning'
     }).then(() => {
         removeToken();
-        // 退出登录后设置状态为false
-        isRelogin.show = false;
+        isRelogin.value.show = false;
     }).catch(() => { });
 }
 
@@ -107,33 +100,94 @@ function handleRegister() {
     loginView.value = false;
     registerView.value = true;
 }
+
 function closeDialog() {
-    loginView.value = false
+    loginView.value = false;
 }
 
-function showLoginView() {
-    console.log('showLoginView')
-    loginView.value = true
-}
-function handleCommand(){}
+function handleCommand() {}
 
 watch(
     () => authStore.loginVisible,
     (newVal) => {
-        loginView.value = newVal
+        loginView.value = newVal;
     }
-)
+);
 
 // 弹窗被用户手动关闭（点 X / 遮罩）时同步 store，避免 store 一直停在 true 导致下次 showLogin 不触发
 watch(loginView, (visible) => {
     if (!visible && authStore.loginVisible) {
-        authStore.hideLogin()
+        authStore.hideLogin();
     }
-})
+});
 </script>
 
 <style lang='scss' scoped>
-@media (min-width: 600px) {
+.right-menu-item {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.avatar-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 32px;
+    color: #fff;
+    cursor: pointer;
+    padding: 0 6px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    &.mobile-light {
+        color: #333;
+
+        &:hover {
+            background: rgba(128, 128, 128, 0.15);
+        }
+    }
+}
+
+.avatar-icon-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-icon {
+    display: block;
+}
+
+.caret-icon {
+    display: block;
+    opacity: 0.8;
+    transition: transform 0.2s ease;
+}
+
+.right-menu-item:hover .caret-icon {
+    transform: rotate(180deg);
+}
+
+.login-status-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    width: 7px;
+    height: 7px;
+    background-color: #10b981;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+}
+
+@media (min-width: 601px) {
     .DialogView {
         position: fixed;
         top: 30%;
@@ -143,16 +197,14 @@ watch(loginView, (visible) => {
 
     .avatar-wrapper {
         height: 32px;
-        cursor: pointer;
-        display: block;
     }
 }
 
 @media (max-width: 600px) {
     .avatar-wrapper {
-        height: 26px;
-        cursor: pointer;
-        display: block;
+        height: 24px;
+        padding: 0 4px;
+        gap: 2px;
     }
 }
 

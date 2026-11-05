@@ -5,6 +5,7 @@ import router from './router';
 import ElementPlus from 'element-plus';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+import { MorphIcon } from 'morphicons/vue';
 
 import '@/assets/css/index.scss';
 import '@/assets/css/global.css';
@@ -18,6 +19,7 @@ app.use(ElementPlus, {
     locale: zhCn,
 });
 app.use(pinia);
+app.component('MorphIcon', MorphIcon);
 
 // 设置全局定时器
 setInterval(() => {
@@ -32,7 +34,9 @@ if (VITE_NODE_ENV !== 'development') {
     console.dir = function () {};
     console.warn = function () {};
 }
-app.mount('#app');
+
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);
 }
+
+app.mount('#app');

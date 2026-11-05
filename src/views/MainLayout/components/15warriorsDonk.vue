@@ -10,9 +10,7 @@
                     <el-option v-for="opt in yearOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
                 </el-select>
                 <button class="download-rank-btn" type="button" @click="downloadRankingImage" :disabled="isDownloading">
-                    <el-icon>
-                        <Download />
-                    </el-icon>
+                    <Download :size="16" style="margin-right: 4px;" />
                     <span>{{ isDownloading ? '下载中...' : '下载榜单' }}</span>
                 </button>
             </div>
@@ -77,17 +75,9 @@
                 </table>
             </div>
             <div v-if="hasCollapseBtn" class="collapse-btn" @click="toggleCollapse">
-                <div v-if="collapse">
-                    <el-icon>
-                        <ArrowUpBold />
-                    </el-icon>
-                    <span>收起折叠</span>
-                </div>
-                <div v-else>
-                    <el-icon>
-                        <ArrowDownBold />
-                    </el-icon>
-                    <span>展开全部</span>
+                <div class="collapse-btn-content">
+                    <MorphIcon :icon="collapse ? ChevronUp : ChevronDown" :size="16" :stroke-width="2.5" spring="bouncy" />
+                    <span>{{ collapse ? '收起折叠' : '展开全部' }}</span>
                 </div>
             </div>
         </section>
@@ -163,7 +153,8 @@
 
 <script setup lang="ts">
 import type { ReportData, YearConfig } from '@/types/15warriorsDonk';
-import { ArrowDownBold, ArrowUpBold, Download } from '@element-plus/icons-vue';
+import { ChevronDown, ChevronUp } from 'lucide';
+import { Download } from '@lucide/vue';
 import { ElIcon, ElMessage } from 'element-plus';
 import { toCanvas } from 'html-to-image';
 import { computed, ref, watch } from 'vue';
@@ -579,6 +570,13 @@ async function downloadRankingImage() {
         font-weight: bold;
         color: #777;
         background: linear-gradient(rgba(245, 245, 247, 0), #f5f5f7);
+
+        .collapse-btn-content {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
 
         html.dark & {
             color: var(--el-text-color-secondary);

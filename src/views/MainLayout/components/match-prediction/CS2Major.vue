@@ -61,13 +61,13 @@
                                 <!-- <div class="reward-info">竞猜会获得平台虚拟奖章，所获奖章在比赛结束后统计</div> -->
                                 <div class="button-group">
                                     <el-button type="primary" @click="captureAndShare" :loading="isCapturing">
-                                        <el-icon><Share /></el-icon>
+                                        <Share2 :size="16" style="margin-right: 4px;" />
                                         截图分享预测
                                     </el-button>
                                 </div>
                                 <div class="button-group">
                                     <el-button type="success"  @click="showCoinViewerfun">
-                                        <el-icon><View /></el-icon>
+                                        <Eye :size="16" style="margin-right: 4px;" />
                                         预览2025布达佩斯Major3D硬币
                                     </el-button>
                                 </div>
@@ -127,7 +127,7 @@ import MajorChampion from './MajorChampion.vue'
 import { useRoute } from 'vue-router'
 import httpInstance from '@/apis/httpInstance'
 import { ElMessage } from 'element-plus'
-import { Share, View } from '@element-plus/icons-vue'
+import { Share2, Eye } from '@lucide/vue'
 import html2canvas from 'html2canvas'
 import CoinPreviewDialog from '@/components/CoinPreviewDialog.vue'
 import { useThemeStore } from '@/stores/themeStore'

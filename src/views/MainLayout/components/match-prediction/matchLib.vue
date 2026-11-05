@@ -18,22 +18,16 @@
                         </div>
                         <div class="match-details">
                             <div class="match-location">
-                                <el-icon>
-                                    <Location />
-                                </el-icon>
+                                <MapPin :size="14" style="margin-right: 2px;" />
                                 <span>{{ match.matchesLocation }}</span>
                             </div>
                             <div class="match-time">
                                 <div class="time-item">
-                                    <el-icon>
-                                        <Calendar />
-                                    </el-icon>
+                                    <Calendar :size="14" style="margin-right: 2px;" />
                                     <span>开始：{{ match.startTime }}</span>
                                 </div>
                                 <div class="time-item">
-                                    <el-icon>
-                                        <Calendar />
-                                    </el-icon>
+                                    <Calendar :size="14" style="margin-right: 2px;" />
                                     <span>结束：{{ match.endTime }}</span>
                                 </div>
                             </div>
@@ -117,12 +111,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Location, Calendar } from '@element-plus/icons-vue'
+import { MapPin, Calendar } from '@lucide/vue'
 import httpInstance from '@/apis/httpInstance'
 import flipNum from '@/components/flip-num.vue'
 import { copyToClipboard, copySuccess, limitedCopy } from '@/utils/clipboard'
 import { throttle } from '@/utils/throttle'
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme'
+import { recordOptimisticCopy, getOptimisticCopyCount } from '@/utils/copyTracker'
 import { easyFormatTime } from '@/utils/time'
 import { getDisplayTags } from '@/utils/tags'
 import { useMemeTagsStore } from '@/stores/memeTags';
@@ -235,7 +230,11 @@ const getMatchBarrageList = async (pageNum: number) => {
         })
 
         if (res.code === 200) {
-            matchBarrageList.value = res.data.list
+            matchBarrageList.value = res.data.list.map(item => {
+                const current = Number(item.cnt) || 0;
+                item.cnt = String(getOptimisticCopyCount(item.id, current));
+                return item;
+            })
             barrageTotal.value = res.data.total
         } else {
             ElMessage.error(res.msg || '获取烂梗列表失败')
@@ -253,17 +252,21 @@ const copyMeme_countPlus1 = async (item: BarrageItem) => {
     const memeText = item.barrage
     const res = copyMeme(memeText)
     if (!res || res === 'limitedSuccess') return
-    copySuccess()
+
+    const next = (Number(item.cnt) || 0) + 1;
+    item.cnt = String(next);
+    recordOptimisticCopy(item.id, next);
+    copySuccess();
 
     try {
-        if (await copyCountPlus1('match', item.id.toString(), barrageCurrentPage.value, barragePageSize.value)) {
-            await getMatchBarrageList(barrageCurrentPage.value)
-            return
+        const ok = await copyCountPlus1('match', item.id.toString(), barrageCurrentPage.value, barragePageSize.value);
+        if (!ok) {
+            plus1Error();
         }
     } catch (error) {
-        console.error('复制次数+1失败:', error)
+        console.error('复制次数+1失败:', error);
+        plus1Error();
     }
-    plus1Error()
 }
 const handleBarragePageChange = (page: number) => {
     barrageCurrentPage.value = page

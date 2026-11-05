@@ -5,14 +5,8 @@
 
         <div class="draggable chat-room-draggable" :style="{ left: `${chatX}vw`, top: `${chatY}px` }" @mousedown="startDrag" v-show="isChatVisible">
             <ChatRoom />
-            <el-button class="close-button" @click="closeChat" type="primary">
-                <svg t="1725098483582" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4538" width="16" height="16">
-                    <path d="M0 0h1024v1024H0z" fill="#ff0505" fill-opacity="0" p-id="4539"></path>
-                    <path
-                        d="M240.448 168l2.346667 2.154667 289.92 289.941333 279.253333-279.253333a42.666667 42.666667 0 0 1 62.506667 58.026666l-2.133334 2.346667-279.296 279.210667 279.274667 279.253333a42.666667 42.666667 0 0 1-58.005333 62.528l-2.346667-2.176-279.253333-279.253333-289.92 289.962666a42.666667 42.666667 0 0 1-62.506667-58.005333l2.154667-2.346667 289.941333-289.962666-289.92-289.92a42.666667 42.666667 0 0 1 57.984-62.506667z"
-                        fill="#ff0505"
-                        p-id="4540"></path>
-                </svg>
+            <el-button class="close-button" @click="closeChat" type="primary" circle text>
+                <X :size="16" style="color: #ff4757;" />
             </el-button>
         </div>
 
@@ -51,7 +45,7 @@
                     <a :href="adLink" target="_blank">
                         <img :style="adImageStyle" :src="adImage" alt="" />
                     </a>
-                    <el-button class="ad-close-button" :icon="Close" circle size="small"
+                    <el-button class="ad-close-button" :icon="X" circle size="small"
                         @click.stop.prevent="closeLayoutAd" />
                 </div>
             </template>
@@ -69,7 +63,7 @@
 <script setup lang="ts">
 import ChatRoom from '@/components/ChatRoom.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
-import { Close } from '@element-plus/icons-vue';
+import { X } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import HomeRightDock from './HomeRightDock.vue';
 import HomeWordCloudPanel from './HomeWordCloudPanel.vue';

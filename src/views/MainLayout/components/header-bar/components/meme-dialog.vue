@@ -15,9 +15,7 @@
                         <el-popover placement="top" :width="'auto'" trigger="hover" :visible="scope.row.popoverVisible">
                             <template #reference>
                                 <div style="cursor: pointer" @touchstart="handleTouchStart(scope.row)" @touchend="handleTouchEnd(scope.row)">
-                                    <el-icon v-if="hasShieldWordInContent(scope.row.content)" style="color: #e6a23c; flex-shrink: 0;" size="large">
-                                        <WarningFilled />&nbsp;
-                                    </el-icon>
+                                    <TriangleAlert v-if="hasShieldWordInContent(scope.row.content)" style="color: #e6a23c; flex-shrink: 0; margin-right: 4px;" :size="16" />
                                     <span class="barrage-text">{{ scope.row.content }}</span>
                                 </div>
                             </template>
@@ -33,9 +31,7 @@
                                             </el-tag>
                                         </div>
                                         <span v-if="hasShieldWordInContent(scope.row.content)" class="shield-word-text">
-                                            <el-icon class="shield-word-icon">
-                                                <Warning />
-                                            </el-icon>
+                                            <TriangleAlert :size="14" class="shield-word-icon" style="color: #e6a23c; margin-right: 2px;" />
                                             包含屏蔽词
                                         </span>
                                     </div>
@@ -68,11 +64,13 @@
 </template>
 
 <script setup lang="ts">
+import { TriangleAlert } from '@lucide/vue';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
 import flipNum from '@/components/flip-num.vue';
 import { useMemeTagsStore } from '@/stores/memeTags';
 import { useShieldWordStore } from '@/stores/shieldWordStore';
 import { copySuccess, copyToClipboard, limitedCopy } from '@/utils/clipboard';
+import { recordOptimisticCopy } from '@/utils/copyTracker';
 import { getDisplayTags } from '@/utils/tags';
 import { throttle } from '@/utils/throttle';
 import { easyFormatTime } from '@/utils/time';
@@ -106,22 +104,23 @@ const copyMeme = throttle(copyToClipboard, limitedCopy, 2000);
 
 async function copyMeme_countPlus1(meme: Meme) {
     const memeText = meme.content;
-    /**
-     * 三种返回值情况
-     * 1. false，代表错误了，用户没能正确复制到剪贴板
-     *    由第一个回调函数copyToClipboard里自行捕获到错误并且出弹窗提醒
-     * 2. 'limitedSuccess'，表示byd在连续点击，被节流函数制裁了
-     *    由第二个回调函数limitedCopy里出弹窗提醒
-     * 3. true，这是正常复制，自行处理，这里出个弹窗提醒并且向后端发请求让复制次数+1
-     */
     const res = copyMeme(memeText);
     if (!res || res === 'limitedSuccess') return;
+
+    const nextCount = (Number(meme.copyCount) || 0) + 1;
+    meme.copyCount = nextCount;
+    recordOptimisticCopy(meme.id, nextCount);
     copySuccess();
-    if (await copyCountPlus1(meme.category ?? '', meme.id)) {
-        emit('refresh');
-        return;
+
+    try {
+        const ok = await copyCountPlus1(meme.category ?? '', meme.id);
+        if (!ok) {
+            plus1Error();
+        }
+    } catch (error) {
+        console.error('更新复制计数失败:', error);
+        plus1Error();
     }
-    plus1Error();
 }
 
 const dictData = ref<any>([]);

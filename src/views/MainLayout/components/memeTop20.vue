@@ -13,12 +13,12 @@
         </div>
 
         <div class="hint-bar">
-            <el-icon class="hint-icon"><InfoFilled /></el-icon>
+            <Info :size="16" class="hint-icon" />
             点击任意条目即可复制内容
         </div>
 
         <div class="meme-list">
-            <div v-for="item in memeList" :key="item.rank" class="meme-item" @click="copyContent(item.content)">
+            <div v-for="item in memeList" :key="item.rank" class="meme-item" @click="copyContent(item)">
                 <div class="rank-column">
                     <span v-if="item.rank === 1" class="rank-icon">🥇</span>
                     <span v-else-if="item.rank === 2" class="rank-icon">🥈</span>
@@ -35,7 +35,15 @@
                 </div>
 
                 <div class="action-column">
-                    <el-icon class="copy-icon"><CopyDocument /></el-icon>
+                    <div class="copy-icon-wrapper" :class="{ 'is-copied': copiedRank === item.rank }">
+                        <MorphIcon
+                            :icon="copiedRank === item.rank ? Check : Copy"
+                            :size="18"
+                            :stroke-width="2"
+                            :color="copiedRank === item.rank ? '#67C23A' : '#909399'"
+                            spring="snappy"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -49,7 +57,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { CopyDocument, InfoFilled } from '@element-plus/icons-vue';
+import { Info } from '@lucide/vue';
+import { Copy, Check } from 'lucide';
 import { copyToClipboard } from '@/utils/clipboard';
 import axios from 'axios';
 
@@ -101,9 +110,20 @@ onMounted(() => {
     fetchMemeData(currentYear.value);
 });
 
-const copyContent = async (text: string) => {
+const copiedRank = ref<number | null>(null);
+let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+const copyContent = async (item: MemeItem) => {
+    const text = item.content;
     const success = copyToClipboard(text);
     if (success) {
+        copiedRank.value = item.rank;
+        if (copyResetTimer) clearTimeout(copyResetTimer);
+        copyResetTimer = setTimeout(() => {
+            if (copiedRank.value === item.rank) {
+                copiedRank.value = null;
+            }
+        }, 1500);
         ElMessage.success({
             message: '复制成功！',
             duration: 1500,
@@ -288,9 +308,15 @@ const copyContent = async (text: string) => {
         justify-content: center;
         height: 100%;
 
-        .copy-icon {
-            font-size: 18px;
-            color: #909399;
+        .copy-icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            &.is-copied {
+                transform: scale(1.15);
+            }
         }
     }
 }

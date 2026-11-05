@@ -7,9 +7,7 @@
                     <div class="tag-icon-wrapper">
                         <img v-if="tag.iconUrl" :src="tag.iconUrl" class="tag-icon" />
                         <span class="tag-label">{{ tag.dictLabel }}</span>
-                        <el-icon>
-                            <Close />
-                        </el-icon>
+                        <X :size="12" />
                     </div>
                 </el-tag>
             </div>
@@ -22,9 +20,7 @@
                     <div class="tag-icon-wrapper">
                         <img v-if="tag.iconUrl" :src="tag.iconUrl" class="tag-icon" />
                         <span class="tag-label">{{ tag.dictLabel }}</span>
-                        <el-icon>
-                            <Plus />
-                        </el-icon>
+                        <Plus :size="12" />
                     </div>
                 </el-tag>
             </div>
@@ -39,7 +35,7 @@
  */
 import { computed } from 'vue';
 import { type getMemeTags as memeTag } from '@/types/meme';
-import { Plus, Close } from '@element-plus/icons-vue';
+import { Plus, X } from '@lucide/vue';
 
 const { tags } = defineProps<{
     tags: memeTag[];

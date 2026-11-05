@@ -6,9 +6,7 @@
         <el-input type="textarea" v-model="content" placeholder="发布帖子...   使用AI辅助人工自动审核，请注意发言规范。" maxlength="299"
           show-word-limit />
         <el-checkbox v-model="haveMeme" size="large">
-          关联烂梗 <span v-if="haveMeme"><el-icon>
-              <InfoFilled />
-            </el-icon> 先在左边搜索然后右边选择一条关联⬇️</span>
+          关联烂梗 <span v-if="haveMeme"><Info :size="14" style="vertical-align: middle; margin: 0 2px;" /> 先在左边搜索然后右边选择一条关联⬇️</span>
         </el-checkbox>
         <span v-if="haveMeme" style="display: flex; gap: 10px;">
           <el-input v-model="searchMemeStr" placeholder="查找烂梗,点击搜索后右边选择关联" :style=searchMemeInputCss />
@@ -36,6 +34,7 @@ word-break: break-all;" />
 </template>
 
 <script setup lang="ts">
+import { Info } from '@lucide/vue';
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import httpInstance from '@/apis/httpInstance'

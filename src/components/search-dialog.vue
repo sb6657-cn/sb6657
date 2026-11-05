@@ -13,9 +13,7 @@
                         <span class="title-text">高级筛选</span>
                         <el-button text class="collapse-btn" @click="toggleAdvancedSearch">
                             <span class="collapse-text">{{ isAdvancedSearchCollapsed ? '展开' : '收起' }}</span>
-                            <el-icon>
-                                <component :is="isAdvancedSearchCollapsed ? 'ArrowDown' : 'ArrowUp'" />
-                            </el-icon>
+                            <component :is="isAdvancedSearchCollapsed ? ChevronDown : ChevronUp" :size="14" style="vertical-align: middle; margin-left: 2px;" />
                         </el-button>
                         <el-button v-if="sortType === SortType.ID" text type="info" :size="isMobile ? 'small' : 'default'" @click="changeSortType(SortType.COPY)">
                             {{ isMobile ? '复制数排序' : '点击按复制次数排序' }}
@@ -43,9 +41,7 @@
                 <!-- 自定义空状态插槽 -->
                 <template #empty>
                     <div class="empty-state">
-                        <el-icon v-if="!hasNoSearchResults" class="loading-icon">
-                            <Loading />
-                        </el-icon>
+                        <Loader2 v-if="!hasNoSearchResults" class="loading-icon is-loading" :size="20" />
                         <span v-if="hasNoSearchResults" class="no-results-message">
                             <span>没有找到搜索结果。想要补充更多烂梗？欢迎</span>
                             <button type="button" class="submission-link" @click="openSubmissionFromSearch">点击投稿</button>
@@ -66,9 +62,7 @@
                         <el-popover placement="top" width="auto" trigger="hover">
                             <template #reference>
                                 <div class="barrage-text" style="display: flex; align-items: center; gap: 4px">
-                                    <el-icon v-if="hasShieldWordInContent(scope.row.content)" style="color: #e6a23c; flex-shrink: 0" size="large">
-                                        <WarningFilled />
-                                    </el-icon>
+                                    <TriangleAlert v-if="hasShieldWordInContent(scope.row.content)" style="color: #e6a23c; flex-shrink: 0;" :size="16" />
                                     <span v-html="scope.row.highlightedContent || scope.row.content"></span>
                                 </div>
                             </template>
@@ -85,9 +79,7 @@
                                         </div>
                                         <!-- 屏蔽词提示 - 用小字显示在tag区域 -->
                                         <span v-if="hasShieldWordInContent(scope.row.content)" class="shield-word-text" style="font-size: 14px; color: #e6a23c; margin-left: 4px">
-                                            <el-icon style="margin-right: 2px; vertical-align: middle">
-                                                <Warning />
-                                            </el-icon>
+                                            <TriangleAlert :size="14" style="margin-right: 2px; vertical-align: middle;" />
                                             包含屏蔽词
                                         </span>
                                     </div>
@@ -124,6 +116,7 @@
 // ==================== 导入依赖 ====================
 import { searchMeme } from '@/apis/getMeme';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
+import { recordOptimisticCopy, applyOptimisticCopyCount } from '@/utils/copyTracker';
 import flipNum from '@/components/flip-num.vue';
 import tagSelector from '@/components/tag-selector.vue';
 import { useMemeTagsStore } from '@/stores/memeTags';
@@ -135,7 +128,7 @@ import { useIsMobile } from '@/composables/useIsMobile';
 import { getDisplayTags } from '@/utils/tags';
 import { debounce, throttle } from '@/utils/throttle';
 import { easyFormatTime } from '@/utils/time';
-import { Loading, Warning } from '@element-plus/icons-vue';
+import { Loader2, TriangleAlert, ChevronDown, ChevronUp } from '@lucide/vue';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref, watch } from 'vue';
 const shieldWordStore = useShieldWordStore();
@@ -222,13 +215,15 @@ async function performSearch(searchKey: string, sortType: SortType = SortType.ID
     hasNoSearchResults.value = false;
     total.value = flatData.total;
     currentPage.value = pageNum;
-    memeArr.value = flatData.list.map((item) => ({
-        id: item.id.toString(),
-        content: item.barrage,
-        tags: item.tags,
-        submitTime: item.submitTime,
-        copyCount: +item.cnt,
-    }));
+    memeArr.value = flatData.list.map((item) =>
+        applyOptimisticCopyCount({
+            id: item.id.toString(),
+            content: item.barrage,
+            tags: item.tags,
+            submitTime: item.submitTime,
+            copyCount: +item.cnt,
+        })
+    );
 }
 
 // 防抖搜索
@@ -299,17 +294,14 @@ async function handleCopyMeme(meme: LocalMeme) {
     const copyResult = copyMeme(meme.content);
     if (!copyResult || copyResult === 'limitedSuccess') return;
 
+    const nextCount = (Number(meme.copyCount) || 0) + 1;
+    meme.copyCount = nextCount;
+    recordOptimisticCopy(meme.id, nextCount);
     copySuccess();
 
     try {
         const success = await copyCountPlus1('', meme.id);
-        if (success) {
-            // 更新本地复制计数
-            const targetIndex = memeArr.value.findIndex((item) => item.id === meme.id);
-            if (targetIndex !== -1) {
-                memeArr.value[targetIndex].copyCount += 1;
-            }
-        } else {
+        if (!success) {
             plus1Error();
         }
     } catch (error) {

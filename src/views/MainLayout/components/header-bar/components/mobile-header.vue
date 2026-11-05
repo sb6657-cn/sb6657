@@ -274,5 +274,7 @@ html.dark .message-icon img {
 
 .user-entry {
     height: 24px;
+    display: flex;
+    align-items: center;
 }
 </style>

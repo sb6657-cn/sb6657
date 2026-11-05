@@ -11,7 +11,7 @@
   >
     <div class="guard-content">
       <div class="guard-header">
-        <el-icon class="shield-icon" :size="36"><Lock /></el-icon>
+        <Lock :size="36" class="shield-icon" />
         <p class="guard-title">Cloudflare 安全验证</p>
         <p class="guard-desc">为抵御恶意脚本压测，请完成人机安全验证</p>
       </div>
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Lock } from '@element-plus/icons-vue';
+import { Lock } from '@lucide/vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 import { SERVER_ADDRESS } from '@/constants/backend';

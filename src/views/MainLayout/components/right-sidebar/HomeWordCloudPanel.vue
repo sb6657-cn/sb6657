@@ -2,9 +2,7 @@
     <div class="word-cloud-panel">
         <button type="button" class="word-cloud-title" title="刷新搜索词云" @click="refreshWordCloud">
             搜索词云
-            <el-icon size="20" class="word-cloud-refresh-icon">
-                <Refresh />
-            </el-icon>
+            <RotateCw :size="18" class="word-cloud-refresh-icon" />
         </button>
         <Suspense>
             <template #default>
@@ -18,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { Refresh } from '@element-plus/icons-vue';
+import { RotateCw } from '@lucide/vue';
 import { defineAsyncComponent, ref } from 'vue';
 
 const WordCloud = defineAsyncComponent(() => import('@/components/wordCloud.vue'));

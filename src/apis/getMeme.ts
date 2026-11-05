@@ -2,6 +2,7 @@ import httpInstance, { type res, post, get } from '@/apis/httpInstance';
 import { API } from '@/constants/backend';
 import { MemeCategory } from '@/constants/backend';
 import type { getHotMeme_res, getMemeList_res, getData, getMemeTags, searchMeme_req, searchMeme_res, getMemeList_meme } from '@/types/meme';
+import { applyOptimisticCopyCount, applyOptimisticToRawMeme } from '@/utils/copyTracker';
 
 async function getHotMeme(url: string, tips: string) {
     try {
@@ -11,14 +12,14 @@ async function getHotMeme(url: string, tips: string) {
             return false;
         }
         const memeArr: Meme[] = res.data.map((item) => {
-            return {
+            return applyOptimisticCopyCount({
                 tags: item.tags,
                 content: item.barrage,
                 id: `${item.barrageId}`,
                 copyCount: Number(item.cnt) || 0,
                 submitTime: item.submitTime,
                 hotDateTime: item.hotDateTime || undefined,
-            };
+            });
         });
         return memeArr;
     } catch (err: any) {
@@ -61,7 +62,7 @@ export async function getMemeList(category: string, pageIndex: number, pageSize:
             throw new Error('请求到的烂梗列表为空');
         }
         const memeArr: Meme[] = res.data.list.map((item) => {
-            return {
+            return applyOptimisticCopyCount({
                 tags: item.tags,
                 content: item.barrage,
                 id: item.id,
@@ -69,7 +70,7 @@ export async function getMemeList(category: string, pageIndex: number, pageSize:
                 copyCount: +item.cnt,
                 likes: +item.likes,
                 submitTime: item.submitTime,
-            };
+            });
         });
         return {
             memeArr,
@@ -95,7 +96,7 @@ export async function getMemeListByCopyCount(pageIndex: number, pageSize: number
             throw new Error('请求到的烂梗列表为空');
         }
         const memeArr: Meme[] = res.data.list.map((item) => {
-            return {
+            return applyOptimisticCopyCount({
                 tags: item.tags,
                 content: item.barrage,
                 id: item.id,
@@ -103,7 +104,7 @@ export async function getMemeListByCopyCount(pageIndex: number, pageSize: number
                 copyCount: +item.cnt,
                 likes: +item.likes,
                 submitTime: item.submitTime,
-            };
+            });
         });
         return {
             memeArr,
@@ -125,5 +126,8 @@ export async function getMemeTags() {
 
 export async function getRandomMeme(): Promise<res<getMemeList_meme>> {
     const res = await get(API.GET_RAND_ONE_MEME);
+    if (res?.flatData) {
+        applyOptimisticToRawMeme(res.flatData);
+    }
     return res;
 }

@@ -50,7 +50,6 @@ import { ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import httpInstance from "@/apis/httpInstance";
 import TurnstileWidget from "@/components/TurnstileWidget.vue";
-import { Right, Check } from '@element-plus/icons-vue'
 
 const props = defineProps({
   closeDialog: {

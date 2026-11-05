@@ -4,8 +4,8 @@
         <StarrySky />
         <IdleScreensaver />
         <AnnouncementDialog />
-        <MergePigLauncher />
-        <MergePigDialog />
+        <!-- <MergePigLauncher /> -->
+        <!-- <MergePigDialog /> -->
         <MergeWatermelonLauncher />
         <MergeWatermelonDialog />
         <TurnstileGuardModal />

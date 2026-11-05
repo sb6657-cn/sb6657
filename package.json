@@ -1,6 +1,6 @@
 {
   "name": "sb6657.cn",
-  "version": "3.16.1+20261103",
+  "version": "3.16.2+20261105",
   "private": true,
   "packageManager": "pnpm@11.3.0",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@lucide/vue": "^1.66.0",
     "axios": "^1.11.0",
     "dompurify": "^3.2.6",
     "echarts": "^5.6.0",
@@ -21,8 +22,10 @@
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
+    "lucide": "^1.66.0",
     "marked": "^15.0.12",
     "matter-js": "^0.20.0",
+    "morphicons": "^2.0.2",
     "pinia": "^3.0.3",
     "sass": "^1.91.0",
     "three": "^0.177.0",

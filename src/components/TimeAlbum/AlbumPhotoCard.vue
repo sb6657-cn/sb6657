@@ -6,7 +6,7 @@
             </template>
             <template #error>
                 <div class="image-state image-state--error">
-                    <el-icon><Picture /></el-icon>
+                    <Image :size="16" />
                     <span>图片暂时无法加载</span>
                 </div>
             </template>
@@ -16,11 +16,11 @@
             <p class="photo-card__title" :title="title">{{ title }}</p>
             <div class="photo-card__actions">
                 <button type="button" class="photo-action" :class="{ 'is-active': image.showComments }" :aria-expanded="image.showComments" :aria-controls="commentsId" @click="emit('toggle-comments')">
-                    <el-icon><ChatDotRound /></el-icon>
+                    <MessageCircle :size="16" />
                     <span>{{ image.showComments ? '收起' : '评论' }} ({{ image.comments.length }})</span>
                 </button>
                 <button type="button" class="photo-action photo-action--primary" @click="emit('comment')">
-                    <el-icon><EditPen /></el-icon>
+                    <Pencil :size="16" />
                     <span>写评论</span>
                 </button>
             </div>
@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import type { AlbumImage } from '@/types/timeAlbum';
 import { formatAlbumCommentDate, getAlbumImageTitle } from '@/utils/timeAlbum';
-import { ChatDotRound, EditPen, Picture } from '@element-plus/icons-vue';
+import { MessageCircle, Pencil, Image } from '@lucide/vue';
 import { computed } from 'vue';
 
 const props = defineProps<{ image: AlbumImage }>();

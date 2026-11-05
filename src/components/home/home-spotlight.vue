@@ -4,9 +4,7 @@
             <h3 id="knowledge-title">{{ currentSpotlight.heading }}</h3>
             <div class="refresh-controls">
                 <span class="refresh-text" @click="handleNext">换一条</span>
-                <el-icon :class="['refresh-icon', { rotating: isRotating }]" size="18" @click="handleNext">
-                    <Refresh />
-                </el-icon>
+                <RotateCw :size="18" :class="['refresh-icon', { rotating: isRotating }]" @click="handleNext" />
             </div>
         </div>
         <div class="spotlight-viewport">
@@ -24,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { RotateCw } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 

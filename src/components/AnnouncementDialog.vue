@@ -5,7 +5,7 @@
                 <div class="announcement-panel">
                     <div class="announcement-header">
                         <span class="announcement-title">{{ currentAnnouncement?.title || '公告' }}</span>
-                        <el-button class="header-close" :icon="Close" circle text @click="onClose" />
+                        <el-button class="header-close" :icon="X" circle text @click="onClose" />
                     </div>
 
                     <div v-if="currentAnnouncement" class="announcement-content">
@@ -32,7 +32,7 @@
 
                     <div class="announcement-footer">
                         <el-text v-if="announcements.length > 1" type="info" size="small">{{ currentIndex + 1 }} / {{ announcements.length }}</el-text>
-                        <el-button class="announcement-close-btn" type="danger" :icon="Close" @click="onClose">
+                        <el-button class="announcement-close-btn" type="danger" :icon="X" @click="onClose">
                             关闭
                         </el-button>
                     </div>
@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Close } from '@element-plus/icons-vue';
+import { X } from '@lucide/vue';
 import { announcementAPI, type Announcement } from '@/apis/announcement';
 
 const visible = ref(false);

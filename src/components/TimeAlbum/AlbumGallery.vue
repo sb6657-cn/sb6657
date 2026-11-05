@@ -5,8 +5,9 @@
 
     <div v-if="images.length > 0" class="load-state">
         <button v-if="hasMore" type="button" class="load-more" :disabled="loading" @click="requestMore">
-            <el-icon v-if="loading" class="is-loading"><Loading /></el-icon>
-            <el-icon v-else><ArrowDownBold /></el-icon>
+            <span class="load-more-icon" :class="{ 'is-loading': loading }">
+                <MorphIcon :icon="loading ? Loader2 : ArrowDown" :size="16" :stroke-width="2.5" spring="snappy" />
+            </span>
             <span>{{ loading ? '正在加载…' : '加载更多' }}</span>
         </button>
         <p v-else>已经到底了</p>
@@ -16,7 +17,7 @@
 <script setup lang="ts">
 import AlbumPhotoCard from '@/components/TimeAlbum/AlbumPhotoCard.vue';
 import type { AlbumImage } from '@/types/timeAlbum';
-import { ArrowDownBold, Loading } from '@element-plus/icons-vue';
+import { ArrowDown, Loader2 } from 'lucide';
 
 defineProps<{
     images: AlbumImage[];
@@ -80,7 +81,18 @@ function requestMore() {
     &:focus-visible {
         border-color: var(--el-color-primary);
         background-color: var(--el-color-primary-light-9);
+    
+    .load-more-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 6px;
+
+        &.is-loading {
+            animation: rotating 1.5s linear infinite;
+        }
     }
+}
 
     &:focus-visible {
         outline: 2px solid var(--el-color-primary-light-5);

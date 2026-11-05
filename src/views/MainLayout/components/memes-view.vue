@@ -6,9 +6,7 @@
                     按标签查看烂梗
                     <el-popover :width="300">
                         <template #reference>
-                            <el-icon size="16">
-                                <Warning />
-                            </el-icon>
+                            <TriangleAlert :size="16" style="vertical-align: middle; color: #e6a23c; cursor: pointer;" />
                         </template>
                         为解决烂梗分栏不足和分类不清晰问题。
                         <br />
@@ -18,9 +16,7 @@
                         投稿标签
                         <el-popover :width="300">
                             <template #reference>
-                                <el-icon size="16">
-                                    <QuestionFilled />
-                                </el-icon>
+                                <CircleHelp :size="16" style="vertical-align: middle; cursor: pointer;" />
                             </template>
                             <b>功能待完善(后续更新将添加)，请在上方(建议/提交)问卷投稿，sry。</b>
                             <br />
@@ -31,7 +27,7 @@
                 <tag-selector v-model:selected-tags="selectedTags" :tags="allTags" />
             </div>
             <div class="top">
-                <el-button class="meme-submit-btn" :icon="EditPen" @click="submissionDialogStore.open">烂梗投稿</el-button>
+                <el-button class="meme-submit-btn" :icon="Pencil" @click="submissionDialogStore.open">烂梗投稿</el-button>
                 <div class="sort-switch" role="group" aria-label="列表排序方式">
                     <button type="button" :class="['sort-option', { 'is-active': sortMode === 'time' }]" :aria-pressed="sortMode === 'time'" @click="changeSortMode('time')">最新投稿</button>
                     <button type="button" :class="['sort-option', { 'is-active': sortMode === 'copyCount' }]" :aria-pressed="sortMode === 'copyCount'" @click="changeSortMode('copyCount')">复制最多</button>
@@ -49,9 +45,7 @@
                         <el-popover placement="top" :width="'auto'" trigger="hover" :visible="scope.row.popoverVisible">
                             <template #reference>
                                 <div class="meme-content" @touchstart="handleTouchStart(scope.row)" @touchend="handleTouchEnd(scope.row)">
-                                    <el-icon v-if="hasShieldWordInContent(scope.row.content)" class="shield-warning-icon" size="large">
-                                        <WarningFilled />
-                                    </el-icon>
+                                    <TriangleAlert v-if="hasShieldWordInContent(scope.row.content)" class="shield-warning-icon" :size="16" style="color: #e6a23c;" />
                                     <span class="barrage-text">{{ scope.row.content }}</span>
                                 </div>
                             </template>
@@ -69,9 +63,7 @@
                                     </div>
                                     <!-- 屏蔽词提示 - 用小字显示在tag区域 -->
                                     <span v-if="hasShieldWordInContent(scope.row.content)" class="shield-word-text">
-                                        <el-icon class="shield-word-icon">
-                                            <Warning />
-                                        </el-icon>
+                                        <TriangleAlert :size="14" class="shield-word-icon" style="color: #e6a23c; margin-right: 2px;" />
                                         包含屏蔽词
                                     </span>
                                     <div class="submit-time">投稿时间:{{ easyFormatTime(scope.row.submitTime) }}</div>
@@ -101,6 +93,7 @@
 <script setup lang="ts">
 import { getMemeList, getMemeListByCopyCount } from '@/apis/getMeme';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
+import { recordOptimisticCopy } from '@/utils/copyTracker';
 import flipNum from '@/components/flip-num.vue';
 import tagSelector from '@/components/tag-selector.vue';
 import { useMemeTagsStore } from '@/stores/memeTags';
@@ -111,7 +104,7 @@ import { copySuccess, copyToClipboard, limitedCopy } from '@/utils/clipboard';
 import { getDisplayTags } from '@/utils/tags';
 import { throttle } from '@/utils/throttle';
 import { easyFormatTime } from '@/utils/time';
-import { EditPen, QuestionFilled, Warning, WarningFilled } from '@element-plus/icons-vue';
+import { Pencil, CircleHelp, TriangleAlert } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useIsMobile } from '@/composables/useIsMobile';
@@ -209,12 +202,21 @@ async function copyMeme_countPlus1(meme: Meme) {
     const memeText = meme.content;
     const res = copyMeme(memeText);
     if (!res || res === 'limitedSuccess') return;
+
+    const nextCount = (Number(meme.copyCount) || 0) + 1;
+    meme.copyCount = nextCount;
+    recordOptimisticCopy(meme.id, nextCount);
     copySuccess();
-    if (await copyCountPlus1(meme.category || memeCategory, meme.id)) {
-        await loadMemes(currentPage.value);
-        return;
+
+    try {
+        const ok = await copyCountPlus1(meme.category || memeCategory, meme.id);
+        if (!ok) {
+            plus1Error();
+        }
+    } catch (error) {
+        console.error('复制次数+1失败:', error);
+        plus1Error();
     }
-    plus1Error();
 }
 
 //移动端的触摸展示
@@ -379,12 +381,30 @@ const scrollToTop = () => {
                 }
             }
 
+            :deep(.el-table__cell) {
+                overflow: visible;
+                .cell {
+                    overflow: visible;
+                }
+            }
+
             :deep(.hover-pointer) {
                 cursor: pointer;
             }
 
             .copy-btn {
                 width: 90px;
+                position: relative;
+                overflow: visible;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
+
+                &:active {
+                    transform: scale(0.92);
+                }
             }
         }
 

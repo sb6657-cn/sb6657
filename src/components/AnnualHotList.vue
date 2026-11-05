@@ -48,9 +48,7 @@
                 @keydown.enter="handleSearchMeme">
                 <template #append>
                     <el-button type="primary" @click="handleSearchMeme">
-                        <el-icon>
-                            <Search />
-                        </el-icon>
+                        <Search :size="16" />
                         搜索
                     </el-button>
                 </template>
@@ -218,7 +216,7 @@
 
 <script setup lang="ts">
 import httpInstance from "@/apis/httpInstance";
-import { Search } from '@element-plus/icons-vue';
+import { Search } from '@lucide/vue';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import { computed, onMounted, reactive, ref } from "vue";
 

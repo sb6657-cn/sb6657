@@ -3,10 +3,10 @@
         <div class="header-search-box" :class="{ 'is-focused': isFocused }">
             <input ref="inputRef" v-model="enteringSearchKey" class="header-search-input" type="search" inputmode="search" enterkeyhint="search" placeholder="输入以搜索烂梗..." @focus="isFocused = true" @blur="isFocused = false" @keyup.enter="handleSearchMemeOnEnter" @keydown.esc="handleEscape" />
             <button v-if="enteringSearchKey" type="button" class="header-search-icon header-search-clear" aria-label="清空搜索内容" @mousedown.prevent @click="clearSearchKey">
-                <el-icon :size="14"><Close /></el-icon>
+                <X :size="14" />
             </button>
             <button type="button" class="header-search-icon header-search-submit" aria-label="搜索" @click="handleSearchMeme">
-                <el-icon :size="15"><Search /></el-icon>
+                <Search :size="15" />
             </button>
         </div>
 
@@ -15,14 +15,14 @@
                 <div class="search-history-header">
                     <span>搜索记录</span>
                     <button type="button" class="search-history-clear" @click="clearSearchHistory">
-                        <el-icon :size="12"><Delete /></el-icon>
+                        <Trash2 :size="12" />
                         清空记录
                     </button>
                 </div>
                 <ul class="search-history-list">
                     <li v-for="item in searchHistory" :key="item">
                         <button type="button" class="search-history-item" @click="searchByHistory(item)">
-                            <el-icon :size="13" class="search-history-clock"><Clock /></el-icon>
+                            <Clock :size="13" class="search-history-clock" />
                             <span class="search-history-text">{{ item }}</span>
                         </button>
                     </li>
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { Clock, Close, Delete, Search } from '@element-plus/icons-vue';
+import { Clock, X, Trash2, Search } from '@lucide/vue';
 import { ElMessage } from 'element-plus';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

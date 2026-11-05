@@ -15,9 +15,7 @@
             可选标签
             <el-popover :width="300">
                 <template #reference>
-                    <el-icon size="16">
-                        <Warning />
-                    </el-icon>
+                    <TriangleAlert :size="16" style="vertical-align: middle; cursor: pointer; color: #e6a23c;" />
                 </template>
                 为解决烂梗分栏不足和分类不清晰问题。
                 <br />
@@ -27,9 +25,7 @@
                 投稿标签
                 <el-popover :width="300">
                     <template #reference>
-                        <el-icon size="16">
-                            <QuestionFilled />
-                        </el-icon>
+                        <CircleHelp :size="16" style="vertical-align: middle; cursor: pointer;" />
                     </template>
                     <b>请在上方(建议/提交)问卷投稿。</b>
                     <br />
@@ -45,9 +41,7 @@
             <div class="match-section">
                 <el-checkbox v-model="isMatchSelected" :disabled="!matchData" class="match-checkbox">
                     关联赛事库
-                    <el-icon class="match-help-icon" size="16">
-                        <QuestionFilled />
-                    </el-icon>
+                    <CircleHelp :size="16" class="match-help-icon" style="vertical-align: middle; cursor: pointer;" />
                 </el-checkbox>
                 <div v-if="matchData" class="match-details-box">
                     <div class="match-info-row">
@@ -75,7 +69,7 @@ import { useMemeTagsStore } from '@/stores/memeTags';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getToken, getTokenExpireTime } from '@/utils/cookieUtils';
 import { type getMemeTags as memeTag } from '@/types/meme';
-import { QuestionFilled, Warning } from '@element-plus/icons-vue';
+import { CircleHelp, TriangleAlert } from '@lucide/vue';
 import { ElNotification } from 'element-plus';
 import { computed, ref, watch } from 'vue';
 

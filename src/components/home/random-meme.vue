@@ -7,9 +7,7 @@
             </div>
             <div class="refresh-controls">
                 <span class="refresh-text" @click="handleRefresh">换一换</span>
-                <el-icon :class="['refresh-icon', { rotating: isRotating }]" size="18" @click="handleRefresh">
-                    <Refresh />
-                </el-icon>
+                <RotateCw :size="18" :class="['refresh-icon', { rotating: isRotating }]" @click="handleRefresh" />
             </div>
         </div>
         <div v-if="randomMeme" class="modern-barrage-card">
@@ -48,12 +46,14 @@
 </template>
 
 <script setup lang="ts">
+import { RotateCw } from '@lucide/vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import flipNum from '@/components/flip-num.vue';
 import { useMemeTagsStore } from '@/stores/memeTags';
 import { getRandomMeme } from '@/apis/getMeme';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
+import { recordOptimisticCopy } from '@/utils/copyTracker';
 import { throttle } from '@/utils/throttle';
 import { copyToClipboard, copySuccess, limitedCopy } from '@/utils/clipboard';
 import { easyFormatTime } from '@/utils/time';
@@ -116,14 +116,17 @@ const copyMeme = throttle(copyToClipboard, limitedCopy, 2000);
 async function handleCopyMeme(meme: getMemeList_meme) {
     const copyResult = copyMeme(meme.barrage);
     if (!copyResult || copyResult === 'limitedSuccess') return;
+
+    if (randomMeme.value) {
+        const next = (Number(randomMeme.value.cnt) || 0) + 1;
+        randomMeme.value.cnt = `${next}`;
+        recordOptimisticCopy(meme.id, next);
+    }
     copySuccess();
 
     try {
         const success = await copyCountPlus1('', meme.id);
-        if (success) {
-            // 更新本地复制计数
-            randomMeme.value!.cnt = `${+randomMeme.value!.cnt + 1}`;
-        } else {
+        if (!success) {
             plus1Error();
         }
     } catch (error) {

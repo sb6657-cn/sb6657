@@ -65,7 +65,6 @@
 import { ElMessageBox, ElMessage } from "element-plus";
 import httpInstance from "@/apis/httpInstance";
 import TurnstileWidget from "@/components/TurnstileWidget.vue";
-import { Right, Check } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
 const registerRef = ref()

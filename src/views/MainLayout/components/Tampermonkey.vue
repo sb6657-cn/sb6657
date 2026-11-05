@@ -17,15 +17,15 @@
 
             <div class="hero-actions">
                 <a :href="userscriptUrl" target="_blank" class="btn-action primary-btn" title="装有油猴的用户点击后会自动弹出安装页">
-                    <el-icon class="btn-icon"><Download /></el-icon>
+                    <Download :size="16" class="btn-icon" />
                     一键安装插件（推荐）
                 </a>
                 <a :href="backupCdnUrl" target="_blank" class="btn-action cdn-btn" title="从 CDN 备用地址下载插件">
-                    <el-icon class="btn-icon"><Download /></el-icon>
+                    <Download :size="16" class="btn-icon" />
                     备用下载 (CDN)
                 </a>
                 <a :href="tampermonkeyHomeUrl" target="_blank" rel="noopener noreferrer" class="btn-action secondary-btn">
-                    <el-icon class="btn-icon"><ChromeFilled /></el-icon>
+                    <Puzzle :size="16" class="btn-icon" />
                     安装油猴管理器
                 </a>
                 <a :href="greasyforkUrl" target="_blank" rel="noopener noreferrer" class="btn-action text-btn">
@@ -250,7 +250,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Download, ChromeFilled } from '@element-plus/icons-vue';
+import { Download, Puzzle } from '@lucide/vue';
 
 const activeTab = ref(1);
 const currentVersion = 'v2026.09.25.01';

@@ -32,7 +32,7 @@ const httpInstance = axios.create({
     // baseURL: "http://127.0.0.1:9999",
     timeout: 60000, // 默认超时时间
 }) as BackendHttpInstance;
-export const sbVersion = 'V3.16.1.20261103';
+export const sbVersion = 'V3.16.2.20261105';
 
 interface req<T> {
     url: string;

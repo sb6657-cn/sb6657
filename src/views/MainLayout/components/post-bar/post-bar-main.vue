@@ -73,11 +73,12 @@
                 </div>
             </div>
         </div>
-        <div class="card post-card-main" style="text-align: center;cursor: pointer;color: orangered;" @click="getPosts()">加载更多<el-icon><ArrowDownBold /></el-icon></div>
+        <div class="card post-card-main" style="text-align: center;cursor: pointer;color: orangered;" @click="getPosts()">加载更多<ChevronDown :size="16" style="vertical-align: middle; margin-left: 4px;" /></div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { ChevronDown } from '@lucide/vue';
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus';
 import httpInstance from '@/apis/httpInstance'
