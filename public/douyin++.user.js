@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         douyin++
+// @name         sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送
 // @namespace    https://sb6657.cn/
-// @version      v2026.11.09.04
-// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送及赞赏充电支持，兼容油猴 5.5.1 及以上
+// @version      v2026.11.09.05
+// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送、赞赏充电及自动检查更新/一键更新支持，兼容油猴 5.5.1 及以上
 // @author       HZM
 // @match        https://live.douyin.com/*
 // @include      https://live.douyin.com/*
@@ -25,7 +25,10 @@
         return;
     }
 
-    const CURRENT_VERSION = 'v2026.11.09.04';
+    const CURRENT_VERSION = 'v2026.11.09.05';
+    const SCRIPT_DOWNLOAD_URL = 'https://sb6657.cn/douyin++.user.js';
+    const PLUGIN_HEADER_NAME = 'dpahjdoiaw';
+    const PLUGIN_HEADER_VALUE = 'douyinpp';
     const API_QUERY_URL = 'https://api.hguofichp.cn/machine/Query';
     const API_PAGE_URL = 'https://api.hguofichp.cn/machine/Page';
     const API_DICT_LIST_URL = 'https://api.hguofichp.cn/machine/dictList';
@@ -155,15 +158,24 @@
         }
         #sb6657-douyin-ball .pulse-badge {
             position: absolute;
-            top: -2px;
-            right: -2px;
+            top: -3px;
+            right: -3px;
             width: 12px;
             height: 12px;
             background-color: #ef4444;
             border: 2px solid #ffffff;
             border-radius: 50%;
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
             pointer-events: none;
+            display: none;
+        }
+        #sb6657-douyin-ball .pulse-badge.visible {
+            display: block;
+            animation: sb6657-badge-pulse 1.6s infinite;
+        }
+        @keyframes sb6657-badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
         }
 
         /* 播放器控制栏“玩烂梗”按钮外层容器：强制恢复鼠标响应（父容器为 pointer-events: none） */
@@ -339,6 +351,7 @@
             color: #ffffff;
         }
         .sb6657-icon-btn {
+            position: relative;
             background: transparent;
             border: none;
             width: 26px;
@@ -350,7 +363,43 @@
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            transition: background 0.15s ease;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .sb6657-icon-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+        .sb6657-icon-btn.checking svg {
+            animation: sb6657-spin 0.85s linear infinite;
+        }
+        @keyframes sb6657-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .sb6657-icon-btn.has-update {
+            color: #d97706;
+            background: rgba(245, 158, 11, 0.14);
+        }
+        .sb6657-update-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            border: 1.5px solid #ffffff;
+            display: none;
+            pointer-events: none;
+        }
+        .sb6657-icon-btn.has-update .sb6657-update-badge {
+            display: block;
         }
         .sb6657-icon-btn:hover {
             background: rgba(0, 0, 0, 0.08);
@@ -363,6 +412,133 @@
         body.dark .sb6657-icon-btn:hover,
         [data-theme='dark'] .sb6657-icon-btn:hover {
             background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+        body.dark .sb6657-icon-btn.has-update,
+        [data-theme='dark'] .sb6657-icon-btn.has-update {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.16);
+        }
+
+        /* 面板内更新提示条 */
+        #sb6657-update-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 10px 14px 0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            font-size: 12.5px;
+            flex-shrink: 0;
+        }
+        body.dark #sb6657-update-bar,
+        [data-theme='dark'] #sb6657-update-bar {
+            background: rgba(217, 119, 6, 0.16);
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #fde68a;
+        }
+        .sb6657-update-bar-text {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .sb6657-update-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .sb6657-update-now-btn {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.12s ease, filter 0.12s ease;
+        }
+        .sb6657-update-now-btn:hover {
+            transform: scale(1.03);
+            filter: brightness(1.06);
+        }
+        .sb6657-update-dismiss-btn {
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 2px 4px;
+            line-height: 1;
+        }
+        .sb6657-update-dismiss-btn:hover {
+            opacity: 1;
+        }
+
+        /* 页面顶部发现新版本悬浮提示横幅 */
+        #sb6657-update-banner {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2147483646;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(17, 24, 39, 0.94);
+            color: #ffffff;
+            border: 1px solid rgba(251, 191, 36, 0.55);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36);
+            backdrop-filter: blur(8px);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 13px;
+            pointer-events: auto !important;
+            user-select: none;
+            white-space: nowrap;
+            max-width: calc(100vw - 24px);
+        }
+        #sb6657-update-banner strong {
+            color: #fcd34d;
+        }
+        .sb6657-banner-btn {
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            pointer-events: auto !important;
+            white-space: nowrap;
+            transition: transform 0.12s ease, filter 0.12s ease;
+        }
+        .sb6657-banner-btn:hover {
+            transform: scale(1.04);
+            filter: brightness(1.08);
+        }
+        .sb6657-banner-close {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.72);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+            line-height: 1;
+            pointer-events: auto !important;
+        }
+        .sb6657-banner-close:hover {
             color: #ffffff;
         }
 
@@ -771,6 +947,8 @@
     let isCooldown = false;
     let activeTagValue = '';
     let hasLoadedDefaultMemes = false;
+    let availableRemoteVersion = '';
+    let isCheckingUpdate = false;
     const msgMetaMap = new Map(); // msgId -> { text, sender }
     const emojiUrlToNameMap = new Map(); // imageUrl -> '[emoji]'
     let emojiReverseReady = false;
@@ -836,7 +1014,7 @@
     function gmRequestText(method, url, bodyData, timeout = 10000) {
         return new Promise((resolve, reject) => {
             const headers = {
-                'dpahjdoiaw': 'c2I2NjU35o+S5Lu2'
+                [PLUGIN_HEADER_NAME]: PLUGIN_HEADER_VALUE
             };
             if (method === 'POST') {
                 headers['Content-Type'] = 'application/json';
@@ -881,6 +1059,186 @@
     function reportCopy(id) {
         if (!id) return;
         gmRequestText('POST', API_ADD_CNT_URL, JSON.stringify({ id }), 6000).catch(() => {});
+    }
+
+    // ==========================================
+    // 插件检查更新、更新提示与一键更新
+    // ==========================================
+    function cleanVersion(ver) {
+        return String(ver || '').trim().replace(/^v/i, '');
+    }
+
+    function compareVersions(verA, verB) {
+        const partsA = cleanVersion(verA).split(/[^0-9]+/).filter(Boolean).map(Number);
+        const partsB = cleanVersion(verB).split(/[^0-9]+/).filter(Boolean).map(Number);
+        const maxLen = Math.max(partsA.length, partsB.length);
+        for (let i = 0; i < maxLen; i++) {
+            const a = partsA[i] || 0;
+            const b = partsB[i] || 0;
+            if (a > b) return 1;
+            if (a < b) return -1;
+        }
+        return 0;
+    }
+
+    function getScriptUpdateUrl() {
+        try {
+            if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) {
+                const candidate = GM_info.script.updateURL || GM_info.script.downloadURL;
+                if (typeof candidate === 'string' && /^https?:\/\//i.test(candidate)) {
+                    return candidate.split('?')[0];
+                }
+            }
+        } catch (e) {}
+        return SCRIPT_DOWNLOAD_URL;
+    }
+
+    function triggerOneClickUpdate() {
+        const targetUrl = getScriptUpdateUrl();
+        showToast('🚀 正在打开 Tampermonkey 一键更新页...', 2800);
+        const opened = window.open(targetUrl, '_blank');
+        if (!opened) {
+            try {
+                const a = document.createElement('a');
+                a.href = targetUrl;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.style.display = 'none';
+                (document.body || document.documentElement).appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) {
+                showToast('⚠️ 弹窗被浏览器拦截，请允许弹窗后重试', 3200);
+            }
+        }
+    }
+
+    function removeUpdateBanner() {
+        const banner = document.getElementById('sb6657-update-banner');
+        if (banner) banner.remove();
+    }
+
+    function showUpdateBanner(remoteVer) {
+        let banner = document.getElementById('sb6657-update-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'sb6657-update-banner';
+            banner.innerHTML = `
+                <span class="sb6657-banner-msg"></span>
+                <button id="sb6657-banner-update-now" class="sb6657-banner-btn" type="button">一键更新</button>
+                <button id="sb6657-banner-update-close" class="sb6657-banner-close" type="button" title="关闭提示">✕</button>
+            `;
+            const stopEvt = (e) => e.stopPropagation();
+            banner.addEventListener('pointerdown', stopEvt);
+            banner.addEventListener('mousedown', stopEvt);
+            banner.addEventListener('mouseup', stopEvt);
+            banner.addEventListener('click', stopEvt);
+            banner.addEventListener('keydown', stopEvt);
+
+            banner.querySelector('#sb6657-banner-update-now').addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                triggerOneClickUpdate();
+            });
+            banner.querySelector('#sb6657-banner-update-close').addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                banner.remove();
+            });
+        }
+        const msgEl = banner.querySelector('.sb6657-banner-msg');
+        if (msgEl) {
+            msgEl.innerHTML = `🎉 douyin++ 发现新版本：<strong>${remoteVer}</strong>（当前：${CURRENT_VERSION}）`;
+        }
+        ensureInOverlayRoot(banner);
+    }
+
+    function syncUpdateUIState(forceShowPrompts = false) {
+        const hasUpdate = Boolean(availableRemoteVersion);
+        const ball = document.getElementById('sb6657-douyin-ball');
+        const ballBadge = ball ? ball.querySelector('.pulse-badge') : null;
+        if (ball) {
+            ball.title = hasUpdate
+                ? `sb6657玩机器烂梗（抖音版）· 发现新版本 ${availableRemoteVersion}`
+                : 'sb6657玩机器烂梗（抖音版）(点击打开/关闭功能面板)';
+        }
+        if (ballBadge) {
+            ballBadge.classList.toggle('visible', hasUpdate);
+        }
+
+        if (updateBtnEl) {
+            updateBtnEl.classList.toggle('has-update', hasUpdate);
+            updateBtnEl.title = hasUpdate
+                ? `发现新版本 ${availableRemoteVersion}，点击重新检查更新`
+                : `检查更新 (当前 ${CURRENT_VERSION})`;
+        }
+
+        if (updateBarEl && updateBarTextEl) {
+            if (hasUpdate) {
+                updateBarTextEl.innerText = `📢 发现新版本 ${availableRemoteVersion}（当前 ${CURRENT_VERSION}）`;
+                if (forceShowPrompts || updateBarEl.dataset.dismissed !== '1') {
+                    updateBarEl.dataset.dismissed = '0';
+                    updateBarEl.style.display = 'flex';
+                }
+            } else {
+                updateBarEl.dataset.dismissed = '0';
+                updateBarEl.style.display = 'none';
+            }
+        }
+
+        if (hasUpdate && forceShowPrompts) {
+            showUpdateBanner(availableRemoteVersion);
+        } else if (!hasUpdate) {
+            removeUpdateBanner();
+        }
+    }
+
+    function checkUpdate(isManual = false) {
+        if (isCheckingUpdate) {
+            if (isManual) showToast('🔍 正在检查更新，请稍候...', 1400);
+            return;
+        }
+        isCheckingUpdate = true;
+        if (updateBtnEl) updateBtnEl.classList.add('checking');
+        if (isManual) {
+            showToast('🔍 正在检查更新...', 1600);
+        }
+
+        const baseUrl = getScriptUpdateUrl();
+        const checkUrl = `${baseUrl}?_t=${Date.now()}`;
+
+        gmRequestText('GET', checkUrl, undefined, 8000)
+            .then((content) => {
+                const match = String(content || '').match(/@version\s+([^\s\r\n]+)/i);
+                if (!match || !match[1]) {
+                    if (isManual) showToast('⚠️ 未能解析远端版本号，请稍后再试', 2200);
+                    return;
+                }
+                const cleanedRemote = cleanVersion(match[1]);
+                const displayRemote = `v${cleanedRemote}`;
+                if (compareVersions(cleanedRemote, CURRENT_VERSION) > 0) {
+                    availableRemoteVersion = displayRemote;
+                    syncUpdateUIState(true);
+                    if (isManual) {
+                        showToast(`🎉 发现新版本 ${displayRemote}，请点击「一键更新」`, 3000);
+                    }
+                } else {
+                    availableRemoteVersion = '';
+                    syncUpdateUIState(false);
+                    if (isManual) {
+                        showToast(`当前已是最新版本 (${CURRENT_VERSION}) 🎉`, 2500);
+                    }
+                }
+            })
+            .catch(() => {
+                if (isManual) {
+                    showToast('❌ 检查更新失败，请确认网络连接', 2400);
+                }
+            })
+            .finally(() => {
+                isCheckingUpdate = false;
+                if (updateBtnEl) updateBtnEl.classList.remove('checking');
+            });
     }
 
     // ==========================================
@@ -1297,6 +1655,9 @@
     let mainViewEl = null;
     let sponsorViewEl = null;
     let sponsorBtnEl = null;
+    let updateBtnEl = null;
+    let updateBarEl = null;
+    let updateBarTextEl = null;
     let listStatusEl = null;
     let listContainerEl = null;
     let tagsBarEl = null;
@@ -1343,11 +1704,27 @@
                         </svg>
                         <span>充电赞赏</span>
                     </button>
+                    <button class="sb6657-icon-btn" id="sb6657-btn-update" type="button" title="检查更新 (当前 ${CURRENT_VERSION})">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                            <path d="M16 16h5v5"></path>
+                        </svg>
+                        <span class="sb6657-update-badge" id="sb6657-update-badge"></span>
+                    </button>
                     <button class="sb6657-icon-btn" id="sb6657-btn-close" type="button" title="关闭面板 (Esc)">✕</button>
                 </div>
             </div>
 
             <div class="sb6657-main-view" id="sb6657-main-view">
+                <div id="sb6657-update-bar">
+                    <span class="sb6657-update-bar-text" id="sb6657-update-bar-text">📢 发现新版本</span>
+                    <div class="sb6657-update-bar-actions">
+                        <button class="sb6657-update-now-btn" id="sb6657-panel-update-now" type="button">一键更新</button>
+                        <button class="sb6657-update-dismiss-btn" id="sb6657-panel-update-dismiss" type="button" title="暂不提示">✕</button>
+                    </div>
+                </div>
                 <div class="sb6657-search-area">
                     <input type="text" class="sb6657-search-input" id="sb6657-search-input" placeholder="输入关键词搜索..." />
                     <button class="sb6657-search-btn" id="sb6657-search-btn" type="button">搜索</button>
@@ -1385,11 +1762,16 @@
         mainViewEl = panelEl.querySelector('#sb6657-main-view');
         sponsorViewEl = panelEl.querySelector('#sb6657-sponsor-view');
         sponsorBtnEl = panelEl.querySelector('#sb6657-btn-sponsor');
+        updateBtnEl = panelEl.querySelector('#sb6657-btn-update');
+        updateBarEl = panelEl.querySelector('#sb6657-update-bar');
+        updateBarTextEl = panelEl.querySelector('#sb6657-update-bar-text');
         listStatusEl = panelEl.querySelector('#sb6657-list-status');
         listContainerEl = panelEl.querySelector('#sb6657-list-container');
         tagsBarEl = panelEl.querySelector('#sb6657-tags-bar');
         searchInputEl = panelEl.querySelector('#sb6657-search-input');
 
+        const panelUpdateNowBtn = panelEl.querySelector('#sb6657-panel-update-now');
+        const panelUpdateDismissBtn = panelEl.querySelector('#sb6657-panel-update-dismiss');
         const searchBtn = panelEl.querySelector('#sb6657-search-btn');
         const closeBtn = panelEl.querySelector('#sb6657-btn-close');
         const sponsorBackBtn = panelEl.querySelector('#sb6657-sponsor-back');
@@ -1425,6 +1807,14 @@
         sponsorOpenWebBtn.addEventListener('click', () => window.open(SPONSOR_HOME_URL, '_blank'));
         sponsorBackBtn.addEventListener('click', switchToMainView);
         sponsorBtnEl.addEventListener('click', toggleSponsorView);
+        updateBtnEl.addEventListener('click', () => checkUpdate(true));
+        panelUpdateNowBtn.addEventListener('click', triggerOneClickUpdate);
+        panelUpdateDismissBtn.addEventListener('click', () => {
+            if (updateBarEl) {
+                updateBarEl.dataset.dismissed = '1';
+                updateBarEl.style.display = 'none';
+            }
+        });
 
         // 防止在面板内按键或点击冒泡给抖音播放器快捷键/暂停
         panelEl.addEventListener('keydown', (e) => e.stopPropagation());
@@ -1440,6 +1830,7 @@
         closeBtn.addEventListener('click', togglePanel);
 
         setupDraggable(panelEl, panelEl.querySelector('#sb6657-panel-header'));
+        syncUpdateUIState(false);
         if (tagList.length) renderTagsBar();
         if (!hasLoadedDefaultMemes) {
             loadDefaultMemes('');
@@ -1691,6 +2082,7 @@
             });
         }
         ensureInOverlayRoot(ball);
+        syncUpdateUIState(false);
 
         // 2. 挂载到所有可见抖音播放器底部控制栏清晰度旁边（修正 pointer-events: none 穿透问题）
         const controlsRights = document.querySelectorAll('.douyin-player-controls-right');
@@ -1735,6 +2127,7 @@
         ensureInOverlayRoot(document.getElementById('sb6657-douyin-ball'));
         ensureInOverlayRoot(document.getElementById('sb6657-panel'));
         ensureInOverlayRoot(document.getElementById('sb6657-toast'));
+        ensureInOverlayRoot(document.getElementById('sb6657-update-banner'));
         ensureInOverlayRoot(document.getElementById('sb6657-danmu-highlight-box'));
         ensureInOverlayRoot(document.getElementById('sb6657-danmu-actions'));
     });
@@ -2213,6 +2606,7 @@
         if (targetEl && (
             targetEl.closest('#sb6657-panel') ||
             targetEl.closest('#sb6657-douyin-ball') ||
+            targetEl.closest('#sb6657-update-banner') ||
             targetEl.closest('.sb6657-ctrl-slot') ||
             targetEl.closest('.douyin-player-controls')
         )) {
@@ -2341,6 +2735,10 @@
         mountIconButtons();
         hookDanmuMessageStore();
         observeNativeDomFallback();
+
+        setTimeout(() => {
+            checkUpdate(false);
+        }, 1500);
 
         setInterval(() => {
             mountIconButtons();
