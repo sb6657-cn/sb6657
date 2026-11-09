@@ -8,6 +8,7 @@ export interface SponsorPublicItem {
     message: string
     sponsorTime: string
     isAnonymous: string
+    isMasked?: string
 }
 
 export interface SponsorPageResult {
