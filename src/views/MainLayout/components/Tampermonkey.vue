@@ -51,7 +51,7 @@
                 <div class="douyin-highlights">
                     <span class="highlight-pill">🔘 页面 sb6657 图标 &amp; 清晰度旁“玩烂梗”入口</span>
                     <span class="highlight-pill">🎈 原生飘屏悬停即停：+1 一键复读 / 回复 @发送者 填框</span>
-                    <span class="highlight-pill">🔍 默认最新 50 条烂梗、关键词检索发送、充电赞赏与一键更新</span>
+                    <span class="highlight-pill">🔍 默认最新 50 条烂梗（触底加载下一页）、搜索发送与一键更新</span>
                 </div>
             </div>
 
@@ -307,7 +307,7 @@ const backupCdnUrl = 'https://cdn.hguofichp.cn/sb6657.cn%E6%96%97%E9%B1%BC%E7%8E
 const tampermonkeyHomeUrl = 'https://www.tampermonkey.net/';
 const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%96%97%E9%B1%BC%E7%8E%A9%E6%9C%BA%E5%99%A8%E7%83%82%E6%A2%97%E6%94%B6%E9%9B%86';
 
-const douyinVersion = 'v2026.11.09.05';
+const douyinVersion = 'v2026.11.09.06';
 const douyinUpdateDate = '2026-11-09';
 const douyinUserscriptUrl = '/douyin++.user.js';
 </script>

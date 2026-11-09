@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送
 // @namespace    https://sb6657.cn/
-// @version      v2026.11.09.05
-// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送、赞赏充电及自动检查更新/一键更新支持，兼容油猴 5.5.1 及以上
+// @version      v2026.11.09.06
+// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗（支持触底自动加载下一页）/搜索发送、赞赏充电及自动检查更新/一键更新支持，兼容油猴 5.5.1 及以上
 // @author       HZM
 // @match        https://live.douyin.com/*
 // @include      https://live.douyin.com/*
@@ -25,11 +25,11 @@
         return;
     }
 
-    const CURRENT_VERSION = 'v2026.11.09.05';
+    const CURRENT_VERSION = 'v2026.11.09.06';
     const SCRIPT_DOWNLOAD_URL = 'https://sb6657.cn/douyin++.user.js';
     const PLUGIN_HEADER_NAME = 'dpahjdoiaw';
     const PLUGIN_HEADER_VALUE = 'douyinpp';
-    const API_QUERY_URL = 'https://api.hguofichp.cn/machine/Query';
+    const API_SEARCH_URL = 'https://api.hguofichp.cn/machine/pageSearch';
     const API_PAGE_URL = 'https://api.hguofichp.cn/machine/Page';
     const API_DICT_LIST_URL = 'https://api.hguofichp.cn/machine/dictList';
     const API_ADD_CNT_URL = 'https://api.hguofichp.cn/machine/addCnt';
@@ -680,6 +680,26 @@
             background: #d1d5db;
             border-radius: 3px;
         }
+        .sb6657-list-footer {
+            padding: 8px 4px 4px;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.5;
+            user-select: none;
+        }
+        .sb6657-load-more-btn {
+            background: transparent;
+            border: none;
+            padding: 0 2px;
+            color: #16a34a;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .sb6657-load-more-btn:hover {
+            color: #15803d;
+        }
         .sb6657-meme-card {
             display: flex;
             align-items: center;
@@ -947,6 +967,17 @@
     let isCooldown = false;
     let activeTagValue = '';
     let hasLoadedDefaultMemes = false;
+    let listMode = 'default';
+    let currentTagLabel = '';
+    let currentSearchKeyword = '';
+    let currentPageNum = 1;
+    let currentTotalCount = 0;
+    let serverFetchedCount = 0;
+    let hasMoreMemes = false;
+    let isLoadingPage = false;
+    let listRequestSeq = 0;
+    let loadedMemeList = [];
+    const loadedMemeKeys = new Set();
     let availableRemoteVersion = '';
     let isCheckingUpdate = false;
     const msgMetaMap = new Map(); // msgId -> { text, sender }
@@ -1596,44 +1627,43 @@
     }
 
     // ==========================================
-    // 烂梗 API 交互（默认最新50条 + 搜索 + 标签筛选）
+    // 烂梗 API 交互（默认最新50条 + 搜索 + 标签筛选，均支持分页）
     // ==========================================
-    function searchMemes(keyword, callback) {
+    function parsePagedResponse(resText) {
+        const res = JSON.parse(resText);
+        if (res.code !== 200 && res.code !== '200') {
+            return { list: [], total: 0, isLastPage: true };
+        }
+        const data = res.data;
+        if (Array.isArray(data)) {
+            return { list: data, total: data.length, isLastPage: true };
+        }
+        const list = Array.isArray(data?.list) ? data.list : [];
+        const total = Number(data?.total) || 0;
+        const explicitLast = typeof data?.lastPage === 'boolean'
+            ? data.lastPage
+            : (typeof data?.isLastPage === 'boolean' ? data.isLastPage : null);
+        const isLastPage = explicitLast !== null ? explicitLast : list.length < DEFAULT_PAGE_SIZE;
+        return { list, total, isLastPage };
+    }
+
+    function searchMemesPage(keyword, pageNum) {
         const postData = JSON.stringify({
             D: '油猴',
             barrage: keyword,
-            QueryBarrage: keyword
+            pageNum,
+            pageSize: DEFAULT_PAGE_SIZE,
+            sort: 0
         });
-        gmRequestText('POST', API_QUERY_URL, postData, 10000)
-            .then((resText) => {
-                const res = JSON.parse(resText);
-                if ((res.code === 200 || res.code === '200') && Array.isArray(res.data)) {
-                    callback(null, res.data);
-                } else {
-                    callback(null, []);
-                }
-            })
-            .catch((err) => callback(err, []));
+        return gmRequestText('POST', API_SEARCH_URL, postData, 10000).then(parsePagedResponse);
     }
 
-    function fetchLatestMemes(tagValue, callback) {
-        let url = `${API_PAGE_URL}?pageNum=1&pageSize=${DEFAULT_PAGE_SIZE}`;
+    function fetchMemesPage(tagValue, pageNum) {
+        let url = `${API_PAGE_URL}?pageNum=${pageNum}&pageSize=${DEFAULT_PAGE_SIZE}`;
         if (tagValue) {
             url += `&tags=${encodeURIComponent(tagValue)}`;
         }
-        gmRequestText('GET', url, undefined, 10000)
-            .then((resText) => {
-                const res = JSON.parse(resText);
-                const list = Array.isArray(res?.data?.list)
-                    ? res.data.list
-                    : (Array.isArray(res?.data) ? res.data : []);
-                if (res.code === 200 || res.code === '200') {
-                    callback(null, list);
-                } else {
-                    callback(null, []);
-                }
-            })
-            .catch((err) => callback(err, []));
+        return gmRequestText('GET', url, undefined, 10000).then(parsePagedResponse);
     }
 
     function fetchDictTags() {
@@ -1660,6 +1690,8 @@
     let updateBarTextEl = null;
     let listStatusEl = null;
     let listContainerEl = null;
+    let listItemsEl = null;
+    let listFooterEl = null;
     let tagsBarEl = null;
     let searchInputEl = null;
 
@@ -1733,7 +1765,10 @@
                 <div class="sb6657-list-status" id="sb6657-list-status">
                     <span>🔥 正在加载最新 50 条烂梗...</span>
                 </div>
-                <div class="sb6657-list-container" id="sb6657-list-container"></div>
+                <div class="sb6657-list-container" id="sb6657-list-container">
+                    <div class="sb6657-list-items" id="sb6657-list-items"></div>
+                    <div class="sb6657-list-footer" id="sb6657-list-footer"></div>
+                </div>
             </div>
 
             <div class="sb6657-sponsor-view" id="sb6657-sponsor-view">
@@ -1767,8 +1802,12 @@
         updateBarTextEl = panelEl.querySelector('#sb6657-update-bar-text');
         listStatusEl = panelEl.querySelector('#sb6657-list-status');
         listContainerEl = panelEl.querySelector('#sb6657-list-container');
+        listItemsEl = panelEl.querySelector('#sb6657-list-items');
+        listFooterEl = panelEl.querySelector('#sb6657-list-footer');
         tagsBarEl = panelEl.querySelector('#sb6657-tags-bar');
         searchInputEl = panelEl.querySelector('#sb6657-search-input');
+
+        listContainerEl.addEventListener('scroll', checkScrollLoadMore);
 
         const panelUpdateNowBtn = panelEl.querySelector('#sb6657-panel-update-now');
         const panelUpdateDismissBtn = panelEl.querySelector('#sb6657-panel-update-dismiss');
@@ -1861,74 +1900,251 @@
         }
     }
 
-    function renderMemeList(list, emptyText) {
+    function ensureListStructure() {
         if (!listContainerEl) return;
-        listContainerEl.innerHTML = '';
+        if (!listItemsEl || !listItemsEl.isConnected) {
+            listItemsEl = document.createElement('div');
+            listItemsEl.className = 'sb6657-list-items';
+            listItemsEl.id = 'sb6657-list-items';
+            listContainerEl.appendChild(listItemsEl);
+        }
+        if (!listFooterEl || !listFooterEl.isConnected) {
+            listFooterEl = document.createElement('div');
+            listFooterEl.className = 'sb6657-list-footer';
+            listFooterEl.id = 'sb6657-list-footer';
+            listContainerEl.appendChild(listFooterEl);
+        }
+    }
 
-        if (!list || !list.length) {
-            listContainerEl.innerHTML = `<div style="text-align:center;padding:32px 12px;color:#9ca3af;font-size:13px;">${emptyText}</div>`;
+    function buildMemeCard(item) {
+        const card = document.createElement('div');
+        card.className = 'sb6657-meme-card';
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'sb6657-meme-text';
+        textSpan.innerText = item.barrage;
+        textSpan.title = '点击直接复制此烂梗';
+        textSpan.addEventListener('click', () => copyText(item.barrage, item.id));
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'sb6657-meme-actions';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'sb6657-btn-copy';
+        copyBtn.type = 'button';
+        copyBtn.innerText = '复制';
+        copyBtn.addEventListener('click', () => copyText(item.barrage, item.id));
+
+        const sendBtn = document.createElement('button');
+        sendBtn.className = 'sb6657-btn-send';
+        sendBtn.type = 'button';
+        sendBtn.innerText = '发送';
+        sendBtn.title = '放入输入框并立即发送';
+        sendBtn.addEventListener('click', () => sendBarrage(item.barrage, item.id));
+
+        actionsDiv.appendChild(copyBtn);
+        actionsDiv.appendChild(sendBtn);
+
+        card.appendChild(textSpan);
+        card.appendChild(actionsDiv);
+        return card;
+    }
+
+    function renderListFooter(state) {
+        ensureListStructure();
+        if (!listFooterEl) return;
+        listFooterEl.innerHTML = '';
+
+        if (state === 'loading-next') {
+            listFooterEl.innerText = '⏳ 正在加载下一页...';
             return;
         }
+        if (state === 'error-next') {
+            const msg = document.createElement('span');
+            msg.innerText = '⚠️ 加载下一页失败，';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sb6657-load-more-btn';
+            btn.innerText = '点击重试';
+            btn.addEventListener('click', () => loadNextMemePage());
+            listFooterEl.appendChild(msg);
+            listFooterEl.appendChild(btn);
+            return;
+        }
+        if (state === 'has-more') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sb6657-load-more-btn';
+            const progress = currentTotalCount > 0 ? `${loadedMemeList.length} / ${currentTotalCount}` : `${loadedMemeList.length}`;
+            btn.innerText = `触底自动加载或点击加载下一页（第 ${currentPageNum} 页 · 已加载 ${progress} 条）`;
+            btn.addEventListener('click', () => loadNextMemePage());
+            listFooterEl.appendChild(btn);
+            return;
+        }
+        if (state === 'no-more' && loadedMemeList.length > 0) {
+            listFooterEl.innerText = `—— 已全部加载（共 ${loadedMemeList.length} 条） ——`;
+        }
+    }
 
-        list.forEach(item => {
+    function appendMemeCards(items, emptyText, isFirstPage) {
+        ensureListStructure();
+        if (!listItemsEl) return;
+
+        if (isFirstPage) {
+            listItemsEl.innerHTML = '';
+            if (listContainerEl) listContainerEl.scrollTop = 0;
+        }
+
+        const frag = document.createDocumentFragment();
+        (items || []).forEach(item => {
             if (!item || !item.barrage) return;
-            const card = document.createElement('div');
-            card.className = 'sb6657-meme-card';
-
-            const textSpan = document.createElement('span');
-            textSpan.className = 'sb6657-meme-text';
-            textSpan.innerText = item.barrage;
-            textSpan.title = '点击直接复制此烂梗';
-            textSpan.addEventListener('click', () => copyText(item.barrage, item.id));
-
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'sb6657-meme-actions';
-
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'sb6657-btn-copy';
-            copyBtn.type = 'button';
-            copyBtn.innerText = '复制';
-            copyBtn.addEventListener('click', () => copyText(item.barrage, item.id));
-
-            const sendBtn = document.createElement('button');
-            sendBtn.className = 'sb6657-btn-send';
-            sendBtn.type = 'button';
-            sendBtn.innerText = '发送';
-            sendBtn.title = '放入输入框并立即发送';
-            sendBtn.addEventListener('click', () => sendBarrage(item.barrage, item.id));
-
-            actionsDiv.appendChild(copyBtn);
-            actionsDiv.appendChild(sendBtn);
-
-            card.appendChild(textSpan);
-            card.appendChild(actionsDiv);
-            listContainerEl.appendChild(card);
+            const key = item.id !== undefined && item.id !== null ? String(item.id) : item.barrage;
+            if (loadedMemeKeys.has(key)) return;
+            loadedMemeKeys.add(key);
+            loadedMemeList.push(item);
+            frag.appendChild(buildMemeCard(item));
         });
+        listItemsEl.appendChild(frag);
+
+        if (isFirstPage && loadedMemeList.length === 0) {
+            listItemsEl.innerHTML = `<div style="text-align:center;padding:32px 12px;color:#9ca3af;font-size:13px;">${emptyText}</div>`;
+        }
+    }
+
+    function syncActiveStatusText() {
+        const count = loadedMemeList.length;
+        const totalSuffix = currentTotalCount > 0 ? ` / ${currentTotalCount}` : '';
+        if (listMode === 'search') {
+            updateListStatus(`🔍 「${currentSearchKeyword}」已加载 ${count}${totalSuffix} 条`, true);
+        } else if (listMode === 'tag') {
+            updateListStatus(`🏷️ 「${currentTagLabel}」已加载 ${count}${totalSuffix} 条`, true);
+        } else {
+            const text = currentPageNum === 1
+                ? (currentTotalCount > 0 ? `🔥 默认展示最新 ${count} 条烂梗（共 ${currentTotalCount} 条）` : `🔥 默认展示最新 ${count} 条烂梗`)
+                : `🔥 最新烂梗已加载 ${count}${totalSuffix} 条`;
+            updateListStatus(text, false);
+        }
+    }
+
+    function requestCurrentModePage(pageNum) {
+        if (listMode === 'search') {
+            return searchMemesPage(currentSearchKeyword, pageNum);
+        }
+        return fetchMemesPage(activeTagValue, pageNum);
+    }
+
+    function startListQuery({ mode, tagValue = '', tagLabel = '', keyword = '' }) {
+        if (!listContainerEl) return;
+        ensureListStructure();
+        const reqSeq = ++listRequestSeq;
+        listMode = mode;
+        activeTagValue = tagValue || '';
+        currentTagLabel = tagLabel || '';
+        currentSearchKeyword = keyword || '';
+        currentPageNum = 1;
+        currentTotalCount = 0;
+        serverFetchedCount = 0;
+        hasMoreMemes = false;
+        isLoadingPage = true;
+        loadedMemeList = [];
+        loadedMemeKeys.clear();
+
+        if (mode === 'search') {
+            updateListStatus(`🔍 正在搜索「${keyword}」...`, true);
+            listItemsEl.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">🔍 正在检索烂梗中...</div>`;
+        } else if (mode === 'tag') {
+            updateListStatus(`🏷️ 正在加载「${tagLabel}」最新 ${DEFAULT_PAGE_SIZE} 条...`, true);
+            listItemsEl.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">⏳ 正在拉取最新烂梗列表...</div>`;
+        } else {
+            updateListStatus(`🔥 正在加载最新 ${DEFAULT_PAGE_SIZE} 条烂梗...`, false);
+            listItemsEl.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">⏳ 正在拉取最新烂梗列表...</div>`;
+        }
+        renderListFooter('loading-first');
+        listContainerEl.scrollTop = 0;
+
+        requestCurrentModePage(1)
+            .then(({ list, total, isLastPage }) => {
+                if (reqSeq !== listRequestSeq) return;
+                isLoadingPage = false;
+                currentTotalCount = total;
+                serverFetchedCount = list.length;
+                hasMoreMemes =
+                    list.length > 0 &&
+                    !isLastPage &&
+                    (total > 0 ? serverFetchedCount < total : list.length >= DEFAULT_PAGE_SIZE);
+
+                const emptyMsg = mode === 'search'
+                    ? `未找到与「${keyword}」相关的弹幕，换个词试试吧~`
+                    : '暂无烂梗数据';
+                appendMemeCards(list, emptyMsg, true);
+                syncActiveStatusText();
+                renderListFooter(hasMoreMemes ? 'has-more' : 'no-more');
+            })
+            .catch(() => {
+                if (reqSeq !== listRequestSeq) return;
+                isLoadingPage = false;
+                hasMoreMemes = false;
+                if (mode === 'search') {
+                    updateListStatus(`⚠️ 搜索「${keyword}」失败`, true);
+                    appendMemeCards([], '请求失败，请检查网络连接后重试', true);
+                } else {
+                    updateListStatus('⚠️ 拉取最新烂梗失败，请稍后重试', Boolean(tagValue));
+                    appendMemeCards([], '加载失败，请检查网络或重新打开面板重试', true);
+                }
+                renderListFooter('error-first');
+            });
+    }
+
+    function loadNextMemePage() {
+        if (isLoadingPage || !hasMoreMemes) return;
+        const reqSeq = listRequestSeq;
+        const targetPage = currentPageNum + 1;
+        isLoadingPage = true;
+        renderListFooter('loading-next');
+
+        requestCurrentModePage(targetPage)
+            .then(({ list, total, isLastPage }) => {
+                if (reqSeq !== listRequestSeq) return;
+                isLoadingPage = false;
+                currentPageNum = targetPage;
+                if (total > 0) currentTotalCount = total;
+                serverFetchedCount += list.length;
+                hasMoreMemes =
+                    list.length > 0 &&
+                    !isLastPage &&
+                    (currentTotalCount > 0 ? serverFetchedCount < currentTotalCount : list.length >= DEFAULT_PAGE_SIZE);
+
+                if (list.length > 0) {
+                    appendMemeCards(list, '', false);
+                    syncActiveStatusText();
+                }
+                renderListFooter(hasMoreMemes ? 'has-more' : 'no-more');
+            })
+            .catch(() => {
+                if (reqSeq !== listRequestSeq) return;
+                isLoadingPage = false;
+                renderListFooter('error-next');
+            });
+    }
+
+    function checkScrollLoadMore() {
+        if (!listContainerEl || !hasMoreMemes || isLoadingPage) return;
+        if (!panelEl || panelEl.style.display !== 'flex') return;
+        if (sponsorViewEl && sponsorViewEl.style.display === 'flex') return;
+        const { scrollTop, clientHeight, scrollHeight } = listContainerEl;
+        if (clientHeight <= 0 || scrollHeight <= clientHeight) return;
+        if (scrollTop + clientHeight >= scrollHeight - 60) {
+            loadNextMemePage();
+        }
     }
 
     function loadDefaultMemes(tagValue = '', tagLabel = '') {
-        if (!listContainerEl) return;
         hasLoadedDefaultMemes = true;
-        activeTagValue = tagValue || '';
-        updateListStatus(
-            tagLabel ? `🏷️ 正在加载「${tagLabel}」最新 ${DEFAULT_PAGE_SIZE} 条...` : `🔥 正在加载最新 ${DEFAULT_PAGE_SIZE} 条烂梗...`,
-            Boolean(tagValue)
-        );
-        listContainerEl.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">⏳ 正在拉取最新烂梗列表...</div>`;
-
-        fetchLatestMemes(tagValue, (err, list) => {
-            if (err) {
-                updateListStatus('⚠️ 拉取最新烂梗失败，请稍后重试', Boolean(tagValue));
-                renderMemeList([], '加载失败，请检查网络或重新打开面板重试');
-                return;
-            }
-            if (tagLabel) {
-                updateListStatus(`🏷️ 「${tagLabel}」最新 ${list.length} 条烂梗`, true);
-            } else {
-                updateListStatus(`🔥 默认展示最新 ${list.length} 条烂梗`, false);
-            }
-            renderMemeList(list, '暂无烂梗数据');
-        });
+        if (tagValue) {
+            startListQuery({ mode: 'tag', tagValue, tagLabel: tagLabel || tagValue });
+        } else {
+            startListQuery({ mode: 'default' });
+        }
     }
 
     function renderTagsBar() {
@@ -1968,18 +2184,7 @@
 
         activeTagValue = '';
         renderTagsBar();
-        updateListStatus(`🔍 正在搜索「${query}」...`, true);
-        listContainerEl.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">🔍 正在检索烂梗中...</div>`;
-
-        searchMemes(query, (err, list) => {
-            if (err) {
-                updateListStatus(`⚠️ 搜索「${query}」失败`, true);
-                renderMemeList([], '请求失败，请检查网络连接后重试');
-                return;
-            }
-            updateListStatus(`🔍 「${query}」共找到 ${list.length} 条结果`, true);
-            renderMemeList(list, `未找到与「${query}」相关的弹幕，换个词试试吧~`);
-        });
+        startListQuery({ mode: 'search', keyword: query });
     }
 
     function togglePanel(e) {
