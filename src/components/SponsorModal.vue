@@ -98,7 +98,7 @@
                 <div class="donor-content-side">
                   <div class="donor-identity">
                     <span class="donor-index">{{ index + 1 }}</span>
-                    <span class="donor-name">{{ maskName(item.maskedName) }}</span>
+                    <span class="donor-name">{{ maskName(item.maskedName, item.isMasked, item.isAnonymous) }}</span>
                     <span
                       class="channel-tag"
                       :class="item.payType === '支付宝' ? 'tag-alipay' : 'tag-wx'"
@@ -195,13 +195,19 @@ const QR_MAP = {
 const currentQrUrl = computed(() => QR_MAP[currentChannel.value])
 
 /**
- * 名字脱敏函数（<3个字脱敏，3~6个字脱1个，>6个字脱2个，>8个字脱3个，>10个字脱4个，热心水友不脱敏）
+ * 名字脱敏函数（isMasked='0'时不脱敏直接显示原名；否则按<3个字脱敏、3~6字脱1个、>6字脱2个、>8字脱3个、>10字脱4个处理，热心水友不脱敏）
  */
-function maskName(raw: string | undefined): string {
+function maskName(raw: string | undefined, isMasked?: string, isAnonymous?: string): string {
+  if (isAnonymous === '1') {
+    return '热心水友'
+  }
   if (!raw || !raw.trim()) {
     return '热心水友'
   }
   const name = raw.trim()
+  if (isMasked === '0') {
+    return name
+  }
   if (name === '热心水友') {
     return '热心水友'
   }

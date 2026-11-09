@@ -1,6 +1,6 @@
 <template>
     <div class="tampermonkey-container">
-        <!-- 顶部 Hero 卡片 -->
+        <!-- 顶部 Hero 卡片（斗鱼原版保留） -->
         <section class="card hero-section">
             <div class="hero-header">
                 <div class="hero-badge">官方插件</div>
@@ -30,6 +30,53 @@
                 </a>
                 <a :href="greasyforkUrl" target="_blank" rel="noopener noreferrer" class="btn-action text-btn">
                     Greasy Fork 备用源
+                </a>
+            </div>
+        </section>
+
+        <!-- 新增：抖音直播 douyin++ 油猴插件卡片 -->
+        <section class="card hero-section douyin-hero">
+            <div class="hero-header">
+                <div class="hero-badge douyin-badge">新增插件 · 抖音直播专版</div>
+                <h2 class="hero-title">douyin++（sb6657玩机器烂梗·抖音版）油猴插件</h2>
+                <p class="hero-desc">
+                    专为抖音直播网页版（<code>live.douyin.com</code>）打造：在直播间页面提供 <strong>sb6657 悬浮图标</strong>与播放器清晰度旁<strong>“玩烂梗”</strong>按钮随时呼出「sb6657玩机器烂梗（抖音版）」面板；鼠标放在抖音原生飘屏弹幕上时该条弹幕暂停并出现 <strong>+1</strong> 与 <strong>回复</strong>（自动按 <code>@发送者ID：内容</code> 填入发送框）；面板默认展示最新 <strong>50 条烂梗</strong>，支持关键词检索一键发送与顶部充电赞赏。
+                </p>
+                <div class="version-meta">
+                    <span class="meta-tag douyin-version">最新版本：{{ douyinVersion }}</span>
+                    <span class="meta-tag date">更新日期：{{ douyinUpdateDate }}</span>
+                    <span class="meta-tag status">支持环境：Tampermonkey 5.5.1 及以上</span>
+                    <span class="meta-tag target">适用站点：live.douyin.com/*</span>
+                </div>
+                <div class="douyin-highlights">
+                    <span class="highlight-pill">🔘 页面 sb6657 图标 &amp; 清晰度旁“玩烂梗”入口</span>
+                    <span class="highlight-pill">🎈 原生飘屏悬停即停：+1 一键复读 / 回复 @发送者 填框</span>
+                    <span class="highlight-pill">🔍 默认最新 50 条烂梗、关键词检索发送 &amp; 顶部充电赞赏</span>
+                </div>
+            </div>
+
+            <div class="hero-actions">
+                <a
+                    :href="douyinUserscriptUrl"
+                    target="_blank"
+                    class="btn-action primary-btn douyin-primary-btn"
+                    title="装有 Tampermonkey 5.5.1+ 的用户点击后会自动弹出安装页"
+                >
+                    <Download :size="16" class="btn-icon" />
+                    一键安装 douyin++（推荐）
+                </a>
+                <a
+                    :href="douyinUserscriptUrl"
+                    download="douyin++.user.js"
+                    class="btn-action cdn-btn douyin-cdn-btn"
+                    title="下载 douyin++.user.js 本地脚本文件"
+                >
+                    <Download :size="16" class="btn-icon" />
+                    下载脚本 (.user.js)
+                </a>
+                <a :href="tampermonkeyHomeUrl" target="_blank" rel="noopener noreferrer" class="btn-action secondary-btn">
+                    <Puzzle :size="16" class="btn-icon" />
+                    安装油猴管理器
                 </a>
             </div>
         </section>
@@ -259,6 +306,10 @@ const userscriptUrl = '/sb6657.user.js';
 const backupCdnUrl = 'https://cdn.hguofichp.cn/sb6657.cn%E6%96%97%E9%B1%BC%E7%8E%A9%E6%9C%BA%E5%99%A8%E7%83%82%E6%A2%97%E6%94%B6%E9%9B%86.user.js';
 const tampermonkeyHomeUrl = 'https://www.tampermonkey.net/';
 const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%96%97%E9%B1%BC%E7%8E%A9%E6%9C%BA%E5%99%A8%E7%83%82%E6%A2%97%E6%94%B6%E9%9B%86';
+
+const douyinVersion = 'v2026.11.09.04';
+const douyinUpdateDate = '2026-11-09';
+const douyinUserscriptUrl = '/douyin++.user.js';
 </script>
 
 <style scoped>
@@ -290,6 +341,21 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     border-color: #2e5936;
 }
 
+/* 新增抖音 douyin++ Hero 样式 */
+.douyin-hero {
+    background-color: #ecfdf5 !important;
+    background: linear-gradient(135deg, #f0fdf9 0%, #dcfce7 100%) !important;
+    border: 1px solid #99e2c8;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+}
+
+:deep(.dark) .douyin-hero,
+[data-theme='dark'] .douyin-hero {
+    background-color: #102a24 !important;
+    background: linear-gradient(135deg, #102a24 0%, #14362e 100%) !important;
+    border-color: #225c4d;
+}
+
 .hero-header {
     display: flex;
     flex-direction: column;
@@ -306,6 +372,10 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     border-radius: 12px;
 }
 
+.douyin-badge {
+    background: linear-gradient(90deg, #059669 0%, #0d9488 100%);
+}
+
 .hero-title {
     font-size: 24px;
     font-weight: 700;
@@ -318,6 +388,15 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     line-height: 1.6;
     color: #6b7280;
     margin: 0;
+}
+
+.hero-desc code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #047857;
 }
 
 .version-meta {
@@ -339,6 +418,41 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     background-color: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
     font-weight: 600;
+}
+
+.meta-tag.douyin-version {
+    background-color: rgba(16, 185, 129, 0.14);
+    color: #047857;
+    font-weight: 600;
+}
+
+.meta-tag.target {
+    background-color: rgba(13, 148, 136, 0.12);
+    color: #0f766e;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.douyin-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.highlight-pill {
+    font-size: 12.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #065f46;
+}
+
+:deep(.dark) .douyin-hero .highlight-pill,
+[data-theme='dark'] .douyin-hero .highlight-pill {
+    background-color: rgba(16, 185, 129, 0.14);
+    border-color: rgba(52, 211, 153, 0.28);
+    color: #a7f3d0;
 }
 
 .hero-actions {
@@ -377,6 +491,16 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     box-shadow: 0 6px 16px rgba(76, 175, 80, 0.35);
 }
 
+.douyin-primary-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+}
+
+.douyin-primary-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.38);
+}
+
 .secondary-btn {
     background-color: #1e88e5;
     color: #ffffff;
@@ -401,6 +525,17 @@ const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%
     color: #1b5e20;
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+}
+
+.douyin-cdn-btn {
+    color: #047857;
+    border-color: #6ee7b7;
+}
+
+.douyin-cdn-btn:hover {
+    background-color: #ecfdf5;
+    border-color: #10b981;
+    color: #065f46;
 }
 
 .text-btn {
