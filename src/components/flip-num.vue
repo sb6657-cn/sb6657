@@ -1,10 +1,10 @@
 <template>
     <span class="flip-num-wrapper">
         <span class="container">
-            <div class="place-holder">{{ nextNum }}</div>
-            <div :class="`flip ${flipState}`">
-                <div>{{ currNum }}</div>
-                <div>{{ nextNum }}</div>
+            <div class="place-holder">{{ numValue }}</div>
+            <div :key="numValue" class="flip" :class="{ rolling: previousNum !== numValue, shrinking: numValue < previousNum }">
+                <div>{{ previousNum }}</div>
+                <div>{{ numValue }}</div>
             </div>
         </span>
         <span v-if="showPlusOne" :key="plusOneKey" class="plus-one-badge">+1</span>
@@ -12,8 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, nextTick, computed } from 'vue';
-import { sleep } from '@/utils/common';
+import { watch, ref, computed, onBeforeUnmount } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -30,11 +29,7 @@ const numValue = computed(() => {
     return typeof props.num === 'string' ? Number(props.num) : props.num;
 });
 
-const currNum = ref(numValue.value);
-const nextNum = ref(numValue.value);
-let flipping = false;
-
-const flipState = ref<'normal' | 'end' | 'end flex-start'>('normal');
+const previousNum = ref(numValue.value);
 const showPlusOne = ref(false);
 const plusOneKey = ref(0);
 let plusTimer: ReturnType<typeof setTimeout> | null = null;
@@ -53,33 +48,14 @@ defineExpose({
     triggerPlus: triggerPlusAnimation,
 });
 
-watch(
-    numValue,
-    async (newVal, oldVal) => {
-        currNum.value = oldVal;
-        nextNum.value = newVal;
+watch(numValue, (current, previous) => {
+    previousNum.value = previous;
+    if (current > previous && current - previous <= 10) triggerPlusAnimation();
+});
 
-        if (oldVal !== undefined && newVal > oldVal && newVal - oldVal <= 10) {
-            triggerPlusAnimation();
-        }
-
-        if (flipping) {
-            currNum.value = newVal;
-            nextNum.value = newVal;
-            return;
-        }
-        flipping = true;
-        // 防止浏览器合并渲染跳过滚动动画，强制渲染带end flex-start类名的那一帧
-        await nextTick();
-        // 这么写是因为对齐问题。宽度占位用的新值，所以在新值比旧值小的时候要靠左对齐，不然动画很诡异
-        flipState.value = newVal < oldVal ? 'end flex-start' : 'end';
-        await sleep(500);
-        currNum.value = newVal;
-        nextNum.value = newVal;
-        flipState.value = 'normal';
-        flipping = false;
-    }
-);
+onBeforeUnmount(() => {
+    if (plusTimer) clearTimeout(plusTimer);
+});
 </script>
 
 <style scoped lang="scss">
@@ -104,15 +80,23 @@ watch(
         flex-direction: column;
         align-items: center;
     }
-    .normal {
-        transform: translateY(0);
+    .rolling {
+        animation: flip-number 0.5s ease forwards;
     }
-    .end {
-        transition: transform 0.5s;
-        transform: translateY(-50%);
-    }
-    .flex-start {
+    .shrinking {
         align-items: flex-start;
+    }
+}
+
+@keyframes flip-number {
+    from { transform: translateY(0); }
+    to { transform: translateY(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .container .rolling {
+        animation: none;
+        transform: translateY(-50%);
     }
 }
 

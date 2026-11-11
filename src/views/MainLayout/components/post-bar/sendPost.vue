@@ -13,7 +13,7 @@
           <el-button style="width: 70px;" type="primary" @click="queryBarrage">搜索</el-button>
           <el-cascader  v-if="data.filteredItems.length" :options="cascaderOptions"
             :props="{ checkStrictly: true, emitPath: false, label: 'barrage', value: 'id' }" clearable
-            teleported="true" popper-class="barrage-cascader-popper" placeholder="选择关联的烂梗" v-model="Post_barrageId"
+            teleported="true" popper-class="barrage-cascader-popper" placeholder="选择关联的烂梗" v-model="selectedBarrageId"
             style="width: 100%;word-wrap: break-word;
 word-break: break-all;" />
         </span>
@@ -43,10 +43,13 @@ import { API } from '@/constants/backend';
 const agree = ref(false)
 const openCommunityNorms = ref(false)
 const content = ref('')
-const barrageId = ref(0)
 const haveMeme = ref(false)
 const searchMemeStr = ref('')
-const Post_barrageId = ref<number | null>(null)
+const selectedBarrageId = ref<number | null>(null)
+
+watch(haveMeme, (enabled) => {
+    if (!enabled) selectedBarrageId.value = null;
+});
 
 interface BarrageSearchItem {
   id: number
@@ -90,13 +93,14 @@ const submitPost = async () => {
 
   try {
     const res = await httpInstance.post('/machine/Post/ReviewPost/submit', {
-      barrageId: Post_barrageId.value,
+      barrageId: haveMeme.value ? selectedBarrageId.value : null,
       content: content.value.trim()
     })
 
     if (res.code === 200) {
       ElMessage.success('发帖成功！等待审核中～')
       content.value = ''
+      haveMeme.value = false;
     } else {
       ElMessage.error(res.msg || '发帖失败')
     }

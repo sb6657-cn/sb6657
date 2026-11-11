@@ -12,8 +12,8 @@
                 <ElTooltip :trigger="isMobile ? 'click' : 'hover'" placement="top" effect="light">
                     <template #content>
                         <div class="tooltip-content">
-                            <div v-if="lastMeme.tags && lastMeme.tags.length" class="tags-container">
-                                <div v-for="(item, index) in lastMeme.tags" :key="index" class="modern-tag">
+                            <div v-if="displayTags.length" class="tags-container">
+                                <div v-for="item in displayTags" :key="item.dictValue" class="modern-tag">
                                     <img v-if="item.iconUrl" :src="item.iconUrl" class="tag-icon" />
                                     <span class="tag-label">{{ item.label }}</span>
                                 </div>
@@ -39,7 +39,6 @@ import { getMemeList } from '@/apis/getMeme';
 import HomeSpotlight from '@/components/home/home-spotlight.vue';
 import { easyFormatTime } from '@/utils/time';
 import { useMemeTagsStore } from '@/stores/memeTags';
-import type { getMemeTags as memeTag } from '@/types/meme';
 import { useIsMobile } from '@/composables/useIsMobile';
 import { getDisplayTags } from '@/utils/tags';
 import { ElTooltip, ElNotification, ElDivider } from 'element-plus';
@@ -47,18 +46,14 @@ import { copyToClipboard } from '@/utils/clipboard';
 
 const isMobile = useIsMobile();
 const memeTagsStore = useMemeTagsStore();
-const memeTags = ref<memeTag[]>([]);
-memeTagsStore.tagsLoaded.then(() => {
-    memeTags.value = memeTagsStore.memeTags;
-});
-
 const lastMeme = reactive({
     time: '',
     meme: '',
-    tags: [{ label: '', iconUrl: '' }],
+    tags: '',
     copy: 0,
     total: 0,
 });
+const displayTags = computed(() => getDisplayTags(lastMeme.tags, memeTagsStore.memeTags));
 const loaded = ref(false);
 const formattedTotal = computed(() => (loaded.value ? lastMeme.total.toLocaleString('zh-CN') : '—'));
 
@@ -67,7 +62,7 @@ async function getLastMeme() {
     if (!res) return;
     lastMeme.time = easyFormatTime(res.memeArr[0].submitTime);
     lastMeme.meme = res.memeArr[0].content;
-    lastMeme.tags = getDisplayTags(res.memeArr[0].tags, memeTags.value);
+    lastMeme.tags = res.memeArr[0].tags ?? '';
     lastMeme.copy = res.memeArr[0].copyCount;
     lastMeme.total = res.total;
     loaded.value = true;

@@ -334,11 +334,24 @@ const douyinUserscriptUrl = `/douyin++.user.js?v=${douyinVersion}`;
     box-shadow: 0 4px 16px rgba(76, 175, 80, 0.12);
 }
 
-:deep(.dark) .hero-section,
-[data-theme='dark'] .hero-section {
+html.dark .hero-section {
     background-color: #172b1c !important;
     background: linear-gradient(135deg, #172b1c 0%, #1e3825 100%) !important;
     border-color: #2e5936;
+}
+
+html.dark .hero-desc,
+html.dark .meta-tag,
+html.dark .text-btn {
+    color: var(--el-text-color-regular);
+}
+
+html.dark .text-btn:hover,
+html.dark .hero-desc code,
+html.dark .meta-tag.version,
+html.dark .meta-tag.douyin-version,
+html.dark .meta-tag.target {
+    color: #a7f3d0;
 }
 
 /* 新增抖音 douyin++ Hero 样式 */
@@ -349,8 +362,7 @@ const douyinUserscriptUrl = `/douyin++.user.js?v=${douyinVersion}`;
     box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
 }
 
-:deep(.dark) .douyin-hero,
-[data-theme='dark'] .douyin-hero {
+html.dark .douyin-hero {
     background-color: #102a24 !important;
     background: linear-gradient(135deg, #102a24 0%, #14362e 100%) !important;
     border-color: #225c4d;
@@ -384,6 +396,7 @@ const douyinUserscriptUrl = `/douyin++.user.js?v=${douyinVersion}`;
 }
 
 .hero-desc {
+    overflow-wrap: anywhere;
     font-size: 15px;
     line-height: 1.6;
     color: #6b7280;
@@ -448,8 +461,7 @@ const douyinUserscriptUrl = `/douyin++.user.js?v=${douyinVersion}`;
     color: #065f46;
 }
 
-:deep(.dark) .douyin-hero .highlight-pill,
-[data-theme='dark'] .douyin-hero .highlight-pill {
+html.dark .douyin-hero .highlight-pill {
     background-color: rgba(16, 185, 129, 0.14);
     border-color: rgba(52, 211, 153, 0.28);
     color: #a7f3d0;

@@ -1,8 +1,8 @@
 <template>
     <div class="word-cloud-panel">
-        <button type="button" class="word-cloud-title" title="刷新搜索词云" @click="refreshWordCloud">
+        <button type="button" class="word-cloud-title" title="刷新搜索词云" :disabled="!wordCloudRef" @click="refreshWordCloud">
             搜索词云
-            <RotateCw :size="18" class="word-cloud-refresh-icon" />
+            <RotateCw :key="refreshCount" :size="18" class="word-cloud-refresh-icon" :class="{ rotating: refreshCount > 0 }" />
         </button>
         <Suspense>
             <template #default>
@@ -20,10 +20,13 @@ import { RotateCw } from '@lucide/vue';
 import { defineAsyncComponent, ref } from 'vue';
 
 const WordCloud = defineAsyncComponent(() => import('@/components/wordCloud.vue'));
-const wordCloudRef = ref<any>(null);
+const wordCloudRef = ref<{ getData: () => void } | null>(null);
+const refreshCount = ref(0);
 
 function refreshWordCloud() {
-    wordCloudRef.value?.getData?.();
+    if (!wordCloudRef.value) return;
+    refreshCount.value++;
+    wordCloudRef.value.getData();
 }
 </script>
 
@@ -72,6 +75,12 @@ function refreshWordCloud() {
         html.dark & {
             color: var(--el-text-color-secondary);
         }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-cloud-panel .word-cloud-refresh-icon.rotating {
+        animation: none;
     }
 }
 
