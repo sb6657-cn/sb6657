@@ -65,10 +65,9 @@ import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
 import flipNum from '@/components/flip-num.vue';
 import { useMemeTagsStore } from '@/stores/memeTags';
 import { useShieldWordStore } from '@/stores/shieldWordStore';
-import { copySuccess, copyToClipboard, limitedCopy } from '@/utils/clipboard';
+import { createCountedCopy } from '@/utils/clipboard';
 import { recordOptimisticCopy } from '@/utils/copyTracker';
 import { getDisplayTags } from '@/utils/tags';
-import { throttle } from '@/utils/throttle';
 import { easyFormatTime } from '@/utils/time';
 import { computed } from 'vue';
 import { useHotMemeStore } from '@/stores/useHotMemeStore';
@@ -79,18 +78,14 @@ const hotMeme = useHotMemeStore();
 const isDaily = computed(() => hotMeme.period === '24h');
 const title = computed(() => (isDaily.value ? '24h热门烂梗' : '七天热门烂梗'));
 
-// 2s节流。节流期间触发了就调第二个回调。表示2s内多次点击复制只取其中一次发请求给后台
-const copyMeme = throttle(copyToClipboard, limitedCopy, 2000);
+const copyAndShouldCount = createCountedCopy();
 
 async function copyMeme_countPlus1(meme: Meme) {
-    const memeText = meme.content;
-    const res = copyMeme(memeText);
-    if (!res || res === 'limitedSuccess') return;
+    if (!copyAndShouldCount(meme.content)) return;
 
     const nextCount = (Number(meme.copyCount) || 0) + 1;
     meme.copyCount = nextCount;
     recordOptimisticCopy(meme.id, nextCount);
-    copySuccess();
 
     try {
         const ok = await copyCountPlus1(meme.category ?? '', meme.id);

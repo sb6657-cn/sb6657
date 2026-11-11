@@ -114,8 +114,7 @@ import { ElMessage } from 'element-plus'
 import { MapPin, Calendar } from '@lucide/vue'
 import httpInstance from '@/apis/httpInstance'
 import flipNum from '@/components/flip-num.vue'
-import { copyToClipboard, copySuccess, limitedCopy } from '@/utils/clipboard'
-import { throttle } from '@/utils/throttle'
+import { createCountedCopy } from '@/utils/clipboard';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme'
 import { recordOptimisticCopy, getOptimisticCopyCount } from '@/utils/copyTracker'
 import { easyFormatTime } from '@/utils/time'
@@ -170,8 +169,7 @@ const barragePageSize = ref(50)
 const barrageCurrentPage = ref(1)
 const dictData = ref<MemeTag[]>([])
 
-// 2s节流。节流期间触发了就调第二个回调。表示2s内多次点击复制只取其中一次发请求给后台
-const copyMeme = throttle(copyToClipboard, limitedCopy, 2000)
+const copyAndShouldCount = createCountedCopy();
 
 // 判断是否为移动端
 const isMobile = ref(window.innerWidth <= 768)
@@ -249,14 +247,11 @@ const getMatchBarrageList = async (pageNum: number) => {
 
 // 复制烂梗
 const copyMeme_countPlus1 = async (item: BarrageItem) => {
-    const memeText = item.barrage
-    const res = copyMeme(memeText)
-    if (!res || res === 'limitedSuccess') return
+    if (!copyAndShouldCount(item.barrage)) return;
 
     const next = (Number(item.cnt) || 0) + 1;
     item.cnt = String(next);
     recordOptimisticCopy(item.id, next);
-    copySuccess();
 
     try {
         const ok = await copyCountPlus1('match', item.id.toString(), barrageCurrentPage.value, barragePageSize.value);

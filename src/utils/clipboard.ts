@@ -1,7 +1,6 @@
-import httpInstance from '@/apis/httpInstance';
-import { ElMessage, ElNotification } from 'element-plus';
-import { API } from '@/constants/backend';
-export function copyError(err: any) {
+import { ElNotification } from 'element-plus';
+
+export function copyError(err: unknown) {
     ElNotification({
         title: '复制失败',
         message: `复制操作失败，请稍后重试。
@@ -24,13 +23,12 @@ export function likeSuccess() {
     });
 }
 
-export function limitedCopy() {
+function limitedCopy() {
     ElNotification({
         title: '请勿刷次数',
         message: '复制成功，但次数没有增加',
         type: 'warning',
     });
-    return 'limitedSuccess';
 }
 export function limitedLike() {
     ElNotification({
@@ -42,18 +40,36 @@ export function limitedLike() {
 }
 
 export function copyToClipboard(copyText: string): boolean {
-    const inputDOM = document.createElement('input');
-    inputDOM.value = copyText;
-    document.body.appendChild(inputDOM);
-    inputDOM.select();
+    const input = document.createElement('textarea');
+    input.value = copyText;
+    input.readOnly = true;
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    document.body.appendChild(input);
     try {
-        document.execCommand('Copy');
-    } catch (err) {
-        copyError(err);
+        input.select();
+        if (!document.execCommand('copy')) throw new Error('浏览器未写入剪贴板');
+        return true;
+    } catch (error) {
+        copyError(error);
         return false;
+    } finally {
+        input.remove();
     }
-    document.body.removeChild(inputDOM);
-    console.log("复制成功: "+copyText);
-    
-    return true;
+}
+
+// 每个入口独立计时。返回 true 时，调用方才更新并上报复制次数。
+export function createCountedCopy() {
+    let nextCountAt = 0;
+    return (text: string): boolean => {
+        if (!copyToClipboard(text)) return false;
+        const now = performance.now();
+        if (now < nextCountAt) {
+            limitedCopy();
+            return false;
+        }
+        nextCountAt = now + 2000;
+        copySuccess();
+        return true;
+    };
 }

@@ -72,7 +72,7 @@ export const WS_SERVER_ADDRESS = SERVER_ADDRESS.replace(/^http/, 'ws');
 - `dpahjdoiaw` 不是鉴权密钥，也不是反爬安全边界。QQ bot、agent、油猴插件或第三方脚本如果复用网站后端接口，不要复制这个请求头，否则会把外部调用统计到官网前端来源里。
 - 响应拦截器会把 AxiosResponse 解成后端返回体，所以组件里 `await httpInstance.get(...)` 得到的是 `{ code, data, msg }` 这一层，不是 Axios 原始响应。
 - `httpInstance.get<T>`、`post<T>` 等实例方法的泛型 `T` 表示 `data` 字段类型；默认是 `unknown`，需要读取 `data` 的调用应声明对应业务类型。
-- Token 即将过期时会用 `/refresh-token` 刷新，并把刷新期间的请求放进队列。
+- Token 即将过期或请求收到 HTTP 401 时，共用一次进行中的 `/refresh-token` 请求。续期失败会通知所有等待者，HTTP 401 最多重试原请求一次。
 - 登录页的“15天内自动登录”控制 token 存储位置：勾选后存 `localStorage`，未勾选只存当前浏览器会话的 `sessionStorage`；业务代码统一通过 `cookieUtils.getToken()` 取登录态。
 - 401 会弹登录框；500/601/其他错误会走 Element Plus 消息提示。
 
@@ -403,7 +403,7 @@ Home
 - 主体是 `el-table`：
     - id 列
     - 内容列，hover 弹出标签和投稿时间
-    - 复制按钮列，复制后调用 `/machine/addCnt/{id}`
+    - 复制按钮列。列表、搜索、热榜、首页随机烂梗和赛事梗库每次点击都写剪贴板，各入口仅对复制次数限制为每两秒上报一次（`/machine/addCnt/{id}`）。
 - 含屏蔽词的内容会用警告图标标记。
 - 顶部投稿按钮通过 `useSubmissionDialogStore` 打开全局投稿弹窗，不再在列表内部创建弹窗实例。
 
@@ -466,7 +466,7 @@ UI：
 - 顶部高级筛选区域可折叠。
 - 支持时间范围、标签筛选、按时间/id 或复制次数排序。
 - 表格展示搜索结果，关键词高亮。
-- 无搜索结果时显示克制的蓝色“投稿”入口；点击后先关闭搜索弹窗，再打开全局投稿弹窗，避免两个弹层叠加。
+- 只展示当前关键词、筛选和页码对应的结果。请求失败可按原条件重试；查询成功且无结果时显示“投稿”入口；点击后先关闭搜索弹窗，再打开全局投稿弹窗，避免两个弹层叠加。
 - 每页 20 条。
 - 移动端分页简化为 `prev, pager, next`，按钮文案变短。
 

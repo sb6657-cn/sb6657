@@ -54,8 +54,7 @@ import { useMemeTagsStore } from '@/stores/memeTags';
 import { getRandomMeme } from '@/apis/getMeme';
 import { copyCountPlus1, plus1Error } from '@/apis/setMeme';
 import { recordOptimisticCopy } from '@/utils/copyTracker';
-import { throttle } from '@/utils/throttle';
-import { copyToClipboard, copySuccess, limitedCopy } from '@/utils/clipboard';
+import { createCountedCopy } from '@/utils/clipboard';
 import { easyFormatTime } from '@/utils/time';
 import type { getMemeList_meme } from '@/types/meme';
 import type { getMemeTags as memeTag } from '@/types/meme';
@@ -111,18 +110,15 @@ const handleRefresh = async () => {
     }, 600);
 };
 
-// 节流过的复制，2s内多次点击复制只取其中一次发请求给后台
-const copyMeme = throttle(copyToClipboard, limitedCopy, 2000);
+const copyAndShouldCount = createCountedCopy();
 async function handleCopyMeme(meme: getMemeList_meme) {
-    const copyResult = copyMeme(meme.barrage);
-    if (!copyResult || copyResult === 'limitedSuccess') return;
+    if (!copyAndShouldCount(meme.barrage)) return;
 
     if (randomMeme.value) {
         const next = (Number(randomMeme.value.cnt) || 0) + 1;
         randomMeme.value.cnt = `${next}`;
         recordOptimisticCopy(meme.id, next);
     }
-    copySuccess();
 
     try {
         const success = await copyCountPlus1('', meme.id);

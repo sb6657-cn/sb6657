@@ -100,9 +100,8 @@ import { useMemeTagsStore } from '@/stores/memeTags';
 import { useShieldWordStore } from '@/stores/shieldWordStore';
 import { useSubmissionDialogStore } from '@/stores/useSubmissionDialogStore';
 import { type getMemeTags as memeTag } from '@/types/meme';
-import { copySuccess, copyToClipboard, limitedCopy } from '@/utils/clipboard';
+import { createCountedCopy } from '@/utils/clipboard';
 import { getDisplayTags } from '@/utils/tags';
-import { throttle } from '@/utils/throttle';
 import { easyFormatTime } from '@/utils/time';
 import { Pencil, CircleHelp, TriangleAlert } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -196,17 +195,13 @@ watch(selectedTagsStr, () => {
 void loadMemes(1);
 
 // 复制
-// 2s节流。节流期间触发了就调第二个回调。表示2s内多次点击复制只取其中一次发请求给后台
-const copyMeme = throttle(copyToClipboard, limitedCopy, 2000);
+const copyAndShouldCount = createCountedCopy();
 async function copyMeme_countPlus1(meme: Meme) {
-    const memeText = meme.content;
-    const res = copyMeme(memeText);
-    if (!res || res === 'limitedSuccess') return;
+    if (!copyAndShouldCount(meme.content)) return;
 
     const nextCount = (Number(meme.copyCount) || 0) + 1;
     meme.copyCount = nextCount;
     recordOptimisticCopy(meme.id, nextCount);
-    copySuccess();
 
     try {
         const ok = await copyCountPlus1(meme.category || memeCategory, meme.id);

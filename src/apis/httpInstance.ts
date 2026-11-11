@@ -32,7 +32,7 @@ const httpInstance = axios.create({
     // baseURL: "http://127.0.0.1:9999",
     timeout: 60000, // 默认超时时间
 }) as BackendHttpInstance;
-export const sbVersion = 'V3.16.5.20261111';
+export const sbVersion = 'V3.16.6.20261111';
 
 interface req<T> {
     url: string;
@@ -82,7 +82,6 @@ export async function get<R = any>(url: string): Promise<res<R>> {
     return result;
 }
 
-let authStore: ReturnType<typeof useAuthStore> | null = null;
 /**
  * 后端使用siteToken来统计UV PV IP日均
  * @param length
@@ -108,36 +107,44 @@ function getSiteTokenString(): string {
     return siteToken;
 }
 
-// 是否正在刷新 token
-let isRefreshing = false;
-// 重试队列
-let retryRequests: Function[] = [];
+type TokenRenewal = {
+    code: number;
+    token: string;
+    refreshToken: string;
+};
 
-// 刷新 token 的函数
-async function refreshToken() {
+let pendingRefresh: Promise<string> | null = null;
+// 旧请求的 401 可能晚于同一批请求的续期成功响应。
+let lastRenewal: { previous: string | null; current: string } | null = null;
+
+async function renewAccessToken(): Promise<string> {
+    const previous = getToken();
+    const refreshToken = getRefreshToken();
     try {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) {
-            throw new Error('No refresh token');
-        }
+        if (!refreshToken) throw new Error('缺少续期凭据');
+        const { data } = await axios.post<TokenRenewal>(`${SERVER_ADDRESS}/refresh-token`, { refreshToken }, { timeout: httpInstance.defaults.timeout });
+        if (data.code !== 200 || !data.token || !data.refreshToken) throw new Error('续期失败');
+        if (getRefreshToken() !== refreshToken) throw new Error('登录会话已更换');
 
-        const response = await axios.post(`${SERVER_ADDRESS}/refresh-token`, {
-            refreshToken,
-        });
-
-        if (response.data.code === 200) {
-            const { token, refreshToken: newRefreshToken } = response.data;
-            // 更新 token
-            setToken(token, newRefreshToken, 15 * 24 * 60 * 60);
-            return token;
-        } else {
-            throw new Error('Refresh token failed');
+        setToken(data.token, data.refreshToken, 15 * 24 * 60 * 60);
+        lastRenewal = { previous, current: data.token };
+        isRelogin.value.show = true;
+        return data.token;
+    } catch (cause) {
+        if (getRefreshToken() === refreshToken) {
+            removeToken();
+            useAuthStore().showLogin();
         }
-    } catch (error) {
-        // 刷新失败，清除所有 token
-        removeToken();
-        throw error;
+        // 不把续期接口的 HTTP 错误当成业务请求的 401 再次重试。
+        throw Object.assign(new Error('登录续期失败'), { cause });
     }
+}
+
+function refreshAccessToken(): Promise<string> {
+    pendingRefresh ??= renewAccessToken().finally(() => {
+        pendingRefresh = null;
+    });
+    return pendingRefresh;
 }
 
 // 请求拦截器
@@ -159,49 +166,9 @@ httpInstance.interceptors.request.use(
 
         const token = getToken();
         if (token) {
-            // 如果有有效token，确保isRelogin状态为true
-            if (!isRelogin.value.show) {
-                isRelogin.value.show = true;
-            }
-
-            // 检查 token 是否即将过期
-            if (isTokenExpiringSoon()) {
-                if (!isRefreshing) {
-                    isRefreshing = true;
-                    try {
-                        // 刷新 token
-                        const newToken = await refreshToken();
-                        // 确保刷新成功后登录状态为true
-                        isRelogin.value.show = true;
-                        // 更新请求头
-                        config.headers['Authorization'] = 'Bearer ' + newToken;
-                        // 重试队列中的请求
-                        retryRequests.forEach((cb) => cb(newToken));
-                        retryRequests = [];
-                    } catch (error) {
-                        // 刷新失败，清除重试队列
-                        retryRequests = [];
-                        // 显示登录框
-                        if (authStore) {
-                            authStore.showLogin();
-                        }
-                        return Promise.reject(error);
-                    } finally {
-                        isRefreshing = false;
-                    }
-                } else {
-                    // 如果正在刷新，将请求加入重试队列
-                    return new Promise((resolve) => {
-                        retryRequests.push((token: string) => {
-                            config.headers['Authorization'] = 'Bearer ' + token;
-                            resolve(config);
-                        });
-                    });
-                }
-            } else {
-                // token 未过期，直接使用
-                config.headers['Authorization'] = 'Bearer ' + token;
-            }
+            isRelogin.value.show = true;
+            const accessToken = pendingRefresh || isTokenExpiringSoon() ? await refreshAccessToken() : token;
+            config.headers['Authorization'] = 'Bearer ' + accessToken;
         }
         return config;
     },
@@ -215,15 +182,27 @@ const errorCode: Record<string, string> = {
     default: '系统未知错误，请反馈给管理员',
 };
 export const isRelogin = ref({ show: Boolean(getToken()) });
+
+function promptLogin() {
+    if (!isRelogin.value.show) {
+        isRelogin.value.show = true;
+        ElMessageBox.confirm('请先登录再使用该功能，或您的登录状态已过期，您可以继续留在该页面，或者重新登录', '请您先登录~', {
+            confirmButtonText: '重新登录',
+            cancelButtonText: '取消',
+            type: 'warning',
+        })
+            .then(() => {
+                isRelogin.value.show = false;
+                useAuthStore().showLogin();
+            })
+            .catch(() => {
+                isRelogin.value.show = false;
+            });
+    }
+}
+
 httpInstance.interceptors.response.use(
     (res) => {
-        if (!authStore) {
-            try {
-                authStore = useAuthStore();
-            } catch (e) {
-                console.warn('Pinia 尚未初始化，无法获取 authStore');
-            }
-        }
         const passHeader = res.headers?.['x-turnstile-pass'] || res.headers?.['X-Turnstile-Pass'];
         if (passHeader) {
             setTurnstilePass(passHeader as string);
@@ -237,30 +216,7 @@ httpInstance.interceptors.response.use(
             return res.data;
         }
         if (code === 401) {
-            if (!isRelogin.value.show) {
-                isRelogin.value.show = true;
-                ElMessageBox.confirm('请先登录再使用该功能，或您的登录状态已过期，您可以继续留在该页面，或者重新登录', '请您先登录~', {
-                    confirmButtonText: '重新登录',
-                    cancelButtonText: '取消',
-                    type: 'warning',
-                })
-                    .then(() => {
-                        isRelogin.value.show = false;
-                        if (authStore) {
-                            authStore.showLogin();
-                        } else {
-                            try {
-                                const store = useAuthStore();
-                                store.showLogin();
-                            } catch (e) {
-                                console.warn('Pinia 尚未初始化，无法获取 authStore');
-                            }
-                        }
-                    })
-                    .catch(() => {
-                        isRelogin.value.show = false;
-                    });
-            }
+            promptLogin();
             return Promise.reject('无效的会话，或者会话已过期，请重新登录。');
         } else if (code === 500) {
             ElMessage({ message: msg, type: 'error', duration: 15000, showClose: true });
@@ -287,51 +243,24 @@ httpInstance.interceptors.response.use(
 
         if (error.response) {
             switch (error.response.status) {
-                case 401:
-                    // token 过期或无效
-                    if (!isRefreshing) {
-                        isRefreshing = true;
-                        try {
-                            // 尝试刷新 token
-                            const newToken = await refreshToken();
-                            // 确保刷新成功后登录状态为true
-                            isRelogin.value.show = true;
-                            // 重试原请求
-                            error.config.headers['Authorization'] = 'Bearer ' + newToken;
-                            return httpInstance(error.config);
-                        } catch (refreshError) {
-                            // 刷新失败，清除 token 并显示登录框
-                            removeToken();
-                            if (!isRelogin.value.show) {
-                                isRelogin.value.show = true;
-                                ElMessageBox.confirm('登录状态已过期，请重新登录', '系统提示', {
-                                    confirmButtonText: '重新登录',
-                                    cancelButtonText: '取消',
-                                    type: 'warning',
-                                })
-                                    .then(() => {
-                                        isRelogin.value.show = false;
-                                        if (authStore) {
-                                            authStore.showLogin();
-                                        }
-                                    })
-                                    .catch(() => {
-                                        isRelogin.value.show = false;
-                                    });
-                            }
-                            return Promise.reject(refreshError);
-                        } finally {
-                            isRefreshing = false;
-                        }
-                    } else {
-                        // 如果正在刷新，将请求加入重试队列
-                        return new Promise((resolve) => {
-                            retryRequests.push((token: string) => {
-                                error.config.headers['Authorization'] = 'Bearer ' + token;
-                                resolve(httpInstance(error.config));
-                            });
-                        });
+                case 401: {
+                    const config = error.config;
+                    if (!config || config._retriedAfterRefresh) throw error;
+                    const current = getToken();
+                    const sent = config.headers.Authorization;
+                    if (!sent) {
+                        if (!current) promptLogin();
+                        throw error;
                     }
+                    if (sent !== 'Bearer ' + current) {
+                        // 只重放本次续期前发出的请求，不能用另一个账号接着重试。
+                        if (!current || lastRenewal?.current !== current || sent !== 'Bearer ' + lastRenewal.previous) throw error;
+                    } else {
+                        await refreshAccessToken();
+                    }
+                    config._retriedAfterRefresh = true;
+                    return httpInstance(config);
+                }
                 case 403:
                     if (error.response?.data?.needTurnstile) {
                         const action = error.response.data.action || 'general';
