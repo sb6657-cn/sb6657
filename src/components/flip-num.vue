@@ -1,5 +1,5 @@
 <template>
-    <span class="flip-num-wrapper">
+    <span ref="counterRef" class="flip-num-wrapper">
         <span class="container">
             <div class="place-holder">{{ numValue }}</div>
             <div :key="numValue" class="flip" :class="{ rolling: previousNum !== numValue, shrinking: numValue < previousNum }">
@@ -7,7 +7,11 @@
                 <div>{{ numValue }}</div>
             </div>
         </span>
-        <span v-if="showPlusOne" :key="plusOneKey" class="plus-one-badge">+1</span>
+        <el-tooltip v-if="showPlusOne && counterRef" :visible="true" virtual-triggering :virtual-ref="counterRef" placement="top" :offset="0" :show-arrow="false" :enterable="false" pure effect="copy-feedback" popper-class="copy-feedback-popper">
+            <template #content>
+                <span :key="plusOneKey" class="plus-one-badge">+1</span>
+            </template>
+        </el-tooltip>
     </span>
 </template>
 
@@ -29,6 +33,7 @@ const numValue = computed(() => {
     return typeof props.num === 'string' ? Number(props.num) : props.num;
 });
 
+const counterRef = ref<HTMLElement>();
 const previousNum = ref(numValue.value);
 const showPlusOne = ref(false);
 const plusOneKey = ref(0);
@@ -100,13 +105,17 @@ onBeforeUnmount(() => {
     }
 }
 
-.plus-one-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
+:global(.copy-feedback-popper) {
     pointer-events: none;
+}
+
+:global(.copy-feedback-popper[data-popper-reference-hidden="true"]) {
+    visibility: hidden;
+}
+
+.plus-one-badge {
+    display: block;
     user-select: none;
-    z-index: 20;
     white-space: nowrap;
     font-size: 11px;
     font-weight: 800;
@@ -122,19 +131,19 @@ onBeforeUnmount(() => {
 @keyframes plusOnePop {
     0% {
         opacity: 0;
-        transform: translate3d(-50%, 6px, 0) scale(0.4);
+        transform: translate3d(0, 6px, 0) scale(0.4);
     }
     20% {
         opacity: 1;
-        transform: translate3d(-50%, -4px, 0) scale(1.15);
+        transform: translate3d(0, -4px, 0) scale(1.15);
     }
     50% {
         opacity: 1;
-        transform: translate3d(-50%, -14px, 0) scale(1);
+        transform: translate3d(0, -14px, 0) scale(1);
     }
     100% {
         opacity: 0;
-        transform: translate3d(-50%, -24px, 0) scale(0.85);
+        transform: translate3d(0, -24px, 0) scale(0.85);
     }
 }
 </style>

@@ -35,9 +35,7 @@
             <div class="modern-copy-button" @click.stop="handleCopyMeme(randomMeme)">
                 <div class="copy-text">复制</div>
                 <div class="copy-icon">📋</div>
-                <div class="copy-count">
-                    <flipNum :num="randomMeme.cnt || 0" />
-                </div>
+                <flipNum class="copy-count" :num="randomMeme.cnt || 0" />
                 <div class="copy-ripple"></div>
             </div>
         </div>
@@ -306,9 +304,7 @@ async function handleCopyMeme(meme: getMemeList_meme) {
                 font-size: 14px;
                 font-weight: 600;
                 color: #ffffff;
-                overflow: hidden;
-                height: 1.2em;
-                line-height: 1.2em;
+                line-height: 1;
             }
         }
     }
@@ -341,9 +337,6 @@ async function handleCopyMeme(meme: getMemeList_meme) {
 
                 .copy-count {
                     font-size: 13px;
-                    overflow: hidden;
-                    height: 1.2em;
-                    line-height: 1.2em;
                 }
             }
 
