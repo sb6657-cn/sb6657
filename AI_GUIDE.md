@@ -454,7 +454,8 @@ UI：
 - 搜索框和投稿按钮位于 logo 行。
 - 操作按钮压缩成一行。
 - 操作区提供主题切换入口。
-- 24h 热门条在移动端以绝对定位显示，并且非首页时隐藏。
+
+移动端 24h 热门条由首页 `Home.vue` 在横幅与公告之间渲染，随正文滚动到吸顶 Tab 下方。移动页头保持高于 Tab，让搜索记录下拉框能覆盖导航。
 
 共享职责继续拆分为 `header-search.vue`、`hot-meme-dialogs.vue`、`header-submission-entry.vue`、`header-message-entry.vue`、`header-support-entry.vue`、`header-business-entry.vue` 和 `ThemeSwitcher.vue`。赞赏入口用受控的 `el-popover`，直接以闪电按钮定位提示气泡。投稿入口只调用全局投稿弹窗 store；主题入口通过 `themeStore` 切换浅色、深色或跟随系统模式；其余组件负责各自的请求、弹窗状态和定时器清理，双端 Header 只决定排列方式。
 
@@ -471,7 +472,7 @@ UI：
 
 ### 热门弹窗 `meme-dialog.vue`
 
-Header 里的 24h/7d 热门弹窗复用组件：
+桌面页头和移动首页复用同一套 24h/7d 热门弹窗：
 
 - 接收 `memeArr/loading/emptyText`
 - Header 用 slot 塞标题和切换按钮。

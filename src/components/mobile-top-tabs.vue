@@ -61,7 +61,7 @@ async function navigateTo(path: string) {
     border-bottom: darkgrey solid 1px;
 
     html.dark & {
-        background-color: var(--header-bg);
+        background-color: var(--body-bg);
         border-bottom-color: var(--header-border);
     }
 

@@ -48,32 +48,17 @@
                 <UserHome />
             </div>
         </div>
-
-        <HotMemeDialogs v-if="showHotMeme" v-slot="{ current, rotation, open }">
-            <img src="@/assets/imgs/hot.png" alt="热门" class="hot-barrage-img" @click="open" />
-            <div class="hot-barrage" @click="open">
-                <transition name="fade">
-                    <span :key="rotation" class="hot-barrage-span">热门：{{ current }}</span>
-                </transition>
-            </div>
-        </HotMemeDialogs>
     </header>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 import HeaderBusinessEntry from './header-business-entry.vue';
 import HeaderMessageEntry from './header-message-entry.vue';
 import HeaderSearch from './header-search.vue';
 import HeaderSubmissionEntry from './header-submission-entry.vue';
 import HeaderSupportEntry from './header-support-entry.vue';
-import HotMemeDialogs from './hot-meme-dialogs.vue';
 import UserHome from './userHome.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
-
-const route = useRoute();
-const showHotMeme = computed(() => route.path === '/home');
 
 function complaintButton() {
     window.open('https://www.wjx.cn/vm/rQUgnS0.aspx#');
@@ -161,48 +146,6 @@ function complaintButton() {
     align-items: center;
     justify-content: space-between;
     position: relative;
-}
-
-.hot-barrage-img {
-    width: 24px;
-    height: 24px;
-    position: absolute;
-    top: 260px;
-    left: 4px;
-    cursor: pointer;
-}
-
-.hot-barrage {
-    width: 360px;
-    overflow: hidden;
-    position: absolute;
-    top: 260px;
-    left: 30px;
-    z-index: 1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.hot-barrage-span {
-    color: #e4d6b8;
-    border-bottom: 1px solid #e4d6b8;
-    opacity: 0.8;
-
-    html.dark & {
-        color: var(--header-text);
-        border-bottom-color: var(--header-text);
-    }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
 }
 
 .complaint-button {

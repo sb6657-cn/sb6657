@@ -3,6 +3,14 @@
         <div class="boom">
             <img src="https://sb6657oss.wishao.fun/6657boom.webp" alt="6657boom" class="boom6657" />
         </div>
+        <HotMemeDialogs v-if="isMobile" v-slot="{ current, rotation, open }">
+            <button type="button" class="home-hot-meme" aria-label="查看近 24 小时热门烂梗" @click="open">
+                <img src="@/assets/imgs/hot.png" alt="" />
+                <Transition name="hot-meme-fade" mode="out-in">
+                    <span :key="rotation">热门：{{ current }}</span>
+                </Transition>
+            </button>
+        </HotMemeDialogs>
         <div class="cards-container">
             <div class="card first-card">
                 <HomeIntro />
@@ -32,6 +40,7 @@ import HomeNowStrip from '@/components/home/home-now-strip.vue';
 import HomePlaza from '@/components/home/home-plaza.vue';
 import RandomMeme from '@/components/home/random-meme.vue';
 import { useIsMobile } from '@/composables/useIsMobile';
+import HotMemeDialogs from '@/views/MainLayout/components/header-bar/components/hot-meme-dialogs.vue';
 import HomeWordCloudPanel from '@/views/MainLayout/components/right-sidebar/HomeWordCloudPanel.vue';
 
 const isMobile = useIsMobile();
@@ -105,12 +114,47 @@ const isMobile = useIsMobile();
         width: 100%;
 
         .boom {
-            height: 150px;
+            height: auto;
+            padding: 6px 0 4px;
 
             .boom6657 {
-                margin-top: 6px;
+                display: block;
                 height: 125px;
             }
+        }
+
+        .home-hot-meme {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 0 4px;
+            border: 0;
+            background: transparent;
+            color: var(--header-text);
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+
+            img {
+                flex: none;
+                width: 24px;
+                height: 24px;
+            }
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        .hot-meme-fade-enter-active,
+        .hot-meme-fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .hot-meme-fade-enter-from,
+        .hot-meme-fade-leave-to {
+            opacity: 0;
         }
 
         .mobile-word-cloud,
