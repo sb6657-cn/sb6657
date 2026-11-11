@@ -30,9 +30,7 @@
                 <img src="@/assets/imgs/github.png" alt="github" class="icon-img github-icon" />
             </a>
 
-            <HeaderSupportEntry v-slot="{ open }" dialog-width="100%">
-                <el-image class="icon-container icon-img" :src="lightningUrl" fit="cover" @click="open" />
-            </HeaderSupportEntry>
+            <HeaderSupportEntry compact />
 
             <HeaderMessageEntry v-slot="{ total }">
                 <div class="user-message">
@@ -74,7 +72,6 @@ import HotMemeDialogs from './hot-meme-dialogs.vue';
 import UserHome from './userHome.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 
-const lightningUrl = 'https://cdn.hguofichp.cn/power.png';
 const route = useRoute();
 const showHotMeme = computed(() => route.path === '/home');
 

@@ -11,7 +11,7 @@
                         <RouterLink to="/Tampermonkey">油猴脚本</RouterLink>
                         <RouterLink to="/Starrysky" target="_blank">星空背景</RouterLink>
                         <RouterLink to="/update">更新日志</RouterLink>
-                        <button class="link-button" type="button" @click="supportDialogVisible = true">赞赏支持</button>
+                        <button class="link-button" type="button" @click="sponsorDialog.open">赞赏支持</button>
                         <a href="https://sb6657.cn/v1.sb6657.cn/" target="_blank" rel="noopener noreferrer">sb6657旧版v1</a>
                         <a href="https://sb6657.cn/v2.sb6657.cn/" target="_blank" rel="noopener noreferrer">sb6657旧版v2</a>
                     </nav>
@@ -47,19 +47,17 @@
             <img src="https://static.wishao.site/sb6657/img/qqgroup.webp" alt="sb6657 官方交流群二维码" style="display: block; width: 100%; max-width: 100%; height: auto; object-fit: contain" />
             <p class="qq-group-hint">QQ群：1070269456、526042235</p>
         </el-dialog>
-
-        <SponsorModal v-model="supportDialogVisible" />
     </footer>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import SponsorModal from '@/components/SponsorModal.vue';
+import { useSponsorDialogStore } from '@/stores/useSponsorDialogStore';
 import { RouterLink } from 'vue-router';
 
 const serverDate = ref(0);
 const qqGroupDialogVisible = ref(false);
-const supportDialogVisible = ref(false);
+const sponsorDialog = useSponsorDialogStore();
 const txServerDate = new Date('2027-02-12'); // 服务器到期日期
 const currentDate = new Date();
 serverDate.value = Math.ceil((txServerDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));

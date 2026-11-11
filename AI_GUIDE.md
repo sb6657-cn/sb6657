@@ -293,6 +293,7 @@ App.vue
 │     ├─ DesktopSidebar（桌面端左侧菜单）
 │     ├─ RouterView 页面内容
 │     ├─ GlobalDialogHost（全局单例弹窗宿主）
+│     │  ├─ SponsorModal
 │     │  ├─ SearchDialogHost -> search-dialog.vue
 │     │  └─ submission-dialog.vue -> meme-submission.vue
 │     ├─ FooterBar
@@ -389,7 +390,7 @@ Home
 
 首页搜索词云的桌面端和移动端共用 `wordCloud.vue`。点击词条会沿用 Header 搜索的 `search` 路由查询参数打开全局搜索弹窗；首页随机烂梗卡片只有烂梗文案和右侧复制按钮触发复制，点击标签会携带 `tag` 查询参数跳转全部烂梗页，时间和其余空白区域不触发复制。
 
-全局 `FooterBar` 将入口分为 `sb6657` 和 `友情链接` 两组。`sb6657` 按当前顺序展示 GitHub、官方交流群、建议/提交 BUG、油猴脚本、星空背景、更新日志、赞赏支持和 sb6657 旧版 v1/v2，其中交流群与赞赏使用 Footer 内的二维码弹窗；`友情链接` 展示玩机器直播间、dgq63136.cn、弗一把及两项 B 站友情推广。两组链接使用可换行 Flex 布局，下方分割线后按原有两行排版展示服务器到期时间，以及 IPv6 状态、网站运行天数和 2024 年运营起始标记。
+全局 `FooterBar` 将入口分为 `sb6657` 和 `友情链接` 两组。`sb6657` 按当前顺序展示 GitHub、官方交流群、建议/提交 BUG、油猴脚本、星空背景、更新日志、赞赏支持和 sb6657 旧版 v1/v2，其中交流群使用 Footer 内的二维码弹窗，页头与页脚的赞赏入口通过 `useSponsorDialogStore` 打开 `global-dialog-host.vue` 中的同一个赞赏弹窗，桌面并排展示收款码和最近赞赏，768px 及以下改为上下排列；`友情链接` 展示玩机器直播间、dgq63136.cn、弗一把及两项 B 站友情推广。两组链接使用可换行 Flex 布局，下方分割线后按原有两行排版展示服务器到期时间，以及 IPv6 状态、网站运行天数和 2024 年运营起始标记。
 
 ### 烂梗列表 `memes-view.vue`
 
@@ -455,7 +456,7 @@ UI：
 - 操作区提供主题切换入口。
 - 24h 热门条在移动端以绝对定位显示，并且非首页时隐藏。
 
-共享职责继续拆分为 `header-search.vue`、`hot-meme-dialogs.vue`、`header-submission-entry.vue`、`header-message-entry.vue`、`header-support-entry.vue`、`header-business-entry.vue` 和 `ThemeSwitcher.vue`。其中投稿入口只调用全局投稿弹窗 store；主题入口通过 `themeStore` 切换浅色、深色或跟随系统模式；其余组件负责各自的请求、弹窗状态和定时器清理，双端 Header 只决定排列方式。
+共享职责继续拆分为 `header-search.vue`、`hot-meme-dialogs.vue`、`header-submission-entry.vue`、`header-message-entry.vue`、`header-support-entry.vue`、`header-business-entry.vue` 和 `ThemeSwitcher.vue`。赞赏入口用受控的 `el-popover`，直接以闪电按钮定位提示气泡。投稿入口只调用全局投稿弹窗 store；主题入口通过 `themeStore` 切换浅色、深色或跟随系统模式；其余组件负责各自的请求、弹窗状态和定时器清理，双端 Header 只决定排列方式。
 
 ### 搜索弹窗 `search-dialog.vue`
 
