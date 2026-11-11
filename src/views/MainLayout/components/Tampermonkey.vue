@@ -40,13 +40,13 @@
                 <div class="hero-badge douyin-badge">新增插件 · 抖音直播专版</div>
                 <h2 class="hero-title">douyin++（sb6657玩机器烂梗·抖音版）油猴插件</h2>
                 <p class="hero-desc">
-                    专为抖音直播网页版（<code>live.douyin.com</code>）打造：在直播间页面提供 <strong>sb6657 悬浮图标</strong>与播放器清晰度旁<strong>“玩烂梗”</strong>按钮随时呼出「sb6657玩机器烂梗（抖音版）」面板；鼠标放在抖音原生飘屏弹幕上时该条弹幕暂停并出现 <strong>+1</strong> 与 <strong>回复</strong>（自动按 <code>@发送者ID：内容</code> 填入发送框）；面板默认展示最新 <strong>50 条烂梗</strong>，支持关键词检索一键发送、顶部充电赞赏以及<strong>自动检查更新与一键更新</strong>。
+                    专为抖音直播网页版（含 <code>live.douyin.com</code> 与从关注页/首页进入的 <code>www.douyin.com/follow/live/*</code>、<code>/live/*</code>、<code>/root/live/*</code> 等直播间）打造：在直播间页面提供 <strong>sb6657 悬浮图标</strong>与播放器清晰度旁<strong>“玩烂梗”</strong>按钮随时呼出「sb6657玩机器烂梗（抖音版）」面板；鼠标放在抖音原生飘屏弹幕上时该条弹幕暂停并出现 <strong>+1</strong> 与 <strong>回复</strong>（自动按 <code>@发送者ID：内容</code> 填入发送框）；面板默认展示最新 <strong>50 条烂梗</strong>，支持关键词检索一键发送、顶部充电赞赏以及<strong>自动检查更新与一键更新</strong>。
                 </p>
                 <div class="version-meta">
                     <span class="meta-tag douyin-version">最新版本：{{ douyinVersion }}</span>
                     <span class="meta-tag date">更新日期：{{ douyinUpdateDate }}</span>
                     <span class="meta-tag status">支持环境：Tampermonkey 5.5.1 及以上</span>
-                    <span class="meta-tag target">适用站点：live.douyin.com/*</span>
+                    <span class="meta-tag target">适用站点：live.douyin.com/* &amp; www.douyin.com 直播页</span>
                 </div>
                 <div class="douyin-highlights">
                     <span class="highlight-pill">🔘 页面 sb6657 图标 &amp; 清晰度旁“玩烂梗”入口</span>
@@ -307,9 +307,9 @@ const backupCdnUrl = 'https://cdn.hguofichp.cn/sb6657.cn%E6%96%97%E9%B1%BC%E7%8E
 const tampermonkeyHomeUrl = 'https://www.tampermonkey.net/';
 const greasyforkUrl = 'https://greasyfork.org/zh-CN/scripts/511842-sb6657-cn%E6%96%97%E9%B1%BC%E7%8E%A9%E6%9C%BA%E5%99%A8%E7%83%82%E6%A2%97%E6%94%B6%E9%9B%86';
 
-const douyinVersion = 'v2026.11.09.06';
-const douyinUpdateDate = '2026-11-09';
-const douyinUserscriptUrl = '/douyin++.user.js';
+const douyinVersion = 'v2026.11.11.01';
+const douyinUpdateDate = '2026-11-11';
+const douyinUserscriptUrl = `/douyin++.user.js?v=${douyinVersion}`;
 </script>
 
 <style scoped>

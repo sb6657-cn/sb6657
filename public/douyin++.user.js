@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗/搜索发送
 // @namespace    https://sb6657.cn/
-// @version      v2026.11.09.06
-// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗（支持触底自动加载下一页）/搜索发送、赞赏充电及自动检查更新/一键更新支持，兼容油猴 5.5.1 及以上
+// @version      v2026.11.11.01
+// @description  sb6657玩机器烂梗（抖音版）：原生飘屏弹幕悬停即停并显示+1与回复、玩烂梗按钮与面板默认展示最新50条烂梗（支持触底自动加载下一页）/搜索发送、赞赏充电及自动检查更新/一键更新支持，兼容 live.douyin.com 与从关注页/首页进入的 www.douyin.com 直播间，支持油猴 5.5.1 及以上
 // @author       HZM
 // @match        https://live.douyin.com/*
+// @match        https://www.douyin.com/*
 // @include      https://live.douyin.com/*
+// @include      https://www.douyin.com/*
 // @icon         https://apic.douyucdn.cn/upload/avatar_v3/202510/39e8bc3233ca412fa991a18bd024cfbc_middle.jpg
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
@@ -25,7 +27,7 @@
         return;
     }
 
-    const CURRENT_VERSION = 'v2026.11.09.06';
+    const CURRENT_VERSION = 'v2026.11.11.01';
     const SCRIPT_DOWNLOAD_URL = 'https://sb6657.cn/douyin++.user.js';
     const PLUGIN_HEADER_NAME = 'dpahjdoiaw';
     const PLUGIN_HEADER_VALUE = 'douyinpp';
@@ -958,7 +960,7 @@
         }
     `;
 
-    addGlobalStyles(globalStyles);
+
 
     // ==========================================
     // 全局状态与工具函数
@@ -983,6 +985,21 @@
     const msgMetaMap = new Map(); // msgId -> { text, sender }
     const emojiUrlToNameMap = new Map(); // imageUrl -> '[emoji]'
     let emojiReverseReady = false;
+    let hasEnteredLiveRoom = false;
+    let hasScheduledUpdateCheck = false;
+    let isDomFallbackObserverAttached = false;
+    let lastObservedLiveHref = '';
+
+    function isDouyinLivePage() {
+        const host = location.hostname;
+        if (host === 'live.douyin.com') return true;
+        const path = location.pathname || '/';
+        if (/(?:^|\/)live\/[^/]+/.test(path)) return true;
+        return Boolean(
+            document.getElementById('chatroom') &&
+            document.querySelector('.douyin-player-controls-right')
+        );
+    }
 
     function getOverlayRoot() {
         return document.fullscreenElement || document.webkitFullscreenElement || document.body || document.documentElement;
@@ -1125,7 +1142,11 @@
     }
 
     function triggerOneClickUpdate() {
-        const targetUrl = getScriptUpdateUrl();
+        const baseUrl = getScriptUpdateUrl();
+        const cacheParam = availableRemoteVersion
+            ? `v=${encodeURIComponent(availableRemoteVersion)}`
+            : `_t=${Date.now()}`;
+        const targetUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${cacheParam}`;
         showToast('🚀 正在打开 Tampermonkey 一键更新页...', 2800);
         const opened = window.open(targetUrl, '_blank');
         if (!opened) {
@@ -2286,6 +2307,7 @@
                 togglePanel(e);
             });
         }
+        ball.style.display = 'flex';
         ensureInOverlayRoot(ball);
         syncUpdateUIState(false);
 
@@ -2529,17 +2551,14 @@
                     msgBus.on('PrivilegeScreenChatMessage', recordList);
                 }
                 if (msgBus && msgBus._sb6657_msg_mapped) {
+                    cp._sb6657_cp_hooked = true;
                     hookedAny = true;
                 }
             }
             return hookedAny;
         };
 
-        if (!tryHook()) {
-            const timer = setInterval(() => {
-                if (tryHook()) clearInterval(timer);
-            }, 250);
-        }
+        tryHook();
     }
 
     // ==========================================
@@ -2804,6 +2823,10 @@
     }
 
     function handleCanvasDanmuMouseMove(x, y, targetEl) {
+        if (!isDouyinLivePage()) {
+            if (activePausedBarrage) unlockPausedBarrage();
+            return;
+        }
         lastMouseX = x;
         lastMouseY = y;
 
@@ -2898,7 +2921,10 @@
     }
 
     function observeNativeDomFallback() {
+        if (isDomFallbackObserverAttached || !document.body) return;
+        isDomFallbackObserverAttached = true;
         const observer = new MutationObserver((mutations) => {
+            if (!isDouyinLivePage()) return;
             for (const m of mutations) {
                 for (const node of m.addedNodes) {
                     if (node.nodeType !== 1) continue;
@@ -2935,19 +2961,59 @@
         }
     });
 
-    function init() {
-        fetchDictTags();
+    function deactivateLiveRoomUi() {
+        unlockPausedBarrage();
+        removeUpdateBanner();
+        if (panelEl) {
+            panelEl.style.display = 'none';
+        }
+        const ball = document.getElementById('sb6657-douyin-ball');
+        if (ball) {
+            ball.style.display = 'none';
+        }
+        document.querySelectorAll('.sb6657-ctrl-slot').forEach(el => el.remove());
+    }
+
+    function syncLiveRouteState() {
+        if (!isDouyinLivePage()) {
+            if (hasEnteredLiveRoom || document.getElementById('sb6657-douyin-ball')) {
+                deactivateLiveRoomUi();
+            }
+            lastObservedLiveHref = '';
+            return;
+        }
+
+        addGlobalStyles(globalStyles);
+
+        if (!hasEnteredLiveRoom) {
+            hasEnteredLiveRoom = true;
+            fetchDictTags();
+        }
+        if (!hasScheduledUpdateCheck) {
+            hasScheduledUpdateCheck = true;
+            setTimeout(() => {
+                if (isDouyinLivePage()) checkUpdate(false);
+            }, 1500);
+        }
+
         mountIconButtons();
-        hookDanmuMessageStore();
         observeNativeDomFallback();
 
-        setTimeout(() => {
-            checkUpdate(false);
-        }, 1500);
+        const currentHref = location.href;
+        const needsDanmuHook =
+            lastObservedLiveHref !== currentHref ||
+            Array.from(document.querySelectorAll('.CanvasDanmakuPlugin')).some(cp => !cp._sb6657_cp_hooked);
+        if (needsDanmuHook) {
+            lastObservedLiveHref = currentHref;
+            hookDanmuMessageStore();
+        }
+    }
 
-        setInterval(() => {
-            mountIconButtons();
-        }, 1500);
+    function init() {
+        syncLiveRouteState();
+        window.addEventListener('popstate', () => setTimeout(syncLiveRouteState, 80));
+        window.addEventListener('hashchange', () => setTimeout(syncLiveRouteState, 80));
+        setInterval(syncLiveRouteState, 600);
     }
 
     if (document.readyState === 'loading') {
