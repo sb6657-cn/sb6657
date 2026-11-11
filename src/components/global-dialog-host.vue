@@ -1,10 +1,12 @@
 <template>
     <SearchDialogHost />
+    <HotMemeDialog />
     <SponsorModal v-model="sponsorDialog.visible" />
     <SubmissionDialog v-model="visible" />
 </template>
 
 <script setup lang="ts">
+import HotMemeDialog from '@/components/hot-meme/hot-meme-dialog.vue';
 import SponsorModal from '@/components/SponsorModal.vue';
 import { useSponsorDialogStore } from '@/stores/useSponsorDialogStore';
 import SearchDialogHost from '@/components/search-dialog-host.vue';

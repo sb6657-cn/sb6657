@@ -6,14 +6,7 @@
         </a>
 
         <div class="header-actions">
-            <HotMemeDialogs v-slot="{ current, rotation, open }">
-                <img src="@/assets/imgs/hot.png" alt="热门" class="hot-barrage-img" @click="open" />
-                <div class="hot-barrage" @click="open">
-                    <transition name="fade">
-                        <span :key="rotation" class="hot-barrage-span">热门：{{ current }}</span>
-                    </transition>
-                </div>
-            </HotMemeDialogs>
+            <HotMemeTicker />
 
             <HeaderSearch class="search-entry" />
 
@@ -65,7 +58,7 @@ import HeaderMessageEntry from './header-message-entry.vue';
 import HeaderSearch from './header-search.vue';
 import HeaderSubmissionEntry from './header-submission-entry.vue';
 import HeaderSupportEntry from './header-support-entry.vue';
-import HotMemeDialogs from './hot-meme-dialogs.vue';
+import HotMemeTicker from '@/components/hot-meme/hot-meme-ticker.vue';
 import UserHome from './userHome.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 
@@ -113,45 +106,6 @@ function complaintButton() {
     display: flex;
     align-items: center;
     position: relative;
-}
-
-.hot-barrage-img {
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-}
-
-.hot-barrage {
-    width: 300px;
-    overflow: hidden;
-    color: #e4d6b8;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-
-    html.dark & {
-        color: var(--header-text);
-    }
-}
-
-.hot-barrage-span {
-    color: #e4d6b8;
-    border-bottom: 1px solid #e4d6b8;
-
-    html.dark & {
-        color: var(--header-text);
-        border-bottom-color: var(--header-text);
-    }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
 }
 
 .search-entry {

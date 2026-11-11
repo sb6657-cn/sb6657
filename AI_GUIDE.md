@@ -113,8 +113,8 @@ export const WS_SERVER_ADDRESS = SERVER_ADDRESS.replace(/^http/, 'ws');
 | GET  | `/machine/Page?`                      | `getMemeList()`、`memes-view.vue`、`didYouKnow.vue` | 分页获取烂梗，常带 `tags/pageNum/pageSize` |
 | GET  | `/machine/sortAllBarrage`             | `getMemeListByCopyCount()`、`memes-view.vue`        | 全部烂梗按复制次数从高到低排序             |
 | POST | `/machine/pageSearch`                 | `search-dialog.vue`、`sendPost.vue`                 | 搜索烂梗，支持关键词、标签、时间、排序     |
-| GET  | `/machine/hotBarrageOf24H`            | `hot-meme-dialogs.vue`                              | 24 小时热门                                |
-| GET  | `/machine/hotBarrageOf7Day`           | `hot-meme-dialogs.vue`                              | 7 天热门                                   |
+| GET  | `/machine/hotBarrageOf24H`            | `useHotMemeStore.ts`                                | 24 小时热门                                |
+| GET  | `/machine/hotBarrageOf7Day`           | `useHotMemeStore.ts`                                | 7 天热门                                   |
 | GET  | `/machine/getRandOne`                 | `random-meme.vue`                                   | 首页随机一条烂梗                           |
 | POST | `/machine/submission`                 | `meme-submission.vue`、`setMeme.ts`                 | 投稿烂梗，可带 `tags/barrage/matchId`      |
 | GET  | `/machine/addCnt/{memeId}`            | 多处复制按钮                                        | 复制次数 +1                                |
@@ -283,7 +283,7 @@ App.vue
 │     ├─ HeaderBar（仅负责双端切换）
 │     │  ├─ DesktopHeader / MobileHeader
 │     │  ├─ HeaderSearch -> 路由 search 查询
-│     │  ├─ HotMemeDialogs -> meme-dialog.vue
+│     │  ├─ 桌面 HotMemeTicker -> useHotMemeStore
 │     │  ├─ HeaderSubmissionEntry -> useSubmissionDialogStore
 │     │  ├─ HeaderMessageEntry
 │     │  ├─ HeaderSupportEntry / HeaderBusinessEntry
@@ -293,7 +293,7 @@ App.vue
 │     ├─ DesktopSidebar（桌面端左侧菜单）
 │     ├─ RouterView 页面内容
 │     ├─ GlobalDialogHost（全局单例弹窗宿主）
-│     │  ├─ SponsorModal
+│     │  ├─ HotMemeDialog / SponsorModal
 │     │  ├─ SearchDialogHost -> search-dialog.vue
 │     │  └─ submission-dialog.vue -> meme-submission.vue
 │     ├─ FooterBar
@@ -457,7 +457,7 @@ UI：
 
 移动端 24h 热门条由首页 `Home.vue` 在横幅与公告之间渲染，随正文滚动到吸顶 Tab 下方。移动页头保持高于 Tab，让搜索记录下拉框能覆盖导航。
 
-共享职责继续拆分为 `header-search.vue`、`hot-meme-dialogs.vue`、`header-submission-entry.vue`、`header-message-entry.vue`、`header-support-entry.vue`、`header-business-entry.vue` 和 `ThemeSwitcher.vue`。赞赏入口用受控的 `el-popover`，直接以闪电按钮定位提示气泡。投稿入口只调用全局投稿弹窗 store；主题入口通过 `themeStore` 切换浅色、深色或跟随系统模式；其余组件负责各自的请求、弹窗状态和定时器清理，双端 Header 只决定排列方式。
+共享职责继续拆分为 `header-search.vue`、`hot-meme-ticker.vue`、`header-submission-entry.vue`、`header-message-entry.vue`、`header-support-entry.vue`、`header-business-entry.vue` 和 `ThemeSwitcher.vue`。赞赏入口用受控的 `el-popover`，直接以闪电按钮定位提示气泡。投稿入口只调用全局投稿弹窗 store；主题入口通过 `themeStore` 切换浅色、深色或跟随系统模式；其余组件负责各自的请求、弹窗状态和定时器清理，双端 Header 只决定排列方式。
 
 ### 搜索弹窗 `search-dialog.vue`
 
@@ -470,15 +470,11 @@ UI：
 - 每页 20 条。
 - 移动端分页简化为 `prev, pager, next`，按钮文案变短。
 
-### 热门弹窗 `meme-dialog.vue`
+### 热门轮播与热榜弹窗
 
-桌面页头和移动首页复用同一套 24h/7d 热门弹窗：
+桌面页头和移动首页都使用 `hot-meme-ticker.vue`。入口每 5 秒轮播一条 24 小时热梗，点击调用 `useHotMemeStore().open()`。轮播的模板、动画和双端样式都在该组件内。
 
-- 接收 `memeArr/loading/emptyText`
-- Header 用 slot 塞标题和切换按钮。
-- 表格结构与 `memes-view.vue` 接近。
-
-这个组件当前还有不少内联样式和注释掉的点赞列，后续清理时可以参考已经整理过的 `memes-view.vue`。
+`global-dialog-host.vue` 挂载唯一的 `hot-meme-dialog.vue`。24 小时和七天热榜在同一个弹窗内切换，store 按周期分别保存榜单和加载状态，轮播始终读取 24 小时榜单。表格支持复制烂梗、查看标签和屏蔽词提示。
 
 ### 贴吧模块
 
