@@ -1,0 +1,107 @@
+.records {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    h3 {
+        margin: 4px 0 14px;
+        font-size: 16px;
+        line-height: 21px;
+    }
+}
+.records-list {
+    flex: 1;
+    contain: size;
+    overflow-y: auto;
+    padding-right: 6px;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--el-border-color-darker) var(--el-fill-color-light);
+
+    li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-content: center;
+        align-items: baseline;
+        gap: 5px 14px;
+        min-height: 77px;
+        padding: 10px 2px;
+        border-bottom: 1px solid var(--el-border-color-lighter);
+    }
+}
+.identity,
+.details {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.identity {
+    min-width: 0;
+    flex-wrap: wrap;
+    row-gap: 2px;
+    font-size: 14px;
+
+    b {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+}
+.details {
+    gap: 4px;
+    color: var(--sponsor-muted);
+    font-size: 12px;
+
+    .channel-icon {
+        font-size: 14px;
+    }
+    .alipay-mark {
+        mask-image: url('@/assets/icons/sponsor/alipay-mark.svg');
+    }
+}
+.amount {
+    color: var(--sponsor-accent);
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+}
+.message,
+.no-message {
+    grid-column: 1;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 20px;
+    overflow-wrap: anywhere;
+}
+.message {
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--sponsor-surface);
+    color: var(--el-text-color-regular);
+    white-space: pre-line;
+
+    span {
+        color: #ff552e;
+        font-weight: bold;
+    }
+}
+.no-message {
+    padding: 4px 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+.status {
+    padding: 16px;
+    text-align: center;
+    color: var(--sponsor-muted);
+    font-size: 12px;
+}
+@media (max-width: 768px) {
+    .records-list {
+        flex: auto;
+        contain: none;
+        max-height: 46dvh;
+    }
+    .message,
+    .no-message {
+        grid-column: 1 / -1;
+    }
+}
