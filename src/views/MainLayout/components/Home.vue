@@ -116,6 +116,10 @@ const isMobile = useIsMobile();
             }
         }
 
+        .cards-container {
+            margin-top: 2px;
+        }
+
         .mobile-word-cloud,
         .mobile-checkin {
             margin-top: 10px;

@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { mergeWatermelonDialogVisible } from './state';
 
 const isVisible = ref(true);
@@ -73,14 +73,6 @@ const startDrag = (e: MouseEvent) => {
     document.addEventListener('mouseup', upHandler);
 };
 
-onMounted(() => {
-    const launcher = launcherRef.value;
-    if (launcher) {
-        launcher.style.top = `calc(50% - 125px)`;
-        launcher.style.right = '0';
-    }
-});
-
 onBeforeUnmount(() => {
     if (dragHandler) document.removeEventListener('mousemove', dragHandler);
     if (upHandler) document.removeEventListener('mouseup', upHandler);
@@ -90,7 +82,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .merge-watermelon-launcher {
     position: fixed;
-    top: 50%;
+    top: calc(50% - 125px);
     right: 0;
     transform: translateY(-50%);
     width: 110px;
@@ -168,6 +160,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 600px) {
     .merge-watermelon-launcher {
+        /* 右侧交流群入口从 55% 开始，给西瓜图标下方留出间距。 */
+        top: calc(55% - 44px);
         width: 65px;
         height: 65px;
     }
@@ -186,6 +180,22 @@ onBeforeUnmount(() => {
     .launcher-img {
         width: 65px;
         height: 65px;
+    }
+
+    @media (max-height: 720px) {
+        .launcher-bubble {
+            top: 50%;
+            right: calc(100% + 8px);
+            bottom: auto;
+            translate: 0 -50%;
+
+            &::after {
+                top: 50%;
+                right: -10px;
+                margin-top: -5px;
+                border-color: transparent transparent transparent var(--card-bg, #fff);
+            }
+        }
     }
 }
 </style>
