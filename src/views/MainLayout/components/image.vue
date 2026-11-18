@@ -191,7 +191,7 @@ void load();
     text-align: right;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .album-page {
         padding: 7px 8px 24px;
     }

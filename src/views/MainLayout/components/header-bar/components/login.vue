@@ -38,7 +38,7 @@
                 </el-form-item>
             </el-form>
         </div>
-        <el-dialog :align-center="true" v-model="resetPasswordView" :draggable="true" :width="dialogWidth"
+        <el-dialog :align-center="true" v-model="resetPasswordView" :draggable="true" width="min(400px, 95vw)"
             :modal="false" :append-to-body="true">
             <reset-password v-show="resetPasswordView" :closeDialog="closeResetPassword"></reset-password>
         </el-dialog>
@@ -48,7 +48,6 @@
 <script setup>
 import httpInstance, { isRelogin } from "@/apis/httpInstance";
 import TurnstileWidget from "@/components/TurnstileWidget.vue";
-import { useIsMobile } from '@/composables/useIsMobile';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { setToken } from "@/utils/cookieUtils";
 import { ElMessage } from "element-plus";
@@ -94,15 +93,6 @@ const rules = reactive({
 const formRef = ref()
 
 const resetPasswordView = ref(false);
-const isMobile = useIsMobile();
-const dialogWidth = ref('400px');
-
-function getDialogWidth() {
-    if (isMobile.value) {
-        dialogWidth.value = '95%';
-    }
-}
-getDialogWidth();
 
 function login() {
     formRef.value.validate((valid) => {

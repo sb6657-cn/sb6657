@@ -272,7 +272,7 @@ html.dark .login-tip {
 .reward-tip { margin: 10px 0 0; font-size: 12px; color: #999; }
 .login-tip { text-align: center; color: #bbb; margin-top: 16px; font-size: 14px; }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .reward-form { flex-direction: column; align-items: stretch; }
     .wallet-meta { flex-direction: column; gap: 8px; }
 }

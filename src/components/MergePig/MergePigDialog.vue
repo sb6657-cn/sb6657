@@ -441,7 +441,7 @@ onBeforeUnmount(() => {
 }
 
 /* 移动端全屏时不显示排行榜 */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .merge-pig-content {
         height: 100%;
         min-height: 100%;

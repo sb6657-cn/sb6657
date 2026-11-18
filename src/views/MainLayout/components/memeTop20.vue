@@ -329,7 +329,7 @@ const copyContent = async (item: MemeItem) => {
 }
 
 /* 移动端适配优化 */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .meme-container {
         margin: 10px;
         padding: 16px 12px;

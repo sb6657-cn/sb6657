@@ -1009,7 +1009,7 @@ onUnmounted(() => {
     overflow-y: auto;
     padding-right: 4px;
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .panel-scroll { max-height: 380px; }
 }
 .meme-list { list-style: none; margin: 0; padding: 0; }

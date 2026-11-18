@@ -695,7 +695,7 @@ onBeforeUnmount(() => {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .merge-watermelon-content {
         height: 100%;
         min-height: 100%;

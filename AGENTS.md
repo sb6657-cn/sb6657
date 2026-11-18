@@ -75,7 +75,7 @@
 ## UI
 
 - 桌面端和移动端布局差得多，不要只改桌面。
-- `useIsMobile()` 是 `(max-width: 600px)`，和组件 CSS 里的 `768px` 等断点不是一回事。
+- 全站手机 / 桌面分界为 768px（含）以下用窄屏布局。JS 复用 `useIsMobile()`；CSS 用 `(max-width: 768px)`，仅桌面用 `(width > 768px)`。控件和内容的局部排版可有独立断点。
 - `MainLayout.vue` 负责壳、设备分流（桌面侧栏 / 移动 Tab）、桌面 Header 吸顶，并只挂一个 `global-dialog-host.vue`。跨页面弹窗挂到该宿主，用独立 Pinia store 开关，不要多处各挂一份。
 - `header-bar.vue` 只按 `useIsMobile()` 挂桌面或移动 Header；双端模板和样式分开维护。
 - `FloatingSidebar.vue` 的动态 `:style` 是拖拽定位需要的，不要当行内样式清掉。

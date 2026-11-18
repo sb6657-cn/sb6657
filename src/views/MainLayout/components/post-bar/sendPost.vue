@@ -136,7 +136,7 @@ const submitPost = async () => {
   text-align: right;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .post-form {
     width: 100%;
   }

@@ -40,7 +40,8 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+  import { ref, computed, watch } from 'vue'
+  import { useIsMobile } from '@/composables/useIsMobile';
   import MatchCoinBase from '../views/MainLayout/components/match-prediction/MatchCoinBase.vue'
   import { ElProgress } from 'element-plus'
   
@@ -62,7 +63,7 @@
   const currentCoinType = ref<'bronze' | 'silver' | 'gold' | 'diamond'>('gold')
   
   // 响应式布局
-  const isMobile = ref(false)
+  const isMobile = useIsMobile();
   const dialogWidth = computed(() => isMobile.value ? '100%' : '80%')
   const viewerHeight = computed(() => isMobile.value ? '80vh' : '70vh')
   
@@ -70,11 +71,6 @@
   const isLoading = ref(true)
   const progress = ref(0)
   const loadingStatusText = ref('初始化...')
-  
-  // 检查是否为移动设备
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth <= 768
-  }
   
   // 处理币种类型变化
   const handleCoinTypeChange = (type: typeof currentCoinType.value) => {
@@ -114,16 +110,6 @@
     loadingStatusText.value = '初始化...'
     currentCoinType.value = 'gold'
   }
-  
-  // 监听窗口大小变化
-  onMounted(() => {
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-  })
-  
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', checkMobile)
-  })
   
   // 监听对话框显示状态
   watch(dialogVisible, (newVal) => {

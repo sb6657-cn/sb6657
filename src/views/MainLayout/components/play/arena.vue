@@ -357,7 +357,7 @@ onMounted(() => {
 
 .empty { color: #bbb; text-align: center; padding: 30px; font-size: 14px; }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .pk-vs { flex-direction: column; }
     .pk-vs-badge { width: 100%; height: 28px; border-radius: 6px; }
     .rank-barrage { max-width: 160px; }

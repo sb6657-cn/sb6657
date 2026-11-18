@@ -19,8 +19,8 @@
         <HomePlaza />
         <el-backtop :right="50" :bottom="50" />
         <ChatRoom class="ChatRoom card"></ChatRoom>
-        <HomeWordCloudPanel v-if="isMobile" class="mobile-word-cloud" />
-        <HomeCheckinStrip v-if="isMobile" class="mobile-checkin" />
+        <HomeWordCloudPanel v-if="showInlinePanels" class="mobile-word-cloud" />
+        <HomeCheckinStrip v-if="showInlinePanels" class="mobile-checkin" />
     </div>
 </template>
 
@@ -32,11 +32,13 @@ import HomeCheckinStrip from '@/components/home/home-checkin-strip.vue';
 import HomeNowStrip from '@/components/home/home-now-strip.vue';
 import HomePlaza from '@/components/home/home-plaza.vue';
 import RandomMeme from '@/components/home/random-meme.vue';
+import { useMediaQuery } from '@/composables/useMediaQuery';
 import { useIsMobile } from '@/composables/useIsMobile';
 import HotMemeTicker from '@/components/hot-meme/hot-meme-ticker.vue';
 import HomeWordCloudPanel from '@/views/MainLayout/components/right-sidebar/HomeWordCloudPanel.vue';
 
 const isMobile = useIsMobile();
+const showInlinePanels = useMediaQuery('(max-width: 1200px)');
 </script>
 
 <style scoped lang="scss">
@@ -84,25 +86,31 @@ const isMobile = useIsMobile();
     margin: 10px 0;
 }
 
-@media (min-width: 601px) {
+@media (width > 768px) {
     .ChatRoom {
         display: none;
     }
+}
 
-    .mobile-word-cloud {
+@media (width > 1200px) {
+    .mobile-word-cloud,
+    .mobile-checkin {
         display: none;
+    }
+}
+
+@media (max-width: 1200px) {
+    .home .cards-container {
+        flex-direction: column;
+    }
+    .mobile-word-cloud,
+    .mobile-checkin {
+        margin-top: 10px;
+        width: 100%;
     }
 }
 
 @media (max-width: 768px) {
-    .home {
-        .cards-container {
-            flex-direction: column;
-        }
-    }
-}
-
-@media (max-width: 600px) {
     .home {
         width: 100%;
 
@@ -117,6 +125,7 @@ const isMobile = useIsMobile();
         }
 
         .cards-container {
+            flex-direction: column;
             margin-top: 2px;
         }
 

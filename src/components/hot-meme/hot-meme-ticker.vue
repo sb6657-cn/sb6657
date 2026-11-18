@@ -72,7 +72,7 @@ onUnmounted(() => clearInterval(timer));
             transform: translateX(2px);
         }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
         width: 100%;
         padding: 0 4px;
         // 贴在首页深色横幅上，沿用米色；--header-text 在浅色主题是深字，会糊进横幅

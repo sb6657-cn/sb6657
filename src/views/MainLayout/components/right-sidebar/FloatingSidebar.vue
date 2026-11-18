@@ -1,6 +1,6 @@
 <template>
     <div class="floating-sidebar">
-        <HomeRightDock v-if="showHomeWordCloud" />
+        <HomeRightDock v-if="showHomeWordCloud" class="home-right-checkin" />
         <HomeWordCloudPanel v-if="showHomeWordCloud" class="home-right-word-cloud" />
 
         <div class="draggable chat-room-draggable" :style="{ left: `${chatX}vw`, top: `${chatY}px` }" @mousedown="startDrag" v-show="isChatVisible">
@@ -62,6 +62,7 @@
 
 <script setup lang="ts">
 import ChatRoom from '@/components/ChatRoom.vue';
+import { useMediaQuery } from '@/composables/useMediaQuery';
 import { useIsMobile } from '@/composables/useIsMobile';
 import { X } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -81,15 +82,15 @@ const adImageDialogVisible = ref(false);
 const qqGroupHintVisible = ref(true);
 const sponsorHintVisible = ref(true);
 const isMobile = useIsMobile();
+const showInlineHomePanels = useMediaQuery('(max-width: 1200px)');
 const popoverVisible = ref(true);
 const layoutAdVisible = ref(true);
 const layoutAdClosed = ref(false);
-const responsiveReady = ref(false);
 let hintTimer: ReturnType<typeof setTimeout> | null = null;
 let removeDragListeners: (() => void) | null = null;
 
 const isHomeRoute = computed(() => props.isHomeRoute);
-const showHomeWordCloud = computed(() => responsiveReady.value && isHomeRoute.value && !isMobile.value);
+const showHomeWordCloud = computed(() => isHomeRoute.value && !showInlineHomePanels.value);
 const adLink = 'https://yousheng186.com/activity/login/1?promotionCode=6657';
 
 const adImage = computed(() => {
@@ -162,7 +163,6 @@ const closeLayoutAd = () => {
 };
 
 onMounted(() => {
-    responsiveReady.value = true;
     hintTimer = setTimeout(() => {
         qqGroupHintVisible.value = false;
         sponsorHintVisible.value = false;
@@ -272,7 +272,15 @@ onBeforeUnmount(() => {
     z-index: 1;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
+    .home-right-checkin,
+    .home-right-word-cloud,
+    .chat-room-draggable {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
     .home-right-word-cloud {
         display: none;
     }

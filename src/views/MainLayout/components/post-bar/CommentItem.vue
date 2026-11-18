@@ -138,7 +138,7 @@ const submitReply = async () => {
 </script>
 
 <style scoped lang="scss">
-@media (min-width: 601px) {
+@media (width > 768px) {
     .comment-item {
         .likeImg {
             width: 18px;
@@ -177,7 +177,7 @@ const submitReply = async () => {
         margin-top: 5px;
     }
 }
-@media (max-width:600px) {
+@media (max-width: 768px) {
     .comment-item {
         .likeImg {
             width: 18px;

@@ -380,13 +380,13 @@ Home
 
 `DidYouKnow.vue` 先展示投稿库规模和最新一条烂梗：总数链到全部烂梗页并单独一行大字，最新投稿时间下一行，梗文案再下一行点击复制。提示中的标签由投稿标签值和当前字典计算，字典晚到也会补齐。下方 `HomeSpotlight` 轮播 15 勇士、年度 TOP20 和时光机。15 勇士和 TOP20 标题仍是「你知道吗？」；切到时光机时标题恢复为「sb6657 时光机」，正文为「万恶之源，我们的来时路。旧版 sb6657.cn 考古专项。」，链接文案为 `sb6657.cn v1` / `sb6657.cn v2`。旧条先向下滚出再从上滚入下一条，带淡入淡出和减速曲线；右侧「换一条」沿用随机烂梗的文字+刷新图标。超级逮虾户不在轮播里。
 
-`HomeCheckinStrip` 整行进 `/checkin`。桌面端由 `FloatingSidebar` 里的 `HomeRightDock` 固定在原广告位（约 `top: 30%`）；搜索词云仍在右下。移动端放在首页正文流最底部。未登录不请求签到接口，文案为「登录后每天领梗币」；已登录则读 `/machine/checkin/status`，展示今日未签到或已签到连续天数。悬停只改文字颜色。
+`HomeCheckinStrip` 整行进 `/checkin`。桌面端由 `FloatingSidebar` 里的 `HomeRightDock` 固定在原广告位（约 `top: 30%`）；搜索词云仍在右下。1200px 及以下放在首页正文流最底部。未登录不请求签到接口，文案为「登录后每天领梗币」；已登录则读 `/machine/checkin/status`，展示今日未签到或已签到连续天数。悬停只改文字颜色。
 
-桌面首页右侧词云不是 `Home.vue` 直接放的，而是 `MainLayout` 给 `.content--with-home-sidebar` 预留右侧空间，`FloatingSidebar` 固定显示 `HomeWordCloudPanel`。
+超过 1200px 的桌面首页右侧词云不是 `Home.vue` 直接放的，而是 `MainLayout` 给 `.content--with-home-sidebar` 预留右侧空间，`FloatingSidebar` 固定显示 `HomeWordCloudPanel`。
 
 `HomeNowStrip` 在玩法卡上方，整行进 `/hotwall`。用与热度墙相同的 SSE 拉一帧 `snapshot` 后立即断开，只展示近 5 分钟热度第一名和次数，不在首页保活事件流。
 
-`HomePlaza` 四张整卡可点，只预览不在首页完成投票/打分。悬停只改标题和「去看」颜色，不上浮、不加阴影。数据分别来自 `/machine/arena/current` 的今日 PK、`/machine/lifecycle/dashboard` 四阶段数量、`/machine/stale/rank` 第一名，以及 `/machine/showImage` 最新一张照片。桌面端两列、`600px` 及以下改单列。
+`HomePlaza` 四张整卡可点，只预览不在首页完成投票/打分。悬停只改标题和「去看」颜色，不上浮、不加阴影。数据分别来自 `/machine/arena/current` 的今日 PK、`/machine/lifecycle/dashboard` 四阶段数量、`/machine/stale/rank` 第一名，以及 `/machine/showImage` 最新一张照片。桌面端两列、`768px` 及以下改单列。
 
 首页搜索词云的桌面端和移动端共用 `wordCloud.vue`。点击词条会沿用 Header 搜索的 `search` 路由查询参数打开全局搜索弹窗；首页随机烂梗卡片只有烂梗文案和右侧复制按钮触发复制，点击标签会携带 `tag` 查询参数跳转全部烂梗页，时间和其余空白区域不触发复制。
 
@@ -654,24 +654,23 @@ App.vue
 
 | 断点          | 使用                                                      |
 | ------------- | --------------------------------------------------------- |
-| `600px`       | 全局移动端判断，`useIsMobile()` 也是 `(max-width: 600px)` |
-| `601px`       | 桌面端样式起点                                            |
-| `640px/680px` | 生命周期演变节点和“合成大猪头”原生游戏的窄屏适配         |
-| `768px`       | 部分复杂页面，如首页卡片、赛事、投稿弹窗、随机烂梗        |
-| `1200px`      | 赛事竞猜和屏蔽词卡片的中等屏适配                          |
+| `≤ 768px`    | 全站窄屏布局：移动页头、顶部 Tab、首页正文入口、弹窗和主要页面 |
+| `> 768px`    | 桌面页头和侧栏                                 |
+| `640px`      | 生命周期演变节点的局部排版                                 |
+| `1200px`      | 首页固定右侧区与正文流切换、赛事竞猜和屏蔽词卡片的中等屏适配                          |
 | `375px/360px` | 赛事拖拽卡片和榜单超窄屏                                  |
 
-`src/composables/useIsMobile.ts` 的 `useIsMobile()` 只认 600px，因此用它控制显隐的组件和 CSS 里的 768px 断点可能不完全一致。
+需要按手机 / 桌面切换组件或交互时使用 `useIsMobile()`（底层复用 `useMediaQuery()`；局部内容布局可直接订阅自己的媒体查询），首次渲染即读取媒体查询，跨断点自动更新。CSS 的对应条件为 `(max-width: 768px)` 和 `(width > 768px)`，包含缩放产生的小数宽度。
 
 ### 桌面端
 
 `MainLayout.vue` + `DesktopSidebar`：
 
-- `MainLayout` 为 `DesktopHeader` 设置 sticky 吸顶，Header 自身只维护尺寸和内部排版。
-- `DesktopSidebar` 仅在桌面端挂载，左侧 `el-menu` 使用与 55px Header 一致的 sticky 偏移，从页面开始滚动时便保持固定。
+- `MainLayout` 为 `DesktopHeader` 设置 sticky 吸顶，Header 自身只维护尺寸和内部排版，1400px 及以下允许操作区换行。
+- `DesktopSidebar` 仅在桌面端挂载，左侧 `el-menu` 使用 `MainLayout` 的 ResizeObserver 测得的 Header 高度作为 sticky 偏移，从页面开始滚动时便保持固定。
 - `.main-content` 是横向 flex。
 - `.content` 占剩余空间。
-- 首页额外加 `.content--with-home-sidebar`，右侧预留 360px 给词云/广告。
+- 首页在超过 1200px 时额外加 `.content--with-home-sidebar`，右侧预留 360px 给词云/签到；1200px 及以下放回正文流，首页介绍卡片改为上下排列。
 - `FloatingSidebar` 显示可拖拽聊天室、首页词云、广告、竖排按钮。
 
 ### 移动端
@@ -688,7 +687,7 @@ App.vue
 - `Home.vue` 里显示移动端 `HomeWordCloudPanel`，聊天室进入内容流。
 - 成长页的统计项换成两列、勋章固定两列；烂度页把投票操作移到整行底部；擂台把左右对手改为上下排列；签到页把打赏表单改为纵向。
 - 生命周期阶段面板靠 `auto-fit/minmax(250px, 1fr)` 自然收成单列，DNA 图在 768px 以下改为图表在上、详情在下。
-- “合成大猪头”的 Vue 弹窗在 600px 以下全屏，原生游戏样式另有 680px 断点，排行榜在移动端按需显示。这两个断点不是同一个概念。
+- “合成大猪头”的 Vue 弹窗在 768px 及以下全屏，原生游戏同步切换窄屏控件，排行榜按需显示。
 - 许多页面表格仍然存在横向压力，后续如果优化移动端，优先看表格列宽和弹窗宽度。
 
 ## 目录地图
@@ -715,7 +714,7 @@ src/
 │  ├─ GuiBinStore.ts         斗鱼贵宾数
 │  └─ themeStore.ts          浅色/深色/跟随系统主题
 ├─ composables/
-│  └─ useIsMobile.ts         监听 600px 媒体查询的 Vue composable
+│  └─ useIsMobile.ts         监听 768px 媒体查询的 Vue composable
 ├─ utils/
 │  ├─ common.ts              sleep 等无 Vue 上下文的通用函数
 │  └─ timeAlbum.ts           相册标题、日期与接口数据规范化
@@ -810,7 +809,7 @@ memeTagsStore.tagsLoaded.then(() => {
 1. 先只改一个组件，不要跨组件顺手重构。
 2. 行内 `style` 迁到语义 class。
 3. Element Plus 弹窗、popover、table 内部样式要注意 teleport 和 scoped，必要时用 `:deep()` 或给弹层内容自己的 root class。
-4. 移动端先确认这个组件使用的是 600px 还是 768px，不要硬套一个断点。
+4. 页面的手机 / 桌面切换遵循全站 768px 分界；调整局部控件前先看其内容所需宽度。
 5. 改完依次跑 `pnpm run lint`、`pnpm run typecheck` 和 `pnpm run build`。lint error 会阻断 CI；仓库里仍有历史 warning，后续可按模块逐步清理。
 
 ## 常见坑
@@ -826,7 +825,7 @@ memeTagsStore.tagsLoaded.then(() => {
 - 合成大猪头和在线聊天的 WebSocket 地址都由 `WS_SERVER_ADDRESS` 从 `SERVER_ADDRESS` 派生，切换后端地址只需要改 `VITE_BASE_URL`，不要再硬编码 host 或端口。
 - `MergePigWsClient` 虽然提供 `sendPing()`，当前没有定时器调用它；现有定时任务只有每 20 秒的 `score_update`，不要把代码注释里的“30s 心跳”当成已启用行为。
 - 合成大猪头的静态图使用 `import.meta.env.BASE_URL + 'merge-pig/'`；资源应放在 `public/merge-pig/`，不要移进 `src/assets` 后仍沿用原路径。
-- 游戏弹窗用 `useIsMobile()` 的 600px 判断，原生游戏 CSS 用 680px；修改其响应式时要同时检查两层。
+- 游戏弹窗和原生游戏都按 768px 分流；修改其响应式时要同时检查两层。
 - `V3.14.0` 更新日志曾记录“AI 玩梗接龙”，但该功能已在 `V3.14.2` 前后端移除，当前没有对应路由、组件或接口，不要按旧日志恢复到架构说明。
 - 生产环境会屏蔽 `console.log/dir/warn`，只保留 `console.error`。
 - `main.ts` 每 24 小时自动 `location.reload()`。

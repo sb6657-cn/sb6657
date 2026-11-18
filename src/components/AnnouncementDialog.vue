@@ -224,7 +224,7 @@ onMounted(() => {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .announcement-panel {
         width: 92%;
         border-radius: 12px;

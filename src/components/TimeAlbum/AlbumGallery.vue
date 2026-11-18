@@ -105,7 +105,7 @@ function requestMore() {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .image-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;

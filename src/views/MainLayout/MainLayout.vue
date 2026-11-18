@@ -1,6 +1,8 @@
 <template>
-    <div>
-        <HeaderBar :class="{ 'layout-header--sticky': !isMobile }" />
+    <div :style="{ '--layout-header-height': `${headerHeight}px` }">
+        <div ref="headerElement" :class="{ 'layout-header--sticky': !isMobile }">
+            <HeaderBar />
+        </div>
         <MobileTopTabs v-if="isMobile" />
 
         <div class="main-content">
@@ -30,7 +32,7 @@ import { useRoute } from 'vue-router';
 import { sbVersion } from '@/apis/httpInstance';
 import { useGuiBinStore } from '@/stores/GuiBinStore';
 import DouyuWebSocket from '@/utils/douyuWebSocket';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { handleDanmu } from '@/utils/douyuWebSocket';
 import { useMemeTagsStore } from '@/stores/memeTags';
 import { RouterLink } from 'vue-router';
@@ -38,6 +40,15 @@ import { useIsMobile } from '@/composables/useIsMobile';
 
 const route = useRoute();
 const isMobile = useIsMobile();
+const headerElement = ref<HTMLElement>();
+const headerHeight = ref(55);
+const headerObserver = new ResizeObserver(([entry]) => {
+    headerHeight.value = entry.target.getBoundingClientRect().height;
+});
+onMounted(() => {
+    if (headerElement.value) headerObserver.observe(headerElement.value);
+});
+onUnmounted(() => headerObserver.disconnect());
 const isHomeRoute = computed(() => route.path === '/' || route.path === '/home');
 
 const guiBinStore = useGuiBinStore();
@@ -66,7 +77,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@media (min-width: 601px) {
+@media (width > 768px) {
     .layout-header--sticky {
         position: sticky;
         top: 0;
@@ -84,8 +95,10 @@ onMounted(() => {
         padding: 10px;
     }
 
-    .content--with-home-sidebar {
-        padding-right: 360px;
+    @media (width > 1200px) {
+        .content--with-home-sidebar {
+            padding-right: 360px;
+        }
     }
 
     .version {
@@ -114,7 +127,7 @@ onMounted(() => {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .main-content,
     .content {
         width: 100%;

@@ -187,7 +187,7 @@ watch(loginView, (visible) => {
     border-radius: 50%;
 }
 
-@media (min-width: 601px) {
+@media (width > 768px) {
     .DialogView {
         position: fixed;
         top: 30%;
@@ -200,7 +200,7 @@ watch(loginView, (visible) => {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .avatar-wrapper {
         height: 24px;
         padding: 0 4px;

@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .merge-pig-launcher {
         width: 65px;
         height: 65px;

@@ -166,7 +166,7 @@ onMounted(() => {
     display: flex;
     justify-content: center;
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .message-container {
         width: 100%;
         padding: 16px;

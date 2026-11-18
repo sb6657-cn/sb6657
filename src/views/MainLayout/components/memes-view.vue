@@ -464,7 +464,7 @@ const scrollToTop = () => {
     }
 }
 
-@media (min-width: 600px) {
+@media (width > 768px) {
     .memes-view {
         .main-table {
             font-size: large;
@@ -472,7 +472,7 @@ const scrollToTop = () => {
     }
 }
 
-@media (max-width: 601px) {
+@media (max-width: 768px) {
     .memes-view {
         width: 100%;
 

@@ -426,7 +426,7 @@ onUnmounted(() => observer?.disconnect());
 .list-end { text-align: center; color: #ccc; font-size: 13px; padding: 16px; }
 .sentinel { height: 1px; }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .meme-item { flex-wrap: wrap; }
     .meme-side { flex-direction: row; width: 100%; justify-content: space-between; }
     .vote-btns { flex-direction: row; }

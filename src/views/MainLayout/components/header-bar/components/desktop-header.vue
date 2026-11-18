@@ -213,4 +213,37 @@ html.dark .message-icon img {
     display: flex;
     align-items: center;
 }
+@media (max-width: 1400px) {
+    .header {
+        flex-wrap: wrap;
+        height: auto;
+        gap: 4px;
+        padding-bottom: 6px;
+    }
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 10px;
+    }
+    .header-title {
+        width: auto;
+        font-size: 24px;
+    }
+    .header-actions :deep(.hot-meme-ticker) {
+        flex: 1;
+        min-width: 140px;
+    }
+    .search-entry {
+        width: 150px;
+        margin-right: 0;
+    }
+    .submit-entry {
+        min-width: 50px;
+        height: 36px;
+        margin-right: 0;
+        border-radius: 4px;
+        align-self: center;
+    }
+}
 </style>

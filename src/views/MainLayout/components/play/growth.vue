@@ -518,7 +518,7 @@ onMounted(async () => {
     padding: 20px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .stat-row { flex-wrap: wrap; }
     .stat-item { min-width: 45%; }
     .medals { grid-template-columns: repeat(2, 1fr); }

@@ -109,7 +109,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useIsMobile } from '@/composables/useIsMobile';
 import { ElMessage } from 'element-plus'
 import { MapPin, Calendar } from '@lucide/vue'
 import httpInstance from '@/apis/httpInstance'
@@ -171,13 +172,7 @@ const dictData = ref<MemeTag[]>([])
 
 const copyAndShouldCount = createCountedCopy();
 
-// 判断是否为移动端
-const isMobile = ref(window.innerWidth <= 768)
-
-// 监听窗口大小变化
-const handleResize = () => {
-    isMobile.value = window.innerWidth <= 768
-}
+const isMobile = useIsMobile();
 
 const getMatchList = async () => {
     try {
@@ -288,14 +283,7 @@ const handleTouchEnd = (row: any) => {
     }
 }
 
-onMounted(() => {
-    getMatchList()
-    window.addEventListener('resize', handleResize)
-})
-
-onUnmounted(() => {
-    window.removeEventListener('resize', handleResize)
-})
+onMounted(getMatchList);
 </script>
 
 <style scoped>

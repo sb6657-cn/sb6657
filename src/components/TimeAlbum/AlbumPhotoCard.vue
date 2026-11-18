@@ -207,7 +207,7 @@ const commentsId = computed(() => `comments-${props.image.id}`);
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .photo-card {
         border-radius: 7px;
     }

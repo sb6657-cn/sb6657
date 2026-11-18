@@ -25,7 +25,7 @@ const route = useRoute();
     min-height: calc(100vh - 60px);
 
     .sidebar-el-menu {
-        top: 55px;
+        top: var(--layout-header-height, 55px);
         position: sticky;
         border: none;
         margin-right: auto;

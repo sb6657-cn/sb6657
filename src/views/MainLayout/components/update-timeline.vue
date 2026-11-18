@@ -290,7 +290,7 @@ function getUpdateTypeClass(type: string): string {
 }
 
 // 移动端适配
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .update-timeline {
         padding: 15px;
         li {

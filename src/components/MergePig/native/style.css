@@ -534,7 +534,7 @@ h1 {
   background: #408451;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .page-shell {
     padding: 0;
   }
@@ -631,7 +631,7 @@ h1 {
   display: none;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   #mobile-leaderboard-btn {
     display: flex !important;
     width: 80px;

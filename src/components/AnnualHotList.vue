@@ -863,7 +863,7 @@ const handlePageChange = (page: number) => {
     line-height: 1.5;
 }
 
-@media(min-width:601px) {
+@media (width > 768px) {
 
     :deep(.el-rate__icon) {
         font-size: 35px;
@@ -915,7 +915,7 @@ const handlePageChange = (page: number) => {
 
 }
 
-@media(max-width: 600px) {
+@media (max-width: 768px) {
     :deep(.tall) {
         width: 90vw;
     }

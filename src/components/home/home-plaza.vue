@@ -244,7 +244,7 @@ function clampedScore(score: number) {
     opacity: 0.72;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .plaza-grid {
         grid-template-columns: 1fr;
     }

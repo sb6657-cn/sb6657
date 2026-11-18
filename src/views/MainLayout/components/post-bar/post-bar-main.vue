@@ -330,7 +330,7 @@ onMounted(() => {
 });
 </script>
 <style scoped lang="scss">
-@media (min-width: 601px) {
+@media (width > 768px) {
     .main-post {
             margin-bottom: 50px;
 
@@ -455,7 +455,7 @@ onMounted(() => {
 
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .main-post {
             margin-bottom: 50px;
 

@@ -158,7 +158,7 @@ onBeforeUnmount(() => {
     cursor: pointer;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .merge-watermelon-launcher {
         /* 右侧交流群入口从 55% 开始，给西瓜图标下方留出间距。 */
         top: calc(55% - 44px);

@@ -184,7 +184,7 @@ const daysSinceLaunch = computed(() => {
         }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
         margin-top: 16px;
         padding-top: 24px;
 

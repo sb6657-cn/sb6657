@@ -306,7 +306,7 @@ getCode();
   padding-left: 12px;
 }
 
-@media (max-width: 601px) {
+@media (max-width: 768px) {
   .register {
     display: flex;
     justify-content: center;
