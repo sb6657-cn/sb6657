@@ -68,7 +68,7 @@
                                 <div class="button-group">
                                     <el-button type="success"  @click="showCoinViewerfun">
                                         <Eye :size="16" style="margin-right: 4px;" />
-                                        预览2025布达佩斯Major3D硬币
+                                        预览2026新加坡Major 3D硬币
                                     </el-button>
                                 </div>
 

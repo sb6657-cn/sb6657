@@ -1,7 +1,7 @@
 <template>
     <el-dialog
       v-model="dialogVisible"
-      title="3D预览奖章,加载约30秒左右"
+      title="2026新加坡Major 3D纪念硬币预览"
       :width="dialogWidth"
       :fullscreen="!isMobile"
       draggable
