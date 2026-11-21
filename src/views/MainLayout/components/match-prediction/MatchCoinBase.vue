@@ -16,15 +16,17 @@
   </template>
 
   <script setup lang="ts">
-  import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
+  import { onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
   import * as THREE from 'three';
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+  import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
   // Props
   const props = defineProps<{
       debug?: boolean
+      initialCoinType?: CoinType
   }>()
 
   // Initialize debugInfo based on prop, default to true if prop is not provided
@@ -39,10 +41,19 @@
   let camera: THREE.PerspectiveCamera;
   let renderer: THREE.WebGLRenderer;
   let controls: OrbitControls;
-  let mixer: any = null
+  let coinMetalMaterial: THREE.MeshPhysicalMaterial | null = null
+  const modelUrl = `${import.meta.env.BASE_URL}major/singapore-2026/coin.glb`
 
   // 添加币种类型定义
   type CoinType = 'bronze' | 'silver' | 'gold' | 'diamond'
+
+  interface CoinStyle {
+    color: string
+    metalness: number
+    roughness: number
+    clearcoat: number
+    clearcoatRoughness: number
+  }
 
   // Define emits at the top level
   const emit = defineEmits<{
@@ -52,35 +63,57 @@
       (e: 'progress', percent: number): void
   }>()
 
-  // 添加币种类型和颜色映射
-  const coinColors: Record<CoinType, string> = {
-    bronze: '#B08D57',  // 更自然的铜色，减少红色调，增加金色调
-    silver: '#696969',  // 保持现有的银灰色
-    gold: '#FFD700',    // 保持原有的金色
-    diamond: '#BFD8EF'  // 保持原有的钻石色
+  // 币种多阶质感配置（铜、银、金、钻）
+  const coinStyles: Record<CoinType, CoinStyle> = {
+    bronze: {
+      color: '#B87333',
+      metalness: 0.82,
+      roughness: 0.35,
+      clearcoat: 0.20,
+      clearcoatRoughness: 0.10
+    },
+    silver: {
+      color: '#DCE2E6',
+      metalness: 0.95,
+      roughness: 0.18,
+      clearcoat: 0.60,
+      clearcoatRoughness: 0.04
+    },
+    gold: {
+      color: '#FFD700',
+      metalness: 0.90,
+      roughness: 0.25,
+      clearcoat: 0.40,
+      clearcoatRoughness: 0.06
+    },
+    diamond: {
+      color: '#B6E2FD',
+      metalness: 0.96,
+      roughness: 0.12,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.02
+    }
   }
 
-  const currentCoinType = ref<CoinType>('gold') // 默认显示金币
+  const currentCoinType = ref<CoinType>(props.initialCoinType || 'gold') // 默认显示金币或传入币种
 
   // 添加改变币种的方法
   const changeCoinType = (type: CoinType) => {
     currentCoinType.value = type
     updateCoinMaterial()
+    emit('update:coinType', type)
   }
 
   // 添加更新材质的方法
   const updateCoinMaterial = () => {
-    if (!scene) return
-
-    const color = coinColors[currentCoinType.value]
-    scene.traverse((object: any) => {
-      if (object.isMesh) {
-        if (object.material) {
-          object.material.color.set(color)
-          object.material.needsUpdate = true
-        }
-      }
-    })
+    if (!coinMetalMaterial) return
+    const style = coinStyles[currentCoinType.value]
+    coinMetalMaterial.color.set(style.color)
+    coinMetalMaterial.metalness = style.metalness
+    coinMetalMaterial.roughness = style.roughness
+    coinMetalMaterial.clearcoat = style.clearcoat
+    coinMetalMaterial.clearcoatRoughness = style.clearcoatRoughness
+    coinMetalMaterial.needsUpdate = true
   }
 
   // 更新容器尺寸信息
@@ -179,38 +212,41 @@
       // 加载模型
       loadingStatus.value = '开始加载模型...'
       const loader = new GLTFLoader()
+      loader.setMeshoptDecoder(MeshoptDecoder)
       console.log('开始加载模型...')
 
       loader.load(
-        '/b.glb',
+        modelUrl,
         (gltf) => {
           console.log('模型加载成功')
           loadingStatus.value = '模型加载成功'
           emit('loading', loadingStatus.value) // Emit success status
           scene.add(gltf.scene)
 
-          // 创建一个新的标准网格材质
-          const standardMaterial = new THREE.MeshStandardMaterial({
-              metalness: 1,
-              roughness: 0,
-              color: coinColors[currentCoinType.value],  // 使用当前选择的币种颜色
+          const initStyle = coinStyles[currentCoinType.value];
+          coinMetalMaterial = new THREE.MeshPhysicalMaterial({
+              metalness: initStyle.metalness,
+              roughness: initStyle.roughness,
+              clearcoat: initStyle.clearcoat,
+              clearcoatRoughness: initStyle.clearcoatRoughness,
+              envMapIntensity: 1.25,
+              color: initStyle.color,
           });
+          if (scene.environment) {
+              coinMetalMaterial.envMap = scene.environment;
+          }
 
-          // 确保模型材质使用环境贴图，并应用新的材质
           scene.traverse((object: any) => {
-              if (object.isMesh) {
-                  console.log('检查到网格对象:', object.name);
-                  // 应用新的标准材质
-                  object.material = standardMaterial;
-                  console.log('已为网格对象应用 MeshStandardMaterial');
-
-                  // 对于标准材质或物理材质，设置 envMap
-                  if (object.material.isMeshStandardMaterial || object.material.isMeshPhysicalMaterial) {
-                      if (scene.environment) {
-                           object.material.envMap = scene.environment;
-                           object.material.needsUpdate = true;
-                           console.log('已为标准/物理材质设置环境贴图');
-                      }
+              if (!object.isMesh) return;
+              const materialName = object.material?.name ?? '';
+              if (materialName.startsWith('Metal')) {
+                  object.material = coinMetalMaterial;
+                  return;
+              }
+              if (object.material?.isMeshStandardMaterial || object.material?.isMeshPhysicalMaterial) {
+                  if (scene.environment) {
+                      object.material.envMap = scene.environment;
+                      object.material.needsUpdate = true;
                   }
               }
           });
@@ -223,10 +259,10 @@
           const maxDim = Math.max(size.x, size.y, size.z)
           const fov = camera.fov * (Math.PI / 180)
           // 计算相机到模型的距离，减小乘数使其更近
-          let cameraDistance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.8;
+          const cameraDistance = Math.abs(maxDim / Math.sin(fov / 2)) * 0.8;
 
-          // 调整相机位置到模型左侧，并看向模型中心
-          camera.position.set(center.x - cameraDistance, center.y, center.z);
+          // glTF 导出后正面朝向 +Z，初始镜头从正面观看
+          camera.position.set(center.x, center.y, center.z + cameraDistance);
           camera.lookAt(center);
 
           controls.target.copy(center);
